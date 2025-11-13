@@ -8,7 +8,6 @@ import {
   generateRestoredFileName,
   generateRestoredOriginalFileName,
   validateFragmentImageCount,
-  validateManifestVersion,
 } from "@pixzle/core";
 import { createDir, readJsonFile, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
@@ -49,7 +48,6 @@ async function restore(options: RestoreOptions): Promise<void> {
 
   const manifest = await readJsonFile<ManifestData>(manifestPath);
 
-  validateManifestVersion(manifest);
   validateFragmentImageCount(imagePaths, manifest);
 
   const restorer = new ImageRestorer();
