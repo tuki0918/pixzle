@@ -1,6 +1,6 @@
 {
   "name": "@pixzle/core",
-  "version": "0.9.0",
+  "version": "0.0.1",
   "description": "Core image fragmentation and restoration logic",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
