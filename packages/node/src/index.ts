@@ -21,54 +21,59 @@ export {
   type ManifestData,
 };
 
-export default class Pixzle {
-  static async shuffle(options: ShuffleOptions): Promise<void> {
-    const { imagePaths, config, outputDir } = validateShuffleOptions(options);
+async function shuffle(options: ShuffleOptions): Promise<void> {
+  const { imagePaths, config, outputDir } = validateShuffleOptions(options);
 
-    const fragmenter = new ImageFragmenter(config ?? {});
-    const { manifest, fragmentedImages } =
-      await fragmenter.fragmentImages(imagePaths);
+  const fragmenter = new ImageFragmenter(config ?? {});
+  const { manifest, fragmentedImages } =
+    await fragmenter.fragmentImages(imagePaths);
 
-    await createDir(outputDir, true);
-    await writeFile(
-      outputDir,
-      MANIFEST_FILE_NAME,
-      JSON.stringify(manifest, null, 2),
-    );
+  await createDir(outputDir, true);
+  await writeFile(
+    outputDir,
+    MANIFEST_FILE_NAME,
+    JSON.stringify(manifest, null, 2),
+  );
 
-    await Promise.all(
-      fragmentedImages.map((img, i) => {
-        const filename = generateFragmentFileName(manifest, i);
-        return writeFile(outputDir, filename, img);
-      }),
-    );
-  }
-
-  static async restore(options: RestoreOptions): Promise<void> {
-    const { imagePaths, manifestPath, outputDir } =
-      validateRestoreOptions(options);
-
-    const manifest = await readJsonFile<ManifestData>(manifestPath);
-
-    validateManifestVersion(manifest);
-    validateFragmentImageCount(imagePaths, manifest);
-
-    const restorer = new ImageRestorer();
-    const restoredImages = await restorer.restoreImages(imagePaths, manifest);
-
-    await createDir(outputDir, true);
-
-    const imageInfos = manifest.images;
-    await Promise.all(
-      restoredImages.map((img, i) => {
-        const filename =
-          generateRestoredOriginalFileName(imageInfos[i]) ??
-          generateRestoredFileName(manifest, i);
-        return writeFile(outputDir, filename, img);
-      }),
-    );
-  }
+  await Promise.all(
+    fragmentedImages.map((img, i) => {
+      const filename = generateFragmentFileName(manifest, i);
+      return writeFile(outputDir, filename, img);
+    }),
+  );
 }
+
+async function restore(options: RestoreOptions): Promise<void> {
+  const { imagePaths, manifestPath, outputDir } =
+    validateRestoreOptions(options);
+
+  const manifest = await readJsonFile<ManifestData>(manifestPath);
+
+  validateManifestVersion(manifest);
+  validateFragmentImageCount(imagePaths, manifest);
+
+  const restorer = new ImageRestorer();
+  const restoredImages = await restorer.restoreImages(imagePaths, manifest);
+
+  await createDir(outputDir, true);
+
+  const imageInfos = manifest.images;
+  await Promise.all(
+    restoredImages.map((img, i) => {
+      const filename =
+        generateRestoredOriginalFileName(imageInfos[i]) ??
+        generateRestoredFileName(manifest, i);
+      return writeFile(outputDir, filename, img);
+    }),
+  );
+}
+
+const pixzle = {
+  shuffle,
+  restore,
+};
+
+export default pixzle;
 
 function validateCommonOptions<T extends ShuffleOptions | RestoreOptions>(
   options: T,

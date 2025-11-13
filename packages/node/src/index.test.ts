@@ -10,9 +10,9 @@ import {
 import { Jimp, JimpMime } from "jimp";
 import { VERSION } from "./constants";
 import { ImageFragmenter } from "./fragmenter";
-import Pixzle from "./index";
+import pixzle from "./index";
 
-describe("Pixzle (integration)", () => {
+describe("pixzle (integration)", () => {
   // Use OS temp directory for test files
   const tmpDir = path.join(tmpdir(), "index_test_tmp");
   const originalImages = [
@@ -48,8 +48,8 @@ describe("Pixzle (integration)", () => {
       await image.write(filePath, JimpMime.png);
       imagePaths.push(filePath);
     }
-    // Fragment images using Pixzle.shuffle
-    await Pixzle.shuffle({
+    // Fragment images using pixzle.shuffle
+    await pixzle.shuffle({
       imagePaths,
       config: { blockSize, prefix },
       outputDir: tmpDir,
@@ -69,8 +69,8 @@ describe("Pixzle (integration)", () => {
         path.join(tmpDir, generateFragmentFileName(manifestDataForFragment, i)),
       );
     }
-    // Restore images using Pixzle.restore
-    await Pixzle.restore({
+    // Restore images using pixzle.restore
+    await pixzle.restore({
       imagePaths: fragmentPaths,
       manifestPath,
       outputDir: tmpDir,
@@ -136,7 +136,7 @@ describe("Pixzle (integration)", () => {
   });
 });
 
-describe("Pixzle (preserveName integration)", () => {
+describe("pixzle (preserveName integration)", () => {
   const tmpDir = path.join(tmpdir(), "index_test_tmp_preserveName");
   const originalImages = [
     Buffer.from([
@@ -172,8 +172,8 @@ describe("Pixzle (preserveName integration)", () => {
       await image.write(filePath, JimpMime.png);
       imagePaths.push(filePath);
     }
-    // Fragment images using Pixzle.shuffle (with preserveName)
-    await Pixzle.shuffle({
+    // Fragment images using pixzle.shuffle (with preserveName)
+    await pixzle.shuffle({
       imagePaths,
       config: { blockSize, prefix, preserveName: true },
       outputDir: tmpDir,
@@ -192,8 +192,8 @@ describe("Pixzle (preserveName integration)", () => {
         path.join(tmpDir, generateFragmentFileName(manifest, i)),
       );
     }
-    // Restore images using Pixzle.restore
-    await Pixzle.restore({
+    // Restore images using pixzle.restore
+    await pixzle.restore({
       imagePaths: fragmentPaths,
       manifestPath,
       outputDir: tmpDir,
@@ -243,7 +243,7 @@ describe("Pixzle (preserveName integration)", () => {
   });
 });
 
-describe("Pixzle (error handling)", () => {
+describe("pixzle (error handling)", () => {
   const tmpDir = path.join(tmpdir(), "index_test_tmp_error_handling");
   let testImagePath: string;
 
@@ -308,7 +308,7 @@ describe("Pixzle (error handling)", () => {
     try {
       // Try to restore with wrong number of fragments
       await expect(
-        Pixzle.restore({
+        pixzle.restore({
           imagePaths: [fragmentPath],
           manifestPath,
           outputDir: tmpDir,
