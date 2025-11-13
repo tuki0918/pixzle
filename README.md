@@ -34,14 +34,14 @@ npm i pixzle
 
 ## Usage
 
-```
-import Pixzle from "pixzle";
+```ts
+import pixzle from "pixzle";
 ```
 
 **Shuffle**
 
 ```ts
-await Pixzle.shuffle({
+await pixzle.shuffle({
   // config: { /** FragmentationConfig */ },
   imagePaths: [
     "./input_1.png",
@@ -79,7 +79,7 @@ output
 **Restore**
 
 ```ts
-await Pixzle.restore({
+await pixzle.restore({
   manifestPath: "./output/fragmented/manifest.json",
   imagePaths: [
     "./output/fragmented/img_1_fragmented.png",
