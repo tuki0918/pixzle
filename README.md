@@ -1,4 +1,4 @@
-# image-shield
+# pixzle
 
 ![](.docs/figure.png)
 
@@ -11,10 +11,10 @@ This npm package provides functionality for image fragmentation and restoration.
 
 This project is a monorepo that contains the following packages:
 
-- **@image-shield/core**: Environment-independent core functionality (types, algorithms, crypto interfaces)
-- **@image-shield/node**: Node.js implementation
-- **@image-shield/browser**: Browser implementation (coming soon)
-- **@image-shield/cli**: CLI implementation
+- **@pixzle/core**: Environment-independent core functionality (types, algorithms, crypto interfaces)
+- **@pixzle/node**: Node.js implementation
+- **@pixzle/browser**: Browser implementation (coming soon)
+- **@pixzle/cli**: CLI implementation
 
 ## Features
 
@@ -29,19 +29,19 @@ Original Image → Load → Convert to RGBA → Shuffle → Fragmented PNG Outpu
 ## Installation
 
 ```
-npm i image-shield
+npm i pixzle
 ```
 
 ## Usage
 
 ```
-import ImageShield from "image-shield";
+import Pixzle from "pixzle";
 ```
 
 **Shuffle**
 
 ```ts
-await ImageShield.shuffle({
+await Pixzle.shuffle({
   // config: { /** FragmentationConfig */ },
   imagePaths: [
     "./input_1.png",
@@ -79,7 +79,7 @@ output
 **Restore**
 
 ```ts
-await ImageShield.restore({
+await Pixzle.restore({
   manifestPath: "./output/fragmented/manifest.json",
   imagePaths: [
     "./output/fragmented/img_1_fragmented.png",
@@ -193,8 +193,3 @@ When processing multiple images with cross-image shuffle enabled, blocks are shu
 > [!NOTE]
 > - The `manifest.json` file contains the necessary information for restoration.
 > - Input images are converted to PNG format.
-
-## Clients
-
-- [Raycast Extension (legacy)](https://github.com/tuki0918/raycast-image-shield)
-

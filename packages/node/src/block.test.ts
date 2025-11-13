@@ -5,7 +5,7 @@ import {
   calculateBlockCountsForCrossImages,
   extractBlock,
   placeBlock,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import {
   blocksToImageBuffer,

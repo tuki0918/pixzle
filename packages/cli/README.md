@@ -1,11 +1,11 @@
-# @image-shield/cli
+# @pixzle/cli
 
-CLI implementation of image fragmentation and restoration using the `@image-shield/node` library.
+CLI implementation of image fragmentation and restoration using the `@pixzle/node` library.
 
 ## Installation
 
 ```bash
-npm install @image-shield/cli
+npm install @pixzle/cli
 ```
 
 ## Usage
@@ -15,11 +15,11 @@ The CLI provides two main commands: `shuffle` and `restore`.
 ### Global Help
 
 ```bash
-image-shield --help
+pixzle --help
 ```
 
 ```
-Usage: image-shield [options] [command]
+Usage: pixzle [options] [command]
 
 CLI tool for image fragmentation and restoration
 
@@ -38,7 +38,7 @@ Commands:
 Fragment images into multiple pieces.
 
 ```bash
-image-shield shuffle <images...> -o <output_directory> [options]
+pixzle shuffle <images...> -o <output_directory> [options]
 ```
 
 #### Options
@@ -56,22 +56,22 @@ image-shield shuffle <images...> -o <output_directory> [options]
 
 **Basic fragmentation:**
 ```bash
-image-shield shuffle image1.jpg image2.png -o ./fragments
+pixzle shuffle image1.jpg image2.png -o ./fragments
 ```
 
 **Custom configuration:**
 ```bash
-image-shield shuffle *.jpg -o ./output -b 20 -p "my_fragment" --preserve-name
+pixzle shuffle *.jpg -o ./output -b 20 -p "my_fragment" --preserve-name
 ```
 
 **With seed for reproducible results:**
 ```bash
-image-shield shuffle image.png -o ./output -s 12345
+pixzle shuffle image.png -o ./output -s 12345
 ```
 
 **Cross-image shuffle (shuffle blocks across all images):**
 ```bash
-image-shield shuffle image1.png image2.png image3.png -o ./output --cross-image-shuffle
+pixzle shuffle image1.png image2.png image3.png -o ./output --cross-image-shuffle
 ```
 
 #### Output Structure
@@ -90,7 +90,7 @@ output/
 Restore fragmented images using the manifest file.
 
 ```bash
-image-shield restore <fragments...> -m <manifest_path> -o <output_directory> [options]
+pixzle restore <fragments...> -m <manifest_path> -o <output_directory> [options]
 ```
 
 #### Options
@@ -104,12 +104,12 @@ image-shield restore <fragments...> -m <manifest_path> -o <output_directory> [op
 
 **Basic restoration:**
 ```bash
-image-shield restore ./fragments/*.png -m ./fragments/manifest.json -o ./restored
+pixzle restore ./fragments/*.png -m ./fragments/manifest.json -o ./restored
 ```
 
 **Specific fragments:**
 ```bash
-image-shield restore fragment_0000.png fragment_0001.png fragment_0002.png -m manifest.json -o ./output
+pixzle restore fragment_0000.png fragment_0001.png fragment_0002.png -m manifest.json -o ./output
 ```
 
 ## Error Handling
@@ -133,7 +133,7 @@ The CLI provides clear error messages for common issues:
 
 2. **Fragment images:**
    ```bash
-   image-shield shuffle images/photo1.jpg images/photo2.png -o ./backup --preserve-name
+   pixzle shuffle images/photo1.jpg images/photo2.png -o ./backup --preserve-name
    ```
    ```
    🔀 Starting image fragmentation...
@@ -148,7 +148,7 @@ The CLI provides clear error messages for common issues:
 
 4. **Restore images:**
    ```bash
-   image-shield restore backup/*.png -m backup/manifest.json -o ./restored
+   pixzle restore backup/*.png -m backup/manifest.json -o ./restored
    ```
    ```
    🔀 Starting image restoration...
@@ -167,7 +167,7 @@ For custom fragmentation:
 
 ```bash
 # Fragment with custom settings
-image-shield shuffle sensitive/*.jpg \
+pixzle shuffle sensitive/*.jpg \
   -o ./vault \
   -b 5 \
   -p "secure_chunk" \
@@ -190,7 +190,7 @@ BACKUP_DIR="./backup"
 
 # Create backup
 echo "Creating backup..."
-image-shield shuffle "$IMAGES_DIR"/*.{jpg,png} \
+pixzle shuffle "$IMAGES_DIR"/*.{jpg,png} \
   -o "$BACKUP_DIR" \
   --preserve-name
 
@@ -214,7 +214,7 @@ RESTORE_DIR="./recovered_photos"
 
 # Restore from backup
 echo "Restoring from backup..."
-image-shield restore "$BACKUP_DIR"/fragment_*.png \
+pixzle restore "$BACKUP_DIR"/fragment_*.png \
   -m "$BACKUP_DIR/manifest.json" \
   -o "$RESTORE_DIR"
 
@@ -232,8 +232,8 @@ fi
 
 ```bash
 # Clone the repository
-git clone https://github.com/tuki0918/image-shield.git
-cd image-shield
+git clone https://github.com/tuki0918/pixzle.git
+cd pixzle
 
 # Install dependencies
 npm install
@@ -255,9 +255,9 @@ npm run dev -- shuffle --help
 
 ## Related Packages
 
-- [`@image-shield/core`](../core) - Core fragmentation logic
-- [`@image-shield/node`](../node) - Node.js implementation
-- [`@image-shield/browser`](../browser) - Browser implementation (coming soon)
+- [`@pixzle/core`](../core) - Core fragmentation logic
+- [`@pixzle/node`](../node) - Node.js implementation
+- [`@pixzle/browser`](../browser) - Browser implementation (coming soon)
 
 ## License
 
@@ -265,4 +265,4 @@ See the [LICENSE](../../LICENSE) file in the root directory.
 
 ## Support
 
-For issues and questions, please visit the [GitHub repository](https://github.com/tuki0918/image-shield/issues).
+For issues and questions, please visit the [GitHub repository](https://github.com/tuki0918/pixzle/issues).

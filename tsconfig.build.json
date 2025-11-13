@@ -11,8 +11,8 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@image-shield/core": ["packages/core/dist"],
-      "@image-shield/node": ["packages/node/dist"]
+      "@pixzle/core": ["packages/core/dist"],
+      "@pixzle/node": ["packages/node/dist"]
     }
   },
   "include": ["src"],

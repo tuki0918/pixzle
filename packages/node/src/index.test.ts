@@ -1,18 +1,18 @@
 import fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { ManifestData } from "@image-shield/core";
+import type { ManifestData } from "@pixzle/core";
 import {
   decodeFileName,
   generateFragmentFileName,
   generateRestoredFileName,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import { VERSION } from "./constants";
 import { ImageFragmenter } from "./fragmenter";
-import ImageShield from "./index";
+import Pixzle from "./index";
 
-describe("ImageShield (integration)", () => {
+describe("Pixzle (integration)", () => {
   // Use OS temp directory for test files
   const tmpDir = path.join(tmpdir(), "index_test_tmp");
   const originalImages = [
@@ -48,8 +48,8 @@ describe("ImageShield (integration)", () => {
       await image.write(filePath, JimpMime.png);
       imagePaths.push(filePath);
     }
-    // Fragment images using ImageShield.shuffle
-    await ImageShield.shuffle({
+    // Fragment images using Pixzle.shuffle
+    await Pixzle.shuffle({
       imagePaths,
       config: { blockSize, prefix },
       outputDir: tmpDir,
@@ -69,8 +69,8 @@ describe("ImageShield (integration)", () => {
         path.join(tmpDir, generateFragmentFileName(manifestDataForFragment, i)),
       );
     }
-    // Restore images using ImageShield.restore
-    await ImageShield.restore({
+    // Restore images using Pixzle.restore
+    await Pixzle.restore({
       imagePaths: fragmentPaths,
       manifestPath,
       outputDir: tmpDir,
@@ -136,7 +136,7 @@ describe("ImageShield (integration)", () => {
   });
 });
 
-describe("ImageShield (preserveName integration)", () => {
+describe("Pixzle (preserveName integration)", () => {
   const tmpDir = path.join(tmpdir(), "index_test_tmp_preserveName");
   const originalImages = [
     Buffer.from([
@@ -172,8 +172,8 @@ describe("ImageShield (preserveName integration)", () => {
       await image.write(filePath, JimpMime.png);
       imagePaths.push(filePath);
     }
-    // Fragment images using ImageShield.shuffle (with preserveName)
-    await ImageShield.shuffle({
+    // Fragment images using Pixzle.shuffle (with preserveName)
+    await Pixzle.shuffle({
       imagePaths,
       config: { blockSize, prefix, preserveName: true },
       outputDir: tmpDir,
@@ -192,8 +192,8 @@ describe("ImageShield (preserveName integration)", () => {
         path.join(tmpDir, generateFragmentFileName(manifest, i)),
       );
     }
-    // Restore images using ImageShield.restore
-    await ImageShield.restore({
+    // Restore images using Pixzle.restore
+    await Pixzle.restore({
       imagePaths: fragmentPaths,
       manifestPath,
       outputDir: tmpDir,
@@ -243,7 +243,7 @@ describe("ImageShield (preserveName integration)", () => {
   });
 });
 
-describe("ImageShield (error handling)", () => {
+describe("Pixzle (error handling)", () => {
   const tmpDir = path.join(tmpdir(), "index_test_tmp_error_handling");
   let testImagePath: string;
 
@@ -308,7 +308,7 @@ describe("ImageShield (error handling)", () => {
     try {
       // Try to restore with wrong number of fragments
       await expect(
-        ImageShield.restore({
+        Pixzle.restore({
           imagePaths: [fragmentPath],
           manifestPath,
           outputDir: tmpDir,

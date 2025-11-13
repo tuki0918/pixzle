@@ -3,7 +3,7 @@ import {
   calculateBlockCounts,
   blocksToImageBuffer as coreBlocksToImageBuffer,
   splitImageToBlocks as coreSplitImageToBlocks,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 
 interface ImageFileToBlocksResult {

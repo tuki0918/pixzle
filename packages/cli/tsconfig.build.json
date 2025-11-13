@@ -9,8 +9,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@image-shield/core": ["../core/dist"],
-      "@image-shield/node": ["../node/dist"]
+      "@pixzle/core": ["../core/dist"],
+      "@pixzle/node": ["../node/dist"]
     },
     "types": ["node"]
   },

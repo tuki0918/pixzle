@@ -5,7 +5,7 @@ import {
   calculateBlockCountsPerImage,
   calculateBlockRange,
   calculateTotalBlocks,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
 import { blocksPerImage, blocksToPngImage, imageFileToBlocks } from "./block";
 import { readFileBuffer } from "./file";

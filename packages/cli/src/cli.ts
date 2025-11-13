@@ -7,7 +7,7 @@ import { registerShuffleCommand } from "./commands/shuffle";
 const program = new Command();
 
 program
-  .name("image-shield")
+  .name("pixzle")
   .description("CLI tool for image fragmentation and restoration")
   .version("0.8.1");
 

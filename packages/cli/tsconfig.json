@@ -6,8 +6,8 @@
     "moduleResolution": "bundler",
     "baseUrl": ".",
     "paths": {
-      "@image-shield/core": ["../core/src"],
-      "@image-shield/node": ["../node/src"]
+      "@pixzle/core": ["../core/src"],
+      "@pixzle/node": ["../node/src"]
     },
     "types": ["node", "vitest/globals"]
   },

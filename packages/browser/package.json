@@ -1,5 +1,5 @@
 {
-  "name": "@image-shield/browser",
+  "name": "@pixzle/browser",
   "version": "0.9.0",
   "description": "Browser implementation of image fragmentation and restoration (RESERVED)",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "test": "echo 'Browser implementation not yet available'"
   },
   "dependencies": {
-    "@image-shield/core": "file:../core"
+    "@pixzle/core": "file:../core"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

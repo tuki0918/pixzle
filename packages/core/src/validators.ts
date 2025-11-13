@@ -66,7 +66,7 @@ export function validateManifestVersion(manifest: ManifestData): void {
   // Check if version is v0.8.1 (raycast) or below
   if (lt(version, "0.9.0")) {
     throw new Error(
-      `[restore] Manifest version ${version} is not supported due to breaking changes.\nTo restore images, please use image-shield v0.8.1.`,
+      `[restore] Manifest version ${version} is not supported due to breaking changes.\nTo restore images, please use pixzle v0.8.1.`,
     );
   }
 }

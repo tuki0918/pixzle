@@ -1,28 +1,28 @@
-# Image Shield Packages
+# Pixzle Packages
 
-This directory contains the individual packages of the image-shield monorepo:
+This directory contains the individual packages of the pixzle monorepo:
 
-## @image-shield/core
+## @pixzle/core
 Environment-independent core functionality including:
 - Type definitions and interfaces
 - Crypto provider abstraction
 - Block distribution algorithms
 - Helper functions
 
-## @image-shield/node
+## @pixzle/node
 Node.js-specific implementation including:
 - File system operations
 - Image processing with Jimp
 - Node.js crypto provider
 - Main ImageFragmenter and ImageRestorer classes
 
-## @image-shield/browser (Reserved)
+## @pixzle/browser (Reserved)
 Future browser implementation will include:
 - Browser-compatible crypto provider
 - Canvas-based image processing
 - File API integration
 
-## @image-shield/cli (Reserved) 
+## @pixzle/cli (Reserved) 
 Future CLI implementation will include:
 - Command-line interface
 - Batch processing utilities

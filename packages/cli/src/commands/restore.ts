@@ -1,4 +1,4 @@
-import ImageShield from "@image-shield/node";
+import Pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { RestoreOptions } from "../types";
 import {
@@ -37,7 +37,7 @@ async function handleRestoreCommand(
     const manifestPath = validateManifestPath(options.manifest);
     const outputDir = validateOutputDirectory(options.output);
 
-    await ImageShield.restore({
+    await Pixzle.restore({
       imagePaths,
       manifestPath,
       outputDir,

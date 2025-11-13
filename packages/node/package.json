@@ -1,5 +1,5 @@
 {
-  "name": "@image-shield/node",
+  "name": "@pixzle/node",
   "version": "0.9.0",
   "description": "Node.js implementation of image fragmentation and restoration",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@image-shield/core": "file:../core",
+    "@pixzle/core": "file:../core",
     "@tuki0918/seeded-shuffle": "^1.0.0",
     "jimp": "^1.6.0"
   },

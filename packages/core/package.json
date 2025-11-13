@@ -1,5 +1,5 @@
 {
-  "name": "@image-shield/core",
+  "name": "@pixzle/core",
   "version": "0.9.0",
   "description": "Core image fragmentation and restoration logic",
   "main": "dist/index.js",

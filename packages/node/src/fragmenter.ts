@@ -9,7 +9,7 @@ import {
   calculateBlockRange,
   encodeFileName,
   validateFileNames,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { SeededRandom, shuffle } from "@tuki0918/seeded-shuffle";
 import { blocksPerImage, blocksToPngImage, imageFileToBlocks } from "./block";
 import { VERSION } from "./constants";

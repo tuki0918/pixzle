@@ -9,7 +9,7 @@ import {
   generateRestoredOriginalFileName,
   validateFragmentImageCount,
   validateManifestVersion,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { createDir, readJsonFile, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
 import { ImageRestorer } from "./restorer";
@@ -21,7 +21,7 @@ export {
   type ManifestData,
 };
 
-export default class ImageShield {
+export default class Pixzle {
   static async shuffle(options: ShuffleOptions): Promise<void> {
     const { imagePaths, config, outputDir } = validateShuffleOptions(options);
 

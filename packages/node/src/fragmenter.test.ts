@@ -5,7 +5,7 @@ import {
   DEFAULT_FRAGMENTATION_CONFIG,
   type FragmentationConfig,
   type ManifestData,
-} from "@image-shield/core";
+} from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import { ImageFragmenter } from "./fragmenter";
 

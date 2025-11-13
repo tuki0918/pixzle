@@ -1,11 +1,11 @@
 {
-  "name": "@image-shield/cli",
+  "name": "@pixzle/cli",
   "version": "0.9.0",
   "description": "CLI implementation of image fragmentation and restoration (RESERVED)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "image-shield": "./dist/cli.js"
+    "pixzle": "./dist/cli.js"
   },
   "files": [
     "dist"
@@ -17,8 +17,8 @@
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {
-    "@image-shield/core": "file:../core",
-    "@image-shield/node": "file:../node",
+    "@pixzle/core": "file:../core",
+    "@pixzle/node": "file:../node",
     "commander": "^12.1.0"
   },
   "devDependencies": {
