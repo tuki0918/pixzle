@@ -13,7 +13,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@pixzle/core": "file:../core",
+    "@pixzle/core": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0",
     "jimp": "^1.6.0"
   },

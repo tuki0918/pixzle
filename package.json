@@ -48,8 +48,7 @@
     "vitest": "^3.1.4"
   },
   "dependencies": {
-    "@pixzle/core": "file:packages/core",
-    "@pixzle/node": "file:packages/node",
+    "@pixzle/node": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0",
     "jimp": "^1.6.0",
     "semver": "^7.7.3"

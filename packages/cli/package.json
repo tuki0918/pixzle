@@ -17,8 +17,8 @@
     "dev": "tsx src/cli.ts"
   },
   "dependencies": {
-    "@pixzle/core": "file:../core",
-    "@pixzle/node": "file:../node",
+    "@pixzle/core": "workspace:*",
+    "@pixzle/node": "workspace:*",
     "commander": "^12.1.0"
   },
   "devDependencies": {

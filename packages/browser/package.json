@@ -13,7 +13,7 @@
     "test": "echo 'Browser implementation not yet available'"
   },
   "dependencies": {
-    "@pixzle/core": "file:../core"
+    "@pixzle/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.2",
