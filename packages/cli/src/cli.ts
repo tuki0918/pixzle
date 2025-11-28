@@ -3,13 +3,14 @@
 import { Command } from "commander";
 import { registerRestoreCommand } from "./commands/restore";
 import { registerShuffleCommand } from "./commands/shuffle";
+import { VERSION } from "./constants";
 
 const program = new Command();
 
 program
   .name("pixzle")
   .description("CLI tool for image fragmentation and restoration")
-  .version("0.8.1");
+  .version(VERSION);
 
 // Register commands
 registerShuffleCommand(program);
