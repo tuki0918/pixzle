@@ -6,6 +6,11 @@
     "lib": ["ES2022"],
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "paths": {
+      "@pixzle/core": ["packages/core/src"],
+      "@pixzle/node": ["packages/node/src"],
+      "@pixzle/cli": ["packages/cli/src"]
+    }
   }
 }

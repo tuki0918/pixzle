@@ -8,10 +8,6 @@
     "declaration": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "paths": {
-      "@pixzle/core": ["../core/dist"],
-      "@pixzle/node": ["../node/dist"]
-    },
     "types": ["node"]
   },
   "exclude": ["**/*.test.ts"]

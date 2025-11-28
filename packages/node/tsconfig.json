@@ -6,9 +6,6 @@
     "moduleResolution": "bundler",
     "rootDir": "./src",
     "baseUrl": ".",
-    "paths": {
-      "@pixzle/core": ["../core/src"]
-    },
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*.ts"]

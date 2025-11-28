@@ -5,10 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "baseUrl": ".",
-    "paths": {
-      "@pixzle/core": ["../core/src"],
-      "@pixzle/node": ["../node/src"]
-    },
+    "paths": {},
     "types": ["node", "vitest/globals"]
   },
   "include": ["src/**/*.ts"]

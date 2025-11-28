@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "rootDir": "./",
+    "baseUrl": ".",
     "types": ["vitest/globals"]
   },
   "include": ["src", "test"],
