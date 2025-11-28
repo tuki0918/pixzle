@@ -12,6 +12,17 @@
     "build:check": "tsc -p tsconfig.build.json --noEmit",
     "test": "vitest"
   },
+  "keywords": [],
+  "author": "tuki0918",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuki0918/pixzle.git",
+    "directory": "packages/node"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@pixzle/core": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0",

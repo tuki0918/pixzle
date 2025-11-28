@@ -16,6 +16,17 @@
     "test": "vitest",
     "dev": "tsx src/cli.ts"
   },
+  "keywords": [],
+  "author": "tuki0918",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuki0918/pixzle.git",
+    "directory": "packages/cli"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@pixzle/core": "workspace:*",
     "@pixzle/node": "workspace:*",
