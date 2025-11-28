@@ -6,7 +6,7 @@ if [ "$SKIP_GIT_HOOKS" = "true" ] || [ "$GITHUB_ACTIONS" = "true" ]; then
   exit 0
 fi
 
-npm run check
-npm run test:ci
-npm run build:check
-npm run build:typecheck
+pnpm check
+pnpm test:ci
+pnpm build:check
+pnpm build:typecheck
