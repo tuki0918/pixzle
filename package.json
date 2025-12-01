@@ -13,6 +13,7 @@
     "packages/*/dist"
   ],
   "scripts": {
+    "cli:dev": "pnpm --filter @pixzle/cli run dev",
     "build": "pnpm run build:packages && tsc -p tsconfig.build.json",
     "build:packages": "pnpm run --filter @pixzle/core build && pnpm run --filter @pixzle/node build && pnpm run --filter @pixzle/cli build && pnpm run --filter @pixzle/browser build",
     "build:check": "pnpm run build:check:packages && tsc -p tsconfig.build.json --noEmit",

@@ -8,5 +8,5 @@
     "paths": {},
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/index.mts"]
 }
