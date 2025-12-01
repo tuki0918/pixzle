@@ -38,8 +38,13 @@ describe("extractBlock", () => {
 
   test("blockSize exceeds image size at edge", () => {
     const block = extractBlock(buffer, imageWidth, imageHeight, 3, 3, 4);
-    // Only 1x1 pixel
-    expect(Array.from(block)).toEqual([61, 62, 63, 64]);
+    // Only 1x1 pixel at (0,0) of the block, but block is 4x4 full size
+    const expected = new Array(4 * 4 * RGBA_CHANNELS).fill(0);
+    expected[0] = 61;
+    expected[1] = 62;
+    expected[2] = 63;
+    expected[3] = 64;
+    expect(Array.from(block)).toEqual(expected);
   });
 
   test("extract top-left block", () => {

@@ -45,7 +45,7 @@ export function extractBlock(
       ? Math.min(blockSize, imageHeight - startY)
       : blockSize;
 
-  const blockData: number[] = [];
+  const blockData = new Uint8Array(blockSize * blockSize * RGBA_CHANNELS);
 
   // Extract pixel data row by row
   for (let y = 0; y < blockHeight; y++) {
@@ -53,15 +53,16 @@ export function extractBlock(
       const pixelX = startX + x;
       const pixelY = startY + y;
       const pixelIndex = (pixelY * imageWidth + pixelX) * RGBA_CHANNELS;
+      const blockIndex = (y * blockSize + x) * RGBA_CHANNELS;
 
       // Copy RGBA channels
       for (let channel = 0; channel < RGBA_CHANNELS; channel++) {
-        blockData.push(buffer[pixelIndex + channel] || 0);
+        blockData[blockIndex + channel] = buffer[pixelIndex + channel] || 0;
       }
     }
   }
 
-  return new Uint8Array(blockData);
+  return blockData;
 }
 
 /**
@@ -91,7 +92,7 @@ export function placeBlock(
   // Place pixels row by row
   for (let y = 0; y < actualHeight; y++) {
     for (let x = 0; x < actualWidth; x++) {
-      const sourceIndex = (y * actualWidth + x) * RGBA_CHANNELS;
+      const sourceIndex = (y * blockSize + x) * RGBA_CHANNELS;
       const targetIndex =
         ((destY + y) * targetWidth + (destX + x)) * RGBA_CHANNELS;
 

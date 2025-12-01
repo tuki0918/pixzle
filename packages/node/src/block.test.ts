@@ -50,8 +50,13 @@ describe("extractBlock", () => {
 
   test("blockSize exceeds image size at edge", () => {
     const block = extractBlock(buffer, imageWidth, imageHeight, 3, 3, 4);
-    // Only 1x1 pixel
-    expect(Buffer.from(block)).toEqual(Buffer.from([61, 62, 63, 64]));
+    // Only 1x1 pixel at (0,0) of the block, but block is 4x4 full size
+    const expected = Buffer.alloc(4 * 4 * 4, 0); // 4x4 pixels * 4 channels
+    expected[0] = 61;
+    expected[1] = 62;
+    expected[2] = 63;
+    expected[3] = 64;
+    expect(Buffer.from(block)).toEqual(expected);
   });
 });
 
