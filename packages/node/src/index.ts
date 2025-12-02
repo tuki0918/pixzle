@@ -20,7 +20,7 @@ export {
   type ManifestData,
 };
 
-async function shuffle(options: ShuffleOptions): Promise<void> {
+async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
   const { imagePaths, config, outputDir } = validateShuffleOptions(options);
 
   const fragmenter = new ImageFragmenter(config ?? {});
@@ -40,6 +40,8 @@ async function shuffle(options: ShuffleOptions): Promise<void> {
       return writeFile(outputDir, filename, img);
     }),
   );
+
+  return manifest;
 }
 
 async function restore(options: RestoreOptions): Promise<void> {

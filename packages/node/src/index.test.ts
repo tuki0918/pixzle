@@ -49,11 +49,14 @@ describe("pixzle (integration)", () => {
       imagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle
-    await pixzle.shuffle({
+    const manifest = await pixzle.shuffle({
       imagePaths,
       config: { blockSize, prefix },
       outputDir: tmpDir,
     });
+    expect(manifest).toBeDefined();
+    expect(manifest.version).toBe(VERSION);
+
     // Find manifest and fragment files
     manifestPath = path.join(tmpDir, "manifest.json");
     fragmentPaths = [];
