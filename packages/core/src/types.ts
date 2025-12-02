@@ -19,7 +19,10 @@ export interface RestoreOptions {
 }
 
 export interface FragmentationConfig {
-  /** Pixel block size (e.g., 10x10 to 10) */
+  /**
+   * Pixel block size (e.g., 10x10 to 10)
+   * Smaller -> High Obfuscation / Larger -> High Performance
+   */
   blockSize?: number;
   /** Prefix for fragment files (optional, default: "fragment") */
   prefix?: string;
