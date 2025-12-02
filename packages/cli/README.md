@@ -97,7 +97,7 @@ pixzle restore <fragments...> -m <manifest_path> -o <output_directory> [options]
 
 | Option | Description | Required |
 |--------|-------------|----------|
-| `-m, --manifest <path>` | Path to the manifest.json file | ❌ (if manual options provided) |
+| `-m, --manifest <path>` | Path to the manifest.json file | ⚠️ |
 | `-o, --output <dir>` | Output directory for restored images | ✅ |
 | `-b, --block-size <number>` | Pixel block size (positive integer) | ❌ (required if manifest missing) |
 | `-s, --seed <number>` | Random seed (integer) | ❌ (required if manifest missing) |
