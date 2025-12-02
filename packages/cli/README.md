@@ -47,7 +47,7 @@ pixzle shuffle <images...> -o <output_directory> [options]
 |--------|-------------|----------|---------|
 | `-o, --output <dir>` | Output directory for fragments and manifest | ✅ | - |
 | `-b, --block-size <size>` | Pixel block size (positive integer) | ❌ | 10 |
-| `-p, --prefix <prefix>` | Prefix for fragment files | ❌ | "fragment" |
+| `-p, --prefix <prefix>` | Prefix for fragment files | ❌ | "img" |
 | `-s, --seed <seed>` | Random seed (integer) | ❌ | auto-generated |
 | `--preserve-name` | Preserve original file names | ❌ | false |
 | `--cross-image-shuffle` | Shuffle blocks across all images instead of within each image independently | ❌ | false (per-image shuffle by default) |
@@ -87,7 +87,7 @@ output/
 
 ### Restore Command
 
-Restore fragmented images using the manifest file.
+Restore fragmented images using the manifest file or manual configuration.
 
 ```bash
 pixzle restore <fragments...> -m <manifest_path> -o <output_directory> [options]
@@ -97,14 +97,26 @@ pixzle restore <fragments...> -m <manifest_path> -o <output_directory> [options]
 
 | Option | Description | Required |
 |--------|-------------|----------|
-| `-m, --manifest <path>` | Path to the manifest.json file | ✅ |
+| `-m, --manifest <path>` | Path to the manifest.json file | ❌ (if manual options provided) |
 | `-o, --output <dir>` | Output directory for restored images | ✅ |
+| `-b, --block-size <number>` | Pixel block size (positive integer) | ❌ (required if manifest missing) |
+| `-s, --seed <number>` | Random seed (integer) | ❌ (required if manifest missing) |
+| `-w, --width <number>` | Image width | ❌ (required if manifest missing) |
+| `-h, --height <number>` | Image height | ❌ (required if manifest missing) |
+
+> [!NOTE]
+> When using manual options (`-b`, `-s`, `-w`, `-h`), only a single image can be restored.
 
 #### Examples
 
-**Basic restoration:**
+**Basic restoration (using manifest):**
 ```bash
 pixzle restore ./fragments/*.png -m ./fragments/manifest.json -o ./restored
+```
+
+**Manual restoration (without manifest):**
+```bash
+pixzle restore ./fragment.png -o ./restored -b 10 -s 12345 -w 500 -h 500
 ```
 
 **Specific fragments:**
