@@ -38,12 +38,6 @@ export interface ImageInfo {
   w: number;
   /** Height */
   h: number;
-  /** Number of channels */
-  c: number;
-  /** Number of blocks X */
-  x: number;
-  /** Number of blocks Y */
-  y: number;
   /** Original file name in base64 encoding (optional) */
   name?: string;
 }

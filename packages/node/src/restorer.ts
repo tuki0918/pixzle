@@ -36,7 +36,10 @@ export class ImageRestorer {
     blocks: Buffer[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
-    const blockCountsPerImage = calculateBlockCountsPerImage(manifest.images);
+    const blockCountsPerImage = calculateBlockCountsPerImage(
+      manifest.images,
+      manifest.config.blockSize,
+    );
     return await Promise.all(
       manifest.images.map(async (imageInfo, index) => {
         const { start, end } = calculateBlockRange(blockCountsPerImage, index);
@@ -57,14 +60,20 @@ export class ImageRestorer {
     blocks: Buffer[];
     blockCountsPerImage: number[];
   }> {
-    const totalBlocks = calculateTotalBlocks(manifest.images);
+    const totalBlocks = calculateTotalBlocks(
+      manifest.images,
+      manifest.config.blockSize,
+    );
     const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
       totalBlocks,
       fragments.length,
     );
 
     // Calculate actual block counts per image for per-image unshuffle
-    const blockCountsPerImage = calculateBlockCountsPerImage(manifest.images);
+    const blockCountsPerImage = calculateBlockCountsPerImage(
+      manifest.images,
+      manifest.config.blockSize,
+    );
 
     // Use blockCountsPerImage when crossImageShuffle is false
     const blockCounts = manifest.config.crossImageShuffle

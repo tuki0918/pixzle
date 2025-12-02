@@ -411,10 +411,10 @@ describe("ImageFragmenter", () => {
         expect(result.manifest.config.crossImageShuffle).toBe(false);
 
         // Verify different block counts
-        expect(result.manifest.images[0].x).toBe(1); // 2x2 image with blockSize 2
-        expect(result.manifest.images[0].y).toBe(1);
-        expect(result.manifest.images[1].x).toBe(3); // 6x6 image with blockSize 2
-        expect(result.manifest.images[1].y).toBe(3);
+        expect(result.manifest.images[0].w).toBe(2); // 2x2 image
+        expect(result.manifest.images[0].h).toBe(2);
+        expect(result.manifest.images[1].w).toBe(6); // 6x6 image
+        expect(result.manifest.images[1].h).toBe(6);
       } finally {
         // Clean up
         if (fs.existsSync(smallImagePath)) fs.unlinkSync(smallImagePath);
@@ -516,10 +516,10 @@ describe("ImageFragmenter", () => {
         expect(result.manifest.config.crossImageShuffle).toBe(true);
 
         // Verify different block counts
-        expect(result.manifest.images[0].x).toBe(1); // 2x2 image with blockSize 2
-        expect(result.manifest.images[0].y).toBe(1);
-        expect(result.manifest.images[1].x).toBe(3); // 6x6 image with blockSize 2
-        expect(result.manifest.images[1].y).toBe(3);
+        expect(result.manifest.images[0].w).toBe(2); // 2x2 image
+        expect(result.manifest.images[0].h).toBe(2);
+        expect(result.manifest.images[1].w).toBe(6); // 6x6 image
+        expect(result.manifest.images[1].h).toBe(6);
       } finally {
         // Clean up
         if (fs.existsSync(smallImagePath)) fs.unlinkSync(smallImagePath);

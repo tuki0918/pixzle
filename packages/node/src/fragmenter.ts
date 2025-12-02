@@ -114,7 +114,10 @@ export class ImageFragmenter {
     );
 
     // Calculate actual block counts per image for per-image shuffle
-    const blockCountsPerImage = calculateBlockCountsPerImage(imageInfos);
+    const blockCountsPerImage = calculateBlockCountsPerImage(
+      imageInfos,
+      this.config.blockSize,
+    );
 
     return { manifest, blocks, blockCountsForCrossImages, blockCountsPerImage };
   }
@@ -139,15 +142,14 @@ export class ImageFragmenter {
   }> {
     const buffer = await readFileBuffer(path);
 
-    const { blocks, width, height, blockCountX, blockCountY } =
-      await imageFileToBlocks(buffer, this.config.blockSize);
+    const { blocks, width, height } = await imageFileToBlocks(
+      buffer,
+      this.config.blockSize,
+    );
 
     const imageInfo: ImageInfo = {
       w: width,
       h: height,
-      c: 4, // Always use 4 channels (RGBA) for generated PNG
-      x: blockCountX,
-      y: blockCountY,
       name: this.config.preserveName
         ? encodeFileName(fileNameWithoutExtension(path))
         : undefined,

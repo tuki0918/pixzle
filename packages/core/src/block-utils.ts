@@ -92,17 +92,39 @@ export function calculateBlockCountsForCrossImages(
 /**
  * Calculate block counts for each image
  * @param images Array of ImageInfo objects
+ * @param blockSize Block size
  * @returns Array of block counts per image (x * y)
  */
-export function calculateBlockCountsPerImage(images: ImageInfo[]): number[] {
-  return images.map((info) => info.x * info.y);
+export function calculateBlockCountsPerImage(
+  images: ImageInfo[],
+  blockSize: number,
+): number[] {
+  return images.map((info) => {
+    const { blockCountX, blockCountY } = calculateBlockCounts(
+      info.w,
+      info.h,
+      blockSize,
+    );
+    return blockCountX * blockCountY;
+  });
 }
 
 /**
  * Calculate total number of blocks from images
  * @param images Array of ImageInfo objects
+ * @param blockSize Block size
  * @returns Total block count
  */
-export function calculateTotalBlocks(images: ImageInfo[]): number {
-  return images.reduce((total, image) => total + image.x * image.y, 0);
+export function calculateTotalBlocks(
+  images: ImageInfo[],
+  blockSize: number,
+): number {
+  return images.reduce((total, image) => {
+    const { blockCountX, blockCountY } = calculateBlockCounts(
+      image.w,
+      image.h,
+      blockSize,
+    );
+    return total + blockCountX * blockCountY;
+  }, 0);
 }
