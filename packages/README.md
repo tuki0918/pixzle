@@ -22,7 +22,7 @@ Future browser implementation will include:
 - Canvas-based image processing
 - File API integration
 
-## @pixzle/cli (Reserved) 
+## @pixzle/cli
 Future CLI implementation will include:
 - Command-line interface
 - Batch processing utilities
