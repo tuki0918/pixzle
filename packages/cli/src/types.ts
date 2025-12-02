@@ -8,6 +8,10 @@ export interface ShuffleOptions {
 }
 
 export interface RestoreOptions {
-  manifest: string;
+  manifest?: string;
   output: string;
+  blockSize?: number;
+  seed?: number;
+  width?: number;
+  height?: number;
 }

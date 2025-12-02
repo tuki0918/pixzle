@@ -11,7 +11,9 @@ export interface RestoreOptions {
   /** Image paths (e.g., ["fragment1.png", "fragment2.png"]) */
   imagePaths: string[];
   /** Manifest path (e.g., "./output/fragments/manifest.json") */
-  manifestPath: string;
+  manifestPath?: string;
+  /** Manifest data object (alternative to manifestPath) */
+  manifestData?: ManifestData;
   /** Output directory (e.g., "./output/restored") */
   outputDir: string;
 }

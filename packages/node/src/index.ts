@@ -43,10 +43,17 @@ async function shuffle(options: ShuffleOptions): Promise<void> {
 }
 
 async function restore(options: RestoreOptions): Promise<void> {
-  const { imagePaths, manifestPath, outputDir } =
+  const { imagePaths, manifestPath, manifestData, outputDir } =
     validateRestoreOptions(options);
 
-  const manifest = await readJsonFile<ManifestData>(manifestPath);
+  let manifest: ManifestData;
+  if (manifestData) {
+    manifest = manifestData;
+  } else if (manifestPath) {
+    manifest = await readJsonFile<ManifestData>(manifestPath);
+  } else {
+    throw new Error("Manifest not provided");
+  }
 
   validateFragmentImageCount(imagePaths, manifest);
 
@@ -91,8 +98,12 @@ function validateShuffleOptions(options: ShuffleOptions) {
 }
 
 function validateRestoreOptions(options: RestoreOptions) {
-  const { manifestPath } = options;
-  if (!manifestPath || typeof manifestPath !== "string")
-    throw new Error("[restore] manifestPath is required and must be a string.");
+  const { manifestPath, manifestData } = options;
+  if (!manifestPath && !manifestData)
+    throw new Error(
+      "[restore] Either manifestPath or manifestData is required.",
+    );
+  if (manifestPath && typeof manifestPath !== "string")
+    throw new Error("[restore] manifestPath must be a string.");
   return validateCommonOptions(options, "restore");
 }

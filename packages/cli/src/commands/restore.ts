@@ -1,3 +1,7 @@
+import type {
+  RestoreOptions as CoreRestoreOptions,
+  ManifestData,
+} from "@pixzle/core";
 import Pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { RestoreOptions } from "../types";
@@ -16,8 +20,12 @@ export function registerRestoreCommand(program: Command): void {
     .command("restore")
     .description("Restore fragmented images")
     .argument("<fragments...>", "Fragment file paths")
-    .requiredOption("-m, --manifest <path>", "Manifest file path")
+    .option("-m, --manifest <path>", "Manifest file path")
     .requiredOption("-o, --output <dir>", "Output directory")
+    .option("-b, --block-size <number>", "Block size", Number.parseInt)
+    .option("-s, --seed <number>", "Random seed", Number.parseInt)
+    .option("-w, --width <number>", "Image width", Number.parseInt)
+    .option("-h, --height <number>", "Image height", Number.parseInt)
     .action(handleRestoreCommand);
 }
 
@@ -34,14 +42,49 @@ async function handleRestoreCommand(
     console.log("🔀 Starting image restoration...");
 
     const imagePaths = validateImagePaths(fragments);
-    const manifestPath = validateManifestPath(options.manifest);
     const outputDir = validateOutputDirectory(options.output);
 
-    await Pixzle.restore({
+    const restoreOptions: CoreRestoreOptions = {
       imagePaths,
-      manifestPath,
       outputDir,
-    });
+    };
+
+    if (options.manifest) {
+      restoreOptions.manifestPath = validateManifestPath(options.manifest);
+    } else if (
+      options.blockSize !== undefined &&
+      options.seed !== undefined &&
+      options.width !== undefined &&
+      options.height !== undefined
+    ) {
+      if (imagePaths.length > 1) {
+        throw new Error(
+          "When using manual options (blockSize, seed, width, height), only a single image can be restored.",
+        );
+      }
+
+      const { width, height } = options;
+      const manifestData: ManifestData = {
+        id: "cli-restore",
+        version: "0.0.0",
+        timestamp: new Date().toISOString(),
+        config: {
+          blockSize: options.blockSize,
+          seed: options.seed,
+          prefix: "img",
+          preserveName: false,
+          crossImageShuffle: false,
+        },
+        images: [{ w: width, h: height }],
+      };
+      restoreOptions.manifestData = manifestData;
+    } else {
+      throw new Error(
+        "Either manifest path or (blockSize, seed, width, height) must be provided.",
+      );
+    }
+
+    await Pixzle.restore(restoreOptions);
 
     console.log(`✅ Images restored successfully to: ${outputDir}`);
   } catch (error) {
