@@ -13,6 +13,17 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
+  "keywords": [],
+  "author": "tuki0918",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tuki0918/pixzle.git",
+    "directory": "packages/browser"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@pixzle/core": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0"
