@@ -6,14 +6,12 @@ This npm package provides functionality for image fragmentation and restoration.
 
 ## Architecture
 
-> [!NOTE]
-> Work in progress
-
 This project is a monorepo that contains the following packages:
 
 - **@pixzle/core**: Environment-independent core functionality (types, algorithms, crypto interfaces)
 - **@pixzle/node**: Node.js implementation
-- **@pixzle/browser**: Browser implementation (coming soon)
+- **@pixzle/browser**: Browser implementation
+- **@pixzle/react**: React components
 - **@pixzle/cli**: CLI implementation
 
 ## Features
