@@ -15,9 +15,9 @@
   "scripts": {
     "cli:dev": "pnpm --filter @pixzle/cli run dev",
     "build": "pnpm run build:packages && tsc -p tsconfig.build.json",
-    "build:packages": "pnpm run --filter @pixzle/core build && pnpm run --filter @pixzle/node build && pnpm run --filter @pixzle/cli build && pnpm run --filter @pixzle/browser build",
+    "build:packages": "pnpm run --filter @pixzle/core build && pnpm run --filter @pixzle/node build && pnpm run --filter @pixzle/cli build && pnpm run --filter @pixzle/browser build && pnpm run --filter @pixzle/react build",
     "build:check": "pnpm run build:check:packages && tsc -p tsconfig.build.json --noEmit",
-    "build:check:packages": "pnpm run --filter @pixzle/core build:check && pnpm run --filter @pixzle/node build:check && pnpm run --filter @pixzle/cli build:check && pnpm run --filter @pixzle/browser build:check",
+    "build:check:packages": "pnpm run --filter @pixzle/core build:check && pnpm run --filter @pixzle/node build:check && pnpm run --filter @pixzle/cli build:check && pnpm run --filter @pixzle/browser build:check && pnpm run --filter @pixzle/react build:check",
     "build:typecheck": "pnpm run build:check:packages && tsc -p tsconfig.build.json --noEmit",
     "changeset:add": "pnpm changeset add",
     "changeset:version": "pnpm changeset version",
