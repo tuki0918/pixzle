@@ -24,7 +24,7 @@ export interface FragmentationConfig {
    * Smaller -> High Obfuscation / Larger -> High Performance
    */
   blockSize?: number;
-  /** Prefix for fragment files (optional, default: "fragment") */
+  /** Prefix for fragment files (optional, default: "img") */
   prefix?: string;
   /** Random seed (auto-generated if not specified) */
   seed?: number | string;
