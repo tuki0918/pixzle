@@ -1,0 +1,54 @@
+import {
+  blocksToImageBuffer as coreBlocksToImageBuffer,
+  splitImageToBlocks as coreSplitImageToBlocks,
+} from "@pixzle/core";
+
+/**
+ * Split an image (HTMLImageElement or ImageBitmap) into blocks
+ */
+export function splitImageToBlocks(
+  image: HTMLImageElement | ImageBitmap,
+  blockSize: number,
+): Uint8Array[] {
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not get 2D context");
+
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, image.width, image.height);
+
+  // imageData.data is Uint8ClampedArray, we need Uint8Array
+  // We create a copy to avoid issues if the canvas is reused or garbage collected in weird ways,
+  // though here it's local.
+  // coreSplitImageToBlocks expects Uint8Array.
+  const buffer = new Uint8Array(imageData.data.buffer);
+
+  return coreSplitImageToBlocks(buffer, image.width, image.height, blockSize);
+}
+
+/**
+ * Create an ImageBitmap from blocks
+ */
+export async function blocksToImage(
+  blocks: Uint8Array[],
+  width: number,
+  height: number,
+  blockSize: number,
+): Promise<ImageBitmap> {
+  const buffer = coreBlocksToImageBuffer(blocks, width, height, blockSize);
+
+  // Create ImageData
+  const imageData = new ImageData(
+    new Uint8ClampedArray(
+      buffer.buffer as ArrayBuffer,
+      buffer.byteOffset,
+      buffer.byteLength,
+    ),
+    width,
+    height,
+  );
+
+  return createImageBitmap(imageData);
+}
