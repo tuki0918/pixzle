@@ -4,6 +4,13 @@
   "description": "Browser implementation of image fragmentation and restoration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
   "files": [
     "dist"
   ],
