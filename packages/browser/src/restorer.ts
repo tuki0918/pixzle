@@ -55,14 +55,14 @@ export class BrowserImageRestorer {
     }
 
     if (typeof source === "string") {
-      const img = new Image();
-      img.crossOrigin = "Anonymous";
-      img.src = source;
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-      return img;
+      const response = await fetch(source);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch image: ${response.status} ${response.statusText}`,
+        );
+      }
+      const blob = await response.blob();
+      return createImageBitmap(blob);
     }
 
     throw new Error("Unsupported image source");

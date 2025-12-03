@@ -82,21 +82,12 @@ describe("BrowserImageRestorer", () => {
     const seed = 123;
     const imageInfo = { w: 100, h: 100 };
 
-    // Mock Image loading
-    const originalImage = global.Image;
-    global.Image = class {
-      onload: () => void = () => {};
-      onerror: () => void = () => {};
-      src = "";
-      crossOrigin = "";
-      width = 100;
-      height = 100;
-
-      constructor() {
-        setTimeout(() => this.onload(), 0);
-      }
-      // biome-ignore lint/suspicious/noExplicitAny: Mocking global Image
-    } as any;
+    // Mock fetch
+    const mockBlob = new Blob([""]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: async () => mockBlob,
+    });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
     vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
@@ -104,9 +95,8 @@ describe("BrowserImageRestorer", () => {
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
-    // Restore global Image
-    global.Image = originalImage;
-
+    expect(global.fetch).toHaveBeenCalledWith(mockUrl);
+    expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
     expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
   });
 
@@ -117,21 +107,12 @@ describe("BrowserImageRestorer", () => {
     const seed = 123;
     const imageInfo = { w: 100, h: 100 };
 
-    // Mock Image loading
-    const originalImage = global.Image;
-    global.Image = class {
-      onload: () => void = () => {};
-      onerror: () => void = () => {};
-      src = "";
-      crossOrigin = "";
-      width = 100;
-      height = 100;
-
-      constructor() {
-        setTimeout(() => this.onload(), 0);
-      }
-      // biome-ignore lint/suspicious/noExplicitAny: Mocking global Image
-    } as any;
+    // Mock fetch
+    const mockBlob = new Blob([""]);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      blob: async () => mockBlob,
+    });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
     vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
@@ -139,9 +120,8 @@ describe("BrowserImageRestorer", () => {
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
-    // Restore global Image
-    global.Image = originalImage;
-
+    expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString());
+    expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
     expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
   });
 });
