@@ -18,7 +18,16 @@
     "test:watch": "vitest",
     "dev": "tsx src/cli.ts"
   },
-  "keywords": [],
+  "keywords": [
+    "pixzle",
+    "image",
+    "fragmentation",
+    "restoration",
+    "shuffle",
+    "obfuscation",
+    "cli",
+    "tool"
+  ],
   "author": "tuki0918",
   "repository": {
     "type": "git",

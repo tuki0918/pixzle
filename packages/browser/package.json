@@ -20,7 +20,16 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "keywords": [],
+  "keywords": [
+    "pixzle",
+    "image",
+    "fragmentation",
+    "restoration",
+    "shuffle",
+    "obfuscation",
+    "browser",
+    "web"
+  ],
   "author": "tuki0918",
   "repository": {
     "type": "git",
