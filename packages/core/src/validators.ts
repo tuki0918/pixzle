@@ -1,4 +1,3 @@
-import { lt } from "semver";
 import { decodeFileName } from "./helpers";
 import type { ImageInfo, ManifestData } from "./types";
 
