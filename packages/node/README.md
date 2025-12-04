@@ -48,7 +48,7 @@ output
 | output 1 | output 2 | output 3 |
 |:-------:|:---------------:|:---------------:|
 | ![](../../.docs/fragmented1/img_1_fragmented.png) | ![](../../.docs/fragmented1/img_2_fragmented.png) | ![](../../.docs/fragmented1/img_3_fragmented.png) |
-| 494 x 494px (334KB) | 494 x 494px (335KB) | 494 x 494px (334KB) |
+| 504 x 504px (159KB) | 496 x 488px (39KB) | 496 x 488px (35KB) |
 
 </details>
 
@@ -80,11 +80,11 @@ output
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
 | ![](../../.docs/fragmented1/img_1_fragmented.png) | ![](../../.docs/fragmented1/img_2_fragmented.png) | ![](../../.docs/fragmented1/img_3_fragmented.png) |
-| 494 x 494px (334KB) | 494 x 494px (335KB) | 494 x 494px (334KB) |
+| 504 x 504px (159KB) | 496 x 488px (39KB) | 496 x 488px (35KB) |
 
 | output 1 | output 2 | output 3 |
 |:-------:|:---------------:|:---------------:|
 | ![](../../.docs/restored1/img_1.png) | ![](../../.docs/restored1/img_2.png) | ![](../../.docs/restored1/img_3.png) |
-| 500 x 500px (117KB) | 400 x 600px (2KB) | 600 x 400px (2KB) |
+| 500 x 500px (116KB) | 400 x 600px (2KB) | 600 x 400px (2KB) |
 
 </details>
