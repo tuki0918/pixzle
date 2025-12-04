@@ -16,7 +16,7 @@ import { BrowserImageRestorer } from '@pixzle/browser';
 const restorer = new BrowserImageRestorer();
 
 const restoredBitmap = await restorer.restoreImage(
-  'path/to/shuffled.png', // or URL, Blob, HTMLImageElement, ImageBitmap
+  'path/to/fragmented/image.png', // or URL, Blob, HTMLImageElement, ImageBitmap
   8, // blockSize
   72411, // seed
   { w: 500, h: 500 } // imageInfo

@@ -70,7 +70,7 @@ pixzle restore <fragment> -o <output_directory> -b <size> -s <seed> -w <width> -
 
 **Example:**
 ```bash
-pixzle restore ./fragment.png -o ./restored -b 10 -s 12345 -w 500 -h 500
+pixzle restore ./fragmented.png -o ./restored -b 10 -s 12345 -w 500 -h 500
 ```
 
 

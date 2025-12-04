@@ -19,7 +19,7 @@ const MyComponent = () => {
       blockSize={2}
       seed={72411}
       imageInfo={ w: 500, h: 500 }
-      image="path/to/shuffled/image.png"
+      image="path/to/fragmented/image.png"
     />
   );
 };
