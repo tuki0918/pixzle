@@ -1,9 +1,9 @@
 import type { ImageInfo } from "@pixzle/core";
-import type React from "react";
+import React, { useEffect } from "react";
 import { usePixzleImage } from "./usePixzleImage";
 
 export interface PixzleImageProps
-  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src"> {
+  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "onError"> {
   blockSize: number;
   seed: number | string;
   imageInfo: ImageInfo;
@@ -21,70 +21,89 @@ export interface PixzleImageProps
    * @default true
    */
   protected?: boolean;
+  /**
+   * Callback called when an error occurs during image restoration.
+   */
+  onError?: (error: Error) => void;
 }
 
-export const PixzleImage: React.FC<PixzleImageProps> = ({
-  blockSize,
-  seed,
-  imageInfo,
-  image,
-  alt = "",
-  fallback = null,
-  errorFallback = null,
-  protected: isProtected = true,
-  ...props
-}) => {
-  const { src, isLoading, error } = usePixzleImage({
-    blockSize,
-    seed,
-    imageInfo,
-    image,
-  });
+export const PixzleImage = React.forwardRef<HTMLImageElement, PixzleImageProps>(
+  (
+    {
+      blockSize,
+      seed,
+      imageInfo,
+      image,
+      alt = "",
+      fallback = null,
+      errorFallback = null,
+      protected: isProtected = true,
+      onError,
+      ...props
+    },
+    ref,
+  ) => {
+    const { src, isLoading, error } = usePixzleImage({
+      blockSize,
+      seed,
+      imageInfo,
+      image,
+    });
 
-  if (error) {
-    console.error("PixzleImage restoration error:", error);
-    if (errorFallback) {
-      return (
-        <>
-          {typeof errorFallback === "function"
-            ? errorFallback(error)
-            : errorFallback}
-        </>
-      );
-    }
-    return null;
-  }
-
-  if (isLoading || !src) {
-    return <>{fallback}</>;
-  }
-
-  // biome-ignore lint/a11y/useAltText: alt is passed via props or defaults to empty string
-  return (
-    <img
-      src={src}
-      alt={alt}
-      {...props}
-      onContextMenu={(e) => {
-        if (isProtected) e.preventDefault();
-        props.onContextMenu?.(e);
-      }}
-      onDragStart={(e) => {
-        if (isProtected) e.preventDefault();
-        props.onDragStart?.(e);
-      }}
-      style={
-        {
-          ...(isProtected
-            ? {
-                userSelect: "none",
-                WebkitUserSelect: "none",
-                WebkitTouchCallout: "none",
-              }
-            : {}),
-          ...props.style,
-        } as React.CSSProperties
+    useEffect(() => {
+      if (error) {
+        console.error("PixzleImage restoration error:", error);
+        onError?.(error);
       }
-    />
-  );
-};
+    }, [error, onError]);
+
+    if (error) {
+      if (errorFallback) {
+        return (
+          <>
+            {typeof errorFallback === "function"
+              ? errorFallback(error)
+              : errorFallback}
+          </>
+        );
+      }
+      return null;
+    }
+
+    if (isLoading || !src) {
+      return <>{fallback}</>;
+    }
+
+    // biome-ignore lint/a11y/useAltText: alt is passed via props or defaults to empty string
+    return (
+      <img
+        ref={ref}
+        src={src}
+        alt={alt}
+        {...props}
+        onContextMenu={(e) => {
+          if (isProtected) e.preventDefault();
+          props.onContextMenu?.(e);
+        }}
+        onDragStart={(e) => {
+          if (isProtected) e.preventDefault();
+          props.onDragStart?.(e);
+        }}
+        style={
+          {
+            ...(isProtected
+              ? {
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  WebkitTouchCallout: "none",
+                }
+              : {}),
+            ...props.style,
+          } as React.CSSProperties
+        }
+      />
+    );
+  },
+);
+
+PixzleImage.displayName = "PixzleImage";
