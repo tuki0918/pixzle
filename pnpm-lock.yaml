@@ -11,12 +11,6 @@ importers:
       '@pixzle/node':
         specifier: workspace:*
         version: link:packages/node
-      '@tuki0918/seeded-shuffle':
-        specifier: ^1.0.0
-        version: 1.0.1
-      jimp:
-        specifier: ^1.6.0
-        version: 1.6.0
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
@@ -27,9 +21,6 @@ importers:
       '@types/node':
         specifier: ^22.10.2
         version: 22.19.1
-      '@types/pngjs':
-        specifier: ^6.0.5
-        version: 6.0.5
       '@vitest/coverage-v8':
         specifier: ^3.1.4
         version: 3.2.4(vitest@3.2.4(@types/node@22.19.1)(happy-dom@20.0.11)(tsx@4.20.6))
