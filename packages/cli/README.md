@@ -10,30 +10,7 @@ npm install @pixzle/cli
 
 ## Usage
 
-The CLI provides two main commands: `shuffle` and `restore`.
-
-### Global Help
-
-```bash
-pixzle --help
-```
-
-```
-Usage: pixzle [options] [command]
-
-CLI tool for image fragmentation and restoration
-
-Options:
-  -V, --version                     output the version number
-  -h, --help                        display help for command
-
-Commands:
-  shuffle [options] <images...>     Fragment images
-  restore [options] <fragments...>  Restore fragmented images
-  help [command]                    display help for command
-```
-
-### Shuffle Command
+### Shuffle
 
 Fragment images into multiple pieces.
 
@@ -41,240 +18,93 @@ Fragment images into multiple pieces.
 pixzle shuffle <images...> -o <output_directory> [options]
 ```
 
-#### Options
+| Option | Description | Default |
+|--------|-------------|---------|
+| `-o, --output <dir>` | Output directory (Required) | - |
+| `-b, --block-size <number>` | Pixel block size | 8 |
+| `-p, --prefix <prefix>` | Prefix for fragment files | "img" |
+| `-s, --seed <seed>` | Random seed | auto |
+| `--preserve-name` | Preserve original file names | false |
+| `--cross-image-shuffle` | Shuffle blocks across all images | false |
 
-| Option | Description | Required | Default |
-|--------|-------------|----------|---------|
-| `-o, --output <dir>` | Output directory for fragments and manifest | ✅ | - |
-| `-b, --block-size <size>` | Pixel block size (positive integer) | ❌ | 10 |
-| `-p, --prefix <prefix>` | Prefix for fragment files | ❌ | "img" |
-| `-s, --seed <seed>` | Random seed (integer) | ❌ | auto-generated |
-| `--preserve-name` | Preserve original file names | ❌ | false |
-| `--cross-image-shuffle` | Shuffle blocks across all images instead of within each image independently | ❌ | false (per-image shuffle by default) |
-
-#### Examples
-
-**Basic fragmentation:**
+**Example:**
 ```bash
-pixzle shuffle image1.jpg image2.png -o ./fragments
+pixzle shuffle input.png -o ./output
 ```
 
-**Custom configuration:**
-```bash
-pixzle shuffle *.jpg -o ./output -b 20 -p "my_fragment" --preserve-name
-```
+### Restore
 
-**With seed for reproducible results:**
-```bash
-pixzle shuffle image.png -o ./output -s 12345
-```
+Restore fragmented images.
 
-**Cross-image shuffle (shuffle blocks across all images):**
-```bash
-pixzle shuffle image1.png image2.png image3.png -o ./output --cross-image-shuffle
-```
-
-#### Output Structure
-
-After fragmentation, the output directory will contain:
-```
-output/
-├── manifest.json          # Metadata for restoration
-├── fragment_0000.png      # Fragment files
-├── fragment_0001.png
-└── ...
-```
-
-### Restore Command
-
-Restore fragmented images using the manifest file or manual configuration.
+#### Using Manifest
 
 ```bash
-pixzle restore <fragments...> -m <manifest_path> -o <output_directory> [options]
+pixzle restore <fragments...> -m <manifest_path> -o <output_directory>
 ```
-
-#### Options
 
 | Option | Description | Required |
 |--------|-------------|----------|
-| `-m, --manifest <path>` | Path to the manifest.json file | ⚠️ |
-| `-o, --output <dir>` | Output directory for restored images | ✅ |
-| `-b, --block-size <number>` | Pixel block size (positive integer) | ❌ (required if manifest missing) |
-| `-s, --seed <number>` | Random seed (integer) | ❌ (required if manifest missing) |
-| `-w, --width <number>` | Image width | ❌ (required if manifest missing) |
-| `-h, --height <number>` | Image height | ❌ (required if manifest missing) |
+| `-m, --manifest <path>` | Path to manifest.json | ✅ |
+| `-o, --output <dir>` | Output directory | ✅ |
 
-> [!NOTE]
-> When using manual options (`-b`, `-s`, `-w`, `-h`), only a single image can be restored.
-
-#### Examples
-
-**Basic restoration (using manifest):**
+**Example:**
 ```bash
-pixzle restore ./fragments/*.png -m ./fragments/manifest.json -o ./restored
+pixzle restore ./output/*.png -m ./output/manifest.json -o ./restored
 ```
 
-**Manual restoration (without manifest):**
+#### Manual Configuration (Single Image)
+
+Restore a single image without a manifest file.
+
+```bash
+pixzle restore <fragment> -o <output_directory> -b <size> -s <seed> -w <width> -h <height>
+```
+
+| Option | Description | Required |
+|--------|-------------|----------|
+| `-o, --output <dir>` | Output directory | ✅ |
+| `-b, --block-size <number>` | Pixel block size | ✅ |
+| `-s, --seed <number>` | Random seed | ✅ |
+| `-w, --width <number>` | Image width | ✅ |
+| `-h, --height <number>` | Image height | ✅ |
+
+**Example:**
 ```bash
 pixzle restore ./fragment.png -o ./restored -b 10 -s 12345 -w 500 -h 500
 ```
 
-**Specific fragments:**
-```bash
-pixzle restore fragment_0000.png fragment_0001.png fragment_0002.png -m manifest.json -o ./output
+
+## Manifest Structure
+
+<details>
+<summary>manifest.json</summary>
+
+```json
+{
+  "id": "631631d5-bcaa-40ac-9c1e-efd6e89e4600",
+  "version": "0.0.0",
+  "timestamp": "2025-12-04T16:08:41.924Z",
+  "config": {
+    "blockSize": 8,
+    "prefix": "img",
+    "seed": 214448,
+    "preserveName": false,
+    "crossImageShuffle": false
+  },
+  "images": [
+    {
+      "w": 500,
+      "h": 500
+    },
+    {
+      "w": 400,
+      "h": 600
+    },
+    {
+      "w": 600,
+      "h": 400
+    }
+  ]
+}
 ```
-
-## Error Handling
-
-The CLI provides clear error messages for common issues:
-
-- **File not found**: When input images or manifest don't exist
-- **Invalid options**: When required options are missing or invalid
-- **Restoration errors**: When fragments are corrupted or manifest doesn't match
-- **Permission errors**: When output directory cannot be created
-
-## Examples Workflow
-
-### Complete Workflow Example
-
-1. **Prepare images:**
-   ```bash
-   ls images/
-   # photo1.jpg  photo2.png  document.pdf
-   ```
-
-2. **Fragment images:**
-   ```bash
-   pixzle shuffle images/photo1.jpg images/photo2.png -o ./backup --preserve-name
-   ```
-   ```
-   🔀 Starting image fragmentation...
-   ✅ Images fragmented successfully to: /path/to/backup
-   ```
-
-3. **Check output:**
-   ```bash
-   ls backup/
-   # manifest.json  fragment_0000.png  fragment_0001.png  fragment_0002.png  fragment_0003.png
-   ```
-
-4. **Restore images:**
-   ```bash
-   pixzle restore backup/*.png -m backup/manifest.json -o ./restored
-   ```
-   ```
-   🔀 Starting image restoration...
-   ✅ Images restored successfully to: /path/to/restored
-   ```
-
-5. **Verify restoration:**
-   ```bash
-   ls restored/
-   # photo1.jpg  photo2.png
-   ```
-
-### Advanced Configuration Example
-
-For custom fragmentation:
-
-```bash
-# Fragment with custom settings
-pixzle shuffle sensitive/*.jpg \
-  -o ./vault \
-  -b 5 \
-  -p "secure_chunk" \
-  -s 42 \
-  --preserve-name
-
-# The output will use smaller blocks (5x5 pixels) and custom naming
-```
-
-## Integration with Scripts
-
-### Bash Script Example
-
-```bash
-#!/bin/bash
-
-# Backup script
-IMAGES_DIR="./photos"
-BACKUP_DIR="./backup"
-
-# Create backup
-echo "Creating backup..."
-pixzle shuffle "$IMAGES_DIR"/*.{jpg,png} \
-  -o "$BACKUP_DIR" \
-  --preserve-name
-
-if [ $? -eq 0 ]; then
-  echo "✅ Backup completed successfully"
-  # Optionally remove original files or move them
-else
-  echo "❌ Backup failed"
-  exit 1
-fi
-```
-
-### Recovery Script Example
-
-```bash
-#!/bin/bash
-
-# Recovery script
-BACKUP_DIR="./backup"
-RESTORE_DIR="./recovered_photos"
-
-# Restore from backup
-echo "Restoring from backup..."
-pixzle restore "$BACKUP_DIR"/fragment_*.png \
-  -m "$BACKUP_DIR/manifest.json" \
-  -o "$RESTORE_DIR"
-
-if [ $? -eq 0 ]; then
-  echo "✅ Recovery completed successfully"
-else
-  echo "❌ Recovery failed"
-  exit 1
-fi
-```
-
-## Development
-
-### Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/tuki0918/pixzle.git
-cd pixzle
-
-# Install dependencies
-npm install
-
-# Build the CLI
-npm run build
-
-# Test the CLI
-cd packages/cli
-npm test
-```
-
-### Running in Development Mode
-
-```bash
-cd packages/cli
-npm run dev -- shuffle --help
-```
-
-## Related Packages
-
-- [`@pixzle/core`](../core) - Core fragmentation logic
-- [`@pixzle/node`](../node) - Node.js implementation
-- [`@pixzle/browser`](../browser) - Browser implementation (coming soon)
-
-## License
-
-See the [LICENSE](../../LICENSE) file in the root directory.
-
-## Support
-
-For issues and questions, please visit the [GitHub repository](https://github.com/tuki0918/pixzle/issues).
+</details>
