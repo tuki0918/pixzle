@@ -16,6 +16,11 @@ export interface PixzleImageProps
    * Element to render if the image restoration fails.
    */
   errorFallback?: React.ReactNode | ((error: Error) => React.ReactNode);
+  /**
+   * Whether to protect the image from being saved via right-click or drag-and-drop.
+   * @default true
+   */
+  protected?: boolean;
 }
 
 export const PixzleImage: React.FC<PixzleImageProps> = ({
@@ -26,6 +31,7 @@ export const PixzleImage: React.FC<PixzleImageProps> = ({
   alt = "",
   fallback = null,
   errorFallback = null,
+  protected: isProtected = true,
   ...props
 }) => {
   const { src, isLoading, error } = usePixzleImage({
@@ -54,5 +60,31 @@ export const PixzleImage: React.FC<PixzleImageProps> = ({
   }
 
   // biome-ignore lint/a11y/useAltText: alt is passed via props or defaults to empty string
-  return <img src={src} alt={alt} {...props} />;
+  return (
+    <img
+      src={src}
+      alt={alt}
+      {...props}
+      onContextMenu={(e) => {
+        if (isProtected) e.preventDefault();
+        props.onContextMenu?.(e);
+      }}
+      onDragStart={(e) => {
+        if (isProtected) e.preventDefault();
+        props.onDragStart?.(e);
+      }}
+      style={
+        {
+          ...(isProtected
+            ? {
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                WebkitTouchCallout: "none",
+              }
+            : {}),
+          ...props.style,
+        } as React.CSSProperties
+      }
+    />
+  );
 };
