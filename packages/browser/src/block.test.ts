@@ -60,6 +60,9 @@ describe("block operations", () => {
     const img = new Image();
     img.width = width;
     img.height = height;
+    // Mock natural dimensions for the test
+    Object.defineProperty(img, "naturalWidth", { value: width });
+    Object.defineProperty(img, "naturalHeight", { value: height });
     // ...existing code...
 
     // We don't need to spy on document.createElement anymore if we mock prototype.getContext

@@ -10,22 +10,31 @@ export function splitImageToBlocks(
   image: HTMLImageElement | ImageBitmap,
   blockSize: number,
 ): Uint8Array[] {
+  const width =
+    image instanceof HTMLImageElement ? image.naturalWidth : image.width;
+  const height =
+    image instanceof HTMLImageElement ? image.naturalHeight : image.height;
+
   const canvas = document.createElement("canvas");
-  canvas.width = image.width;
-  canvas.height = image.height;
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Could not get 2D context");
 
   ctx.drawImage(image, 0, 0);
-  const imageData = ctx.getImageData(0, 0, image.width, image.height);
+  const imageData = ctx.getImageData(0, 0, width, height);
 
   // imageData.data is Uint8ClampedArray, we need Uint8Array
   // We create a copy to avoid issues if the canvas is reused or garbage collected in weird ways,
   // though here it's local.
   // coreSplitImageToBlocks expects Uint8Array.
-  const buffer = new Uint8Array(imageData.data.buffer);
+  const buffer = new Uint8Array(
+    imageData.data.buffer,
+    imageData.data.byteOffset,
+    imageData.data.byteLength,
+  );
 
-  return coreSplitImageToBlocks(buffer, image.width, image.height, blockSize);
+  return coreSplitImageToBlocks(buffer, width, height, blockSize);
 }
 
 /**
