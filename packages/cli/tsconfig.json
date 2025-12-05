@@ -4,7 +4,7 @@
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
+    "rootDir": "./src",
     "paths": {},
     "types": ["node", "vitest/globals"]
   },
