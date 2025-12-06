@@ -6,7 +6,7 @@ import {
 } from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 
-interface ImageFileToBlocksResult {
+interface ImageToBlocksResult {
   blocks: Buffer[];
   width: number;
   height: number;
@@ -93,10 +93,10 @@ export function blocksToImageBuffer(
  * @param blockSize Block size in pixels
  * @returns Promise resolving to block data and image metadata
  */
-export async function imageFileToBlocks(
+export async function imageToBlocks(
   input: string | Buffer,
   blockSize: number,
-): Promise<ImageFileToBlocksResult> {
+): Promise<ImageToBlocksResult> {
   try {
     // Load and process image with Jimp (automatically converts to RGBA)
     const image = await Jimp.read(input);

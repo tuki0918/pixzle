@@ -10,7 +10,7 @@ import { Jimp, JimpMime } from "jimp";
 import {
   blocksToImageBuffer,
   blocksToPngImage,
-  imageFileToBlocks,
+  imageToBlocks,
   splitImageToBlocks,
 } from "./block";
 
@@ -170,7 +170,7 @@ describe("calculateBlockCountsForCrossImages", () => {
   });
 });
 
-describe("imageFileToBlocks & blocksToPngImage (integration)", () => {
+describe("imageToBlocks & blocksToPngImage (integration)", () => {
   const tmpDir = path.join(tmpdir(), "block_test_tmp");
   const tmpPng = path.join(tmpDir, "test.png");
   const width = 4;
@@ -202,7 +202,7 @@ describe("imageFileToBlocks & blocksToPngImage (integration)", () => {
     if (fs.existsSync(tmpDir)) fs.rmdirSync(tmpDir);
   });
 
-  test("imageFileToBlocks splits PNG into correct blocks", async () => {
+  test("imageToBlocks splits PNG into correct blocks", async () => {
     const {
       blocks,
       width: w,
@@ -210,7 +210,7 @@ describe("imageFileToBlocks & blocksToPngImage (integration)", () => {
       channels: c,
       blockCountX: x,
       blockCountY: y,
-    } = await imageFileToBlocks(tmpPng, blockSize);
+    } = await imageToBlocks(tmpPng, blockSize);
     expect(w).toBe(width);
     expect(h).toBe(height);
     expect(c).toBe(channels);
@@ -224,7 +224,7 @@ describe("imageFileToBlocks & blocksToPngImage (integration)", () => {
   });
 
   test("blocksToPngImage reconstructs PNG from blocks", async () => {
-    const { blocks } = await imageFileToBlocks(tmpPng, blockSize);
+    const { blocks } = await imageToBlocks(tmpPng, blockSize);
     const pngBuffer = await blocksToPngImage(blocks, width, height, blockSize);
     // Decode PNG and check raw buffer
     const jimpImage = await Jimp.read(pngBuffer);

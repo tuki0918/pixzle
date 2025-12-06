@@ -8,7 +8,7 @@ import {
   takeBlocks,
 } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageFileToBlocks } from "./block";
+import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
 import { readFileBuffer } from "./file";
 
 export class ImageRestorer {
@@ -96,10 +96,7 @@ export class ImageRestorer {
       ? fragment
       : await readFileBuffer(fragment);
 
-    const { blocks } = await imageFileToBlocks(
-      buffer,
-      manifest.config.blockSize,
-    );
+    const { blocks } = await imageToBlocks(buffer, manifest.config.blockSize);
     return takeBlocks(blocks, expectedCount);
   }
 
