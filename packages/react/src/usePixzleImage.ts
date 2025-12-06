@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 export interface UsePixzleImageProps {
   blockSize: number;
-  seed: number | string;
+  seed: number;
   imageInfo: ImageInfo;
   image: string | Blob;
 }

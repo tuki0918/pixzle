@@ -5,7 +5,7 @@ import { usePixzleImage } from "./usePixzleImage";
 export interface PixzleImageProps
   extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "onError"> {
   blockSize: number;
-  seed: number | string;
+  seed: number;
   imageInfo: ImageInfo;
   image: string | Blob;
   /**

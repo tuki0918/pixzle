@@ -14,7 +14,7 @@ export class ImageRestorer {
   async restoreImage(
     imageSource: string | URL | Blob | HTMLImageElement | ImageBitmap,
     blockSize: number,
-    seed: number | string,
+    seed: number,
     imageInfo: ImageInfo,
   ): Promise<ImageBitmap> {
     const image = await this._loadImage(imageSource);
