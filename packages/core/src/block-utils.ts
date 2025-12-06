@@ -90,6 +90,26 @@ export function calculateBlockCountsForCrossImages(
 }
 
 /**
+ * Calculate block count for a single image
+ * @param width Image width
+ * @param height Image height
+ * @param blockSize Block size
+ * @returns Total block count (blockCountX * blockCountY)
+ */
+export function calculateBlockCount(
+  width: number,
+  height: number,
+  blockSize: number,
+): number {
+  const { blockCountX, blockCountY } = calculateBlockCounts(
+    width,
+    height,
+    blockSize,
+  );
+  return blockCountX * blockCountY;
+}
+
+/**
  * Calculate block counts for each image
  * @param images Array of ImageInfo objects
  * @param blockSize Block size
@@ -99,14 +119,7 @@ export function calculateBlockCountsPerImage(
   images: ImageInfo[],
   blockSize: number,
 ): number[] {
-  return images.map((info) => {
-    const { blockCountX, blockCountY } = calculateBlockCounts(
-      info.w,
-      info.h,
-      blockSize,
-    );
-    return blockCountX * blockCountY;
-  });
+  return images.map((info) => calculateBlockCount(info.w, info.h, blockSize));
 }
 
 /**
@@ -119,12 +132,38 @@ export function calculateTotalBlocks(
   images: ImageInfo[],
   blockSize: number,
 ): number {
-  return images.reduce((total, image) => {
-    const { blockCountX, blockCountY } = calculateBlockCounts(
-      image.w,
-      image.h,
-      blockSize,
-    );
-    return total + blockCountX * blockCountY;
-  }, 0);
+  return images.reduce(
+    (total, image) => total + calculateBlockCount(image.w, image.h, blockSize),
+    0,
+  );
+}
+
+/**
+ * Take the first n blocks from an array of blocks
+ * @param blocks Array of blocks
+ * @param count Number of blocks to take
+ * @returns Array of blocks with the specified count
+ */
+export function takeBlocks<T>(blocks: T[], count: number): T[] {
+  return blocks.slice(0, count);
+}
+
+/**
+ * Extract the required number of blocks from an array of blocks
+ * This is useful when restoring images from fragment images that may have
+ * extra padding blocks due to their square-ish layout
+ * @param blocks Array of blocks from the fragment image
+ * @param width Original image width
+ * @param height Original image height
+ * @param blockSize Block size
+ * @returns Array of blocks with the expected count
+ */
+export function extractBlocks<T>(
+  blocks: T[],
+  width: number,
+  height: number,
+  blockSize: number,
+): T[] {
+  const expectedCount = calculateBlockCount(width, height, blockSize);
+  return takeBlocks(blocks, expectedCount);
 }

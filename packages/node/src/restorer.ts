@@ -5,6 +5,7 @@ import {
   calculateBlockCountsPerImage,
   calculateBlockRange,
   calculateTotalBlocks,
+  takeBlocks,
 } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
 import { blocksPerImage, blocksToPngImage, imageFileToBlocks } from "./block";
@@ -99,7 +100,7 @@ export class ImageRestorer {
       buffer,
       manifest.config.blockSize,
     );
-    return blocks.slice(0, expectedCount);
+    return takeBlocks(blocks, expectedCount);
   }
 
   private async _readBlocks(

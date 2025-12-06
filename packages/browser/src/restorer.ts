@@ -1,4 +1,4 @@
-import type { ImageInfo } from "@pixzle/core";
+import { type ImageInfo, extractBlocks } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
 import { blocksToImage, splitImageToBlocks } from "./block";
 
@@ -19,7 +19,15 @@ export class BrowserImageRestorer {
   ): Promise<ImageBitmap> {
     const image = await this._loadImage(imageSource);
 
-    const blocks = splitImageToBlocks(image, blockSize);
+    // Split the fragment image into blocks and take only the expected number
+    // The fragment image may have extra padding blocks due to its square-ish layout
+    const allBlocks = splitImageToBlocks(image, blockSize);
+    const blocks = extractBlocks(
+      allBlocks,
+      imageInfo.w,
+      imageInfo.h,
+      blockSize,
+    );
 
     const restoredBlocks = unshuffle(blocks, seed) as Uint8Array[];
 
