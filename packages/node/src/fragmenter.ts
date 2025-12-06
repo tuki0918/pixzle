@@ -13,7 +13,7 @@ import {
 import { SeededRandom, shuffle } from "@tuki0918/seeded-shuffle";
 import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
 import { VERSION } from "./constants";
-import { fileNameWithoutExtension, readFileBuffer } from "./file";
+import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { generateManifestId } from "./utils";
 
 export class ImageFragmenter {
@@ -140,7 +140,7 @@ export class ImageFragmenter {
     imageInfo: ImageInfo;
     blocks: Buffer[];
   }> {
-    const buffer = await readFileBuffer(path);
+    const buffer = await loadBuffer(path);
 
     const { blocks, width, height } = await imageToBlocks(
       buffer,

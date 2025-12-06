@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { fetchBuffer, isUrl, readFileBuffer, readJsonFile } from "./file";
+import { fetchBuffer, isUrl, loadBuffer, loadJson } from "./file";
 
 describe("isUrl", () => {
   it("should return true for http URLs", () => {
@@ -62,7 +62,7 @@ describe("fetchBuffer", () => {
   });
 });
 
-describe("readFileBuffer with URL support", () => {
+describe("loadBuffer", () => {
   it("should use fetch for URLs", async () => {
     const testData = new Uint8Array([10, 20, 30]);
     const mockResponse = {
@@ -71,14 +71,14 @@ describe("readFileBuffer with URL support", () => {
     };
     global.fetch = vi.fn().mockResolvedValue(mockResponse);
 
-    const result = await readFileBuffer("https://example.com/image.png");
+    const result = await loadBuffer("https://example.com/image.png");
 
     expect(fetch).toHaveBeenCalledWith("https://example.com/image.png");
     expect(result).toEqual(Buffer.from(testData));
   });
 });
 
-describe("readJsonFile with URL support", () => {
+describe("loadJson", () => {
   it("should fetch and parse JSON from URL", async () => {
     const testJson = { name: "test", value: 123 };
     const mockResponse = {
@@ -91,7 +91,7 @@ describe("readJsonFile with URL support", () => {
     };
     global.fetch = vi.fn().mockResolvedValue(mockResponse);
 
-    const result = await readJsonFile("https://example.com/data.json");
+    const result = await loadJson("https://example.com/data.json");
 
     expect(fetch).toHaveBeenCalledWith("https://example.com/data.json");
     expect(result).toEqual(testJson);

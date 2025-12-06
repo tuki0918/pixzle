@@ -9,7 +9,7 @@ import {
   generateRestoredOriginalFileName,
   validateFragmentImageCount,
 } from "@pixzle/core";
-import { createDir, isUrl, readJsonFile, writeFile } from "./file";
+import { createDir, isUrl, loadJson, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
 import { ImageRestorer } from "./restorer";
 
@@ -53,7 +53,7 @@ async function restore(options: RestoreOptions): Promise<void> {
   if (manifestData) {
     manifest = manifestData;
   } else if (manifestPath) {
-    manifest = await readJsonFile<ManifestData>(manifestPath);
+    manifest = await loadJson<ManifestData>(manifestPath);
   } else {
     throw new Error("Manifest not provided");
   }

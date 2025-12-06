@@ -9,7 +9,7 @@ import {
 } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
 import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
-import { readFileBuffer } from "./file";
+import { loadBuffer } from "./file";
 
 export class ImageRestorer {
   async restoreImages(
@@ -94,7 +94,7 @@ export class ImageRestorer {
   ): Promise<Buffer[]> {
     const buffer = Buffer.isBuffer(fragment)
       ? fragment
-      : await readFileBuffer(fragment);
+      : await loadBuffer(fragment);
 
     const { blocks } = await imageToBlocks(buffer, manifest.config.blockSize);
     return takeBlocks(blocks, expectedCount);

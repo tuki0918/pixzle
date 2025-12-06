@@ -58,28 +58,28 @@ export async function writeFile(
 }
 
 /**
- * Read a JSON file and return its content
- * @param filePath Path to the JSON file or URL
- * @returns Content of the JSON file
+ * Read a JSON from file or URL and return its content
+ * @param source Path to the file or URL
+ * @returns Parsed JSON content
  */
-export async function readJsonFile<T>(filePath: string): Promise<T> {
-  if (isUrl(filePath)) {
-    const buffer = await fetchBuffer(filePath);
+export async function loadJson<T>(source: string): Promise<T> {
+  if (isUrl(source)) {
+    const buffer = await fetchBuffer(source);
     return JSON.parse(buffer.toString("utf8"));
   }
-  return JSON.parse(await fs.readFile(filePath, "utf8"));
+  return JSON.parse(await fs.readFile(source, "utf8"));
 }
 
 /**
- * Read a file or URL and return its content as Buffer
- * @param filePath Path to the file or URL
- * @returns Content of the file as Buffer
+ * Load data from a file or URL and return as Buffer
+ * @param source Path to the file or URL
+ * @returns Content as Buffer
  */
-export async function readFileBuffer(filePath: string): Promise<Buffer> {
-  if (isUrl(filePath)) {
-    return await fetchBuffer(filePath);
+export async function loadBuffer(source: string): Promise<Buffer> {
+  if (isUrl(source)) {
+    return await fetchBuffer(source);
   }
-  return await fs.readFile(filePath);
+  return await fs.readFile(source);
 }
 
 /**
