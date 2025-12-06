@@ -2,10 +2,10 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PixzleImage } from "./PixzleImage";
 
-// Mock BrowserImageRestorer
+// Mock ImageRestorer
 vi.mock("@pixzle/browser", () => {
   return {
-    BrowserImageRestorer: vi.fn().mockImplementation(() => {
+    ImageRestorer: vi.fn().mockImplementation(() => {
       return {
         restoreImage: vi.fn().mockResolvedValue({
           width: 100,
@@ -77,9 +77,9 @@ describe("PixzleImage", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     // Mock restoreImage to fail
-    const { BrowserImageRestorer } = await import("@pixzle/browser");
+    const { ImageRestorer } = await import("@pixzle/browser");
     // biome-ignore lint/suspicious/noExplicitAny: Mocking implementation
-    (BrowserImageRestorer as any).mockImplementationOnce(() => ({
+    (ImageRestorer as any).mockImplementationOnce(() => ({
       restoreImage: vi.fn().mockRejectedValue(new Error("Restoration failed")),
     }));
 

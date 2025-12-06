@@ -1,11 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import * as blockModule from "./block";
-import { BrowserImageRestorer } from "./restorer";
+import { ImageRestorer } from "./restorer";
 
 // Mock the block module
 vi.mock("./block", () => ({
   splitImageToBlocks: vi.fn(),
-  blocksToImage: vi.fn(),
+  blocksToImageBitmap: vi.fn(),
 }));
 
 // Mock ImageBitmap class
@@ -26,9 +26,9 @@ global.createImageBitmap = vi.fn().mockImplementation(async (source) => {
   return new MockImageBitmap(100, 100) as unknown as ImageBitmap;
 });
 
-describe("BrowserImageRestorer", () => {
+describe("ImageRestorer", () => {
   it("should restore image from ImageBitmap", async () => {
-    const restorer = new BrowserImageRestorer();
+    const restorer = new ImageRestorer();
     const mockImage = new MockImageBitmap(100, 100) as unknown as ImageBitmap;
     const blockSize = 10;
     const seed = 123;
@@ -41,7 +41,9 @@ describe("BrowserImageRestorer", () => {
     ) as unknown as ImageBitmap;
 
     vi.mocked(blockModule.splitImageToBlocks).mockReturnValue(mockBlocks);
-    vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
+    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+      mockRestoredImage,
+    );
 
     const result = await restorer.restoreImage(
       mockImage,
@@ -55,19 +57,21 @@ describe("BrowserImageRestorer", () => {
       blockSize,
     );
     // unshuffle is called internally, we assume it works or mock it if we want to test exact order
-    expect(blockModule.blocksToImage).toHaveBeenCalled();
+    expect(blockModule.blocksToImageBitmap).toHaveBeenCalled();
     expect(result).toBe(mockRestoredImage);
   });
 
   it("should restore image from Blob", async () => {
-    const restorer = new BrowserImageRestorer();
+    const restorer = new ImageRestorer();
     const mockBlob = new Blob([""]);
     const blockSize = 10;
     const seed = 123;
     const imageInfo = { w: 100, h: 100 };
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
+    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+      mockRestoredImage,
+    );
     vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockBlob, blockSize, seed, imageInfo);
@@ -76,7 +80,7 @@ describe("BrowserImageRestorer", () => {
   });
 
   it("should restore image from URL string", async () => {
-    const restorer = new BrowserImageRestorer();
+    const restorer = new ImageRestorer();
     const mockUrl = "http://example.com/image.png";
     const blockSize = 10;
     const seed = 123;
@@ -90,7 +94,9 @@ describe("BrowserImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
+    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+      mockRestoredImage,
+    );
     vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
@@ -101,7 +107,7 @@ describe("BrowserImageRestorer", () => {
   });
 
   it("should restore image from URL object", async () => {
-    const restorer = new BrowserImageRestorer();
+    const restorer = new ImageRestorer();
     const mockUrl = new URL("http://example.com/image.png");
     const blockSize = 10;
     const seed = 123;
@@ -115,7 +121,9 @@ describe("BrowserImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImage).mockResolvedValue(mockRestoredImage);
+    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+      mockRestoredImage,
+    );
     vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);

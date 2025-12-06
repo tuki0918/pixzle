@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { blocksToImage, splitImageToBlocks } from "./block";
+import { blocksToImageBitmap, splitImageToBlocks } from "./block";
 
 // Mock createImageBitmap since it's not available in happy-dom/jsdom usually
 global.createImageBitmap = vi.fn().mockImplementation(async (imageData) => {
@@ -97,7 +97,7 @@ describe("block operations", () => {
       new Uint8Array(16).fill(4),
     ];
 
-    const result = await blocksToImage(blocks, width, height, blockSize);
+    const result = await blocksToImageBitmap(blocks, width, height, blockSize);
 
     expect(global.createImageBitmap).toHaveBeenCalled();
     // Check if ImageData was created correctly

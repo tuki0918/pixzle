@@ -1,8 +1,8 @@
 import { type ImageInfo, extractBlocks } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksToImage, splitImageToBlocks } from "./block";
+import { blocksToImageBitmap, splitImageToBlocks } from "./block";
 
-export class BrowserImageRestorer {
+export class ImageRestorer {
   /**
    * Restore a single image from a shuffled source
    * @param imageSource The shuffled image (URL, Blob, HTMLImageElement, or ImageBitmap)
@@ -31,7 +31,12 @@ export class BrowserImageRestorer {
 
     const restoredBlocks = unshuffle(blocks, seed) as Uint8Array[];
 
-    return blocksToImage(restoredBlocks, imageInfo.w, imageInfo.h, blockSize);
+    return blocksToImageBitmap(
+      restoredBlocks,
+      imageInfo.w,
+      imageInfo.h,
+      blockSize,
+    );
   }
 
   private async _loadImage(

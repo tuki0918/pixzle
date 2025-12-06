@@ -40,7 +40,7 @@ export function splitImageToBlocks(
 /**
  * Create an ImageBitmap from blocks
  */
-export async function blocksToImage(
+export async function blocksToImageBitmap(
   blocks: Uint8Array[],
   width: number,
   height: number,
