@@ -9,13 +9,14 @@ import {
   generateRestoredOriginalFileName,
   validateFragmentImageCount,
 } from "@pixzle/core";
-import { createDir, readJsonFile, writeFile } from "./file";
+import { createDir, isUrl, readJsonFile, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
 import { ImageRestorer } from "./restorer";
 
 export {
   ImageFragmenter,
   ImageRestorer,
+  isUrl,
   type FragmentationConfig,
   type ManifestData,
 };

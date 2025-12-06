@@ -1,15 +1,29 @@
 import { existsSync, lstatSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { isUrl } from "@pixzle/node";
 
 /**
- * Validates an array of image file paths
- * @param paths Array of file paths to validate
- * @returns Array of resolved absolute paths
+ * Check if a string is a URL
+ * @param str String to check
+ * @returns true if the string is a valid URL
+ */
+export { isUrl };
+
+/**
+ * Validates an array of image file paths or URLs
+ * @param paths Array of file paths or URLs to validate
+ * @returns Array of resolved absolute paths or original URLs
  */
 export function validateImagePaths(paths: string[]): string[] {
   const resolvedPaths: string[] = [];
 
   for (const path of paths) {
+    // If it's a URL, add it directly without local file validation
+    if (isUrl(path)) {
+      resolvedPaths.push(path);
+      continue;
+    }
+
     const resolvedPath = resolve(path);
 
     if (!existsSync(resolvedPath)) {
@@ -47,11 +61,16 @@ export function validateOutputDirectory(outputPath: string): string {
 }
 
 /**
- * Validates manifest file path
- * @param manifestPath Path to manifest file
- * @returns Resolved absolute path
+ * Validates manifest file path or URL
+ * @param manifestPath Path to manifest file or URL
+ * @returns Resolved absolute path or original URL
  */
 export function validateManifestPath(manifestPath: string): string {
+  // If it's a URL, return it directly without local file validation
+  if (isUrl(manifestPath)) {
+    return manifestPath;
+  }
+
   const resolvedPath = resolve(manifestPath);
 
   if (!existsSync(resolvedPath)) {
