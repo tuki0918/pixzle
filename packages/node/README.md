@@ -19,7 +19,7 @@ import Pixzle from "@pixzle/node";
 ```ts
 await Pixzle.shuffle({
   // config: { /** FragmentationConfig */ },
-  imagePaths: [
+  images: [
     "./input_1.png",
     "./input_2.png",
     "./input_3.png",
@@ -56,8 +56,8 @@ output
 
 ```ts
 await Pixzle.restore({
-  manifestPath: "./output/fragmented/manifest.json",
-  imagePaths: [
+  manifest: "./output/fragmented/manifest.json",
+  images: [
     "./output/fragmented/img_1_fragmented.png",
     "./output/fragmented/img_2_fragmented.png",
     "./output/fragmented/img_3_fragmented.png",
