@@ -10,36 +10,36 @@ import { isUrl } from "@pixzle/node";
 export { isUrl };
 
 /**
- * Validates an array of image file paths or URLs
- * @param paths Array of file paths or URLs to validate
+ * Validates an array of image sources (file paths or URLs)
+ * @param sources Array of file paths or URLs to validate
  * @returns Array of resolved absolute paths or original URLs
  */
-export function validateImagePaths(paths: string[]): string[] {
-  const resolvedPaths: string[] = [];
+export function validateImageSources(sources: string[]): string[] {
+  const resolvedSources: string[] = [];
 
-  for (const path of paths) {
+  for (const source of sources) {
     // If it's a URL, add it directly without local file validation
-    if (isUrl(path)) {
-      resolvedPaths.push(path);
+    if (isUrl(source)) {
+      resolvedSources.push(source);
       continue;
     }
 
-    const resolvedPath = resolve(path);
+    const resolvedPath = resolve(source);
 
     if (!existsSync(resolvedPath)) {
-      console.error(`Error: File not found: ${path}`);
+      console.error(`Error: File not found: ${source}`);
       process.exit(1);
     }
 
     if (!lstatSync(resolvedPath).isFile()) {
-      console.error(`Error: Not a file: ${path}`);
+      console.error(`Error: Not a file: ${source}`);
       process.exit(1);
     }
 
-    resolvedPaths.push(resolvedPath);
+    resolvedSources.push(resolvedPath);
   }
 
-  return resolvedPaths;
+  return resolvedSources;
 }
 
 /**
@@ -61,25 +61,25 @@ export function validateOutputDirectory(outputPath: string): string {
 }
 
 /**
- * Validates manifest file path or URL
- * @param manifestPath Path to manifest file or URL
+ * Validates manifest source (file path or URL)
+ * @param source Path to manifest file or URL
  * @returns Resolved absolute path or original URL
  */
-export function validateManifestPath(manifestPath: string): string {
+export function validateManifestSource(source: string): string {
   // If it's a URL, return it directly without local file validation
-  if (isUrl(manifestPath)) {
-    return manifestPath;
+  if (isUrl(source)) {
+    return source;
   }
 
-  const resolvedPath = resolve(manifestPath);
+  const resolvedPath = resolve(source);
 
   if (!existsSync(resolvedPath)) {
-    console.error(`Error: Manifest file not found: ${manifestPath}`);
+    console.error(`Error: Manifest file not found: ${source}`);
     process.exit(1);
   }
 
   if (!lstatSync(resolvedPath).isFile()) {
-    console.error(`Error: Manifest path is not a file: ${manifestPath}`);
+    console.error(`Error: Manifest path is not a file: ${source}`);
     process.exit(1);
   }
 

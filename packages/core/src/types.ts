@@ -1,6 +1,6 @@
 export interface ShuffleOptions {
-  /** Image paths (e.g., ["image1.png", "image2.png"]) */
-  imagePaths: string[];
+  /** Image sources - file paths or URLs (e.g., ["image1.png", "https://example.com/image2.png"]) */
+  images: string[];
   /** Fragmentation config */
   config?: FragmentationConfig;
   /** Output directory (e.g., "./output/fragments") */
@@ -8,11 +8,11 @@ export interface ShuffleOptions {
 }
 
 export interface RestoreOptions {
-  /** Image paths (e.g., ["fragment1.png", "fragment2.png"]) */
-  imagePaths: string[];
-  /** Manifest path (e.g., "./output/fragments/manifest.json") */
-  manifestPath?: string;
-  /** Manifest data object (alternative to manifestPath) */
+  /** Image sources - file paths or URLs (e.g., ["fragment1.png", "https://example.com/fragment2.png"]) */
+  images: string[];
+  /** Manifest source - file path or URL (e.g., "./manifest.json" or "https://example.com/manifest.json") */
+  manifest?: string;
+  /** Manifest data object (alternative to manifest) */
   manifestData?: ManifestData;
   /** Output directory (e.g., "./output/restored") */
   outputDir: string;

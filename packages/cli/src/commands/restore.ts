@@ -6,8 +6,8 @@ import Pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { RestoreOptions } from "../types";
 import {
-  validateImagePaths,
-  validateManifestPath,
+  validateImageSources,
+  validateManifestSource,
   validateOutputDirectory,
 } from "../validators";
 
@@ -41,23 +41,23 @@ async function handleRestoreCommand(
   try {
     console.log("🔀 Starting image restoration...");
 
-    const imagePaths = validateImagePaths(fragments);
+    const images = validateImageSources(fragments);
     const outputDir = validateOutputDirectory(options.output);
 
     const restoreOptions: CoreRestoreOptions = {
-      imagePaths,
+      images,
       outputDir,
     };
 
     if (options.manifest) {
-      restoreOptions.manifestPath = validateManifestPath(options.manifest);
+      restoreOptions.manifest = validateManifestSource(options.manifest);
     } else if (
       options.blockSize !== undefined &&
       options.seed !== undefined &&
       options.width !== undefined &&
       options.height !== undefined
     ) {
-      if (imagePaths.length > 1) {
+      if (images.length > 1) {
         throw new Error(
           "When using manual options (blockSize, seed, width, height), only a single image can be restored.",
         );

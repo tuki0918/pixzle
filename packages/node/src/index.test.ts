@@ -29,7 +29,7 @@ describe("pixzle (integration)", () => {
   const height = 2;
   const blockSize = 1;
   const prefix = "indextestimg";
-  let imagePaths: string[] = [];
+  let testImagePaths: string[] = [];
   let manifestPath = "";
   let fragmentPaths: string[] = [];
   let restoredPaths: string[] = [];
@@ -37,7 +37,7 @@ describe("pixzle (integration)", () => {
   beforeAll(async () => {
     // Create tmp directory and save original images as PNG
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-    imagePaths = [];
+    testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
       const image = Jimp.fromBitmap({
@@ -46,11 +46,11 @@ describe("pixzle (integration)", () => {
         height,
       });
       await image.write(filePath, JimpMime.png);
-      imagePaths.push(filePath);
+      testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle
     const manifest = await pixzle.shuffle({
-      imagePaths,
+      images: testImagePaths,
       config: { blockSize, prefix },
       outputDir: tmpDir,
     });
@@ -74,8 +74,8 @@ describe("pixzle (integration)", () => {
     }
     // Restore images using pixzle.restore
     await pixzle.restore({
-      imagePaths: fragmentPaths,
-      manifestPath,
+      images: fragmentPaths,
+      manifest: manifestPath,
       outputDir: tmpDir,
     });
     // Find restored images (use the same logic as index.ts, based on fragmentPaths)
@@ -101,7 +101,7 @@ describe("pixzle (integration)", () => {
   afterAll(() => {
     // Clean up tmp files
     for (const f of [
-      ...imagePaths,
+      ...testImagePaths,
       ...fragmentPaths,
       ...restoredPaths,
       manifestPath,
@@ -132,7 +132,7 @@ describe("pixzle (integration)", () => {
 
     // Check that restored images match original images
     for (let i = 0; i < originalImages.length; i++) {
-      const orig = await Jimp.read(imagePaths[i]);
+      const orig = await Jimp.read(testImagePaths[i]);
       const restored = await Jimp.read(restoredPaths[i]);
       expect(restored.bitmap.data).toEqual(orig.bitmap.data);
     }
@@ -155,7 +155,7 @@ describe("pixzle (preserveName integration)", () => {
   const height = 2;
   const blockSize = 1;
   const prefix = "indextestimgorig";
-  let imagePaths: string[] = [];
+  let testImagePaths: string[] = [];
   let manifestPath = "";
   let fragmentPaths: string[] = [];
   let restoredPaths: string[] = [];
@@ -164,7 +164,7 @@ describe("pixzle (preserveName integration)", () => {
   beforeAll(async () => {
     // Create tmp directory and save original images as PNG
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-    imagePaths = [];
+    testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
       const image = Jimp.fromBitmap({
@@ -173,11 +173,11 @@ describe("pixzle (preserveName integration)", () => {
         height,
       });
       await image.write(filePath, JimpMime.png);
-      imagePaths.push(filePath);
+      testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle (with preserveName)
     await pixzle.shuffle({
-      imagePaths,
+      images: testImagePaths,
       config: { blockSize, prefix, preserveName: true },
       outputDir: tmpDir,
     });
@@ -197,21 +197,21 @@ describe("pixzle (preserveName integration)", () => {
     }
     // Restore images using pixzle.restore
     await pixzle.restore({
-      imagePaths: fragmentPaths,
-      manifestPath,
+      images: fragmentPaths,
+      manifest: manifestPath,
       outputDir: tmpDir,
     });
     // Find restored images (should be named as original file name)
     restoredPaths = [];
-    for (let i = 0; i < imagePaths.length; i++) {
-      const origName = path.parse(imagePaths[i]).name;
+    for (let i = 0; i < testImagePaths.length; i++) {
+      const origName = path.parse(testImagePaths[i]).name;
       restoredPaths.push(path.join(tmpDir, `${origName}.png`));
     }
   });
 
   afterAll(() => {
     for (const f of [
-      ...imagePaths,
+      ...testImagePaths,
       ...fragmentPaths,
       ...restoredPaths,
       manifestPath,
@@ -225,8 +225,8 @@ describe("pixzle (preserveName integration)", () => {
     expect(manifest).toBeDefined();
     expect(manifest?.config.preserveName).toBe(true);
     expect(Array.isArray(manifest?.images)).toBe(true);
-    for (let i = 0; i < imagePaths.length; i++) {
-      const expectedName = path.parse(imagePaths[i]).name;
+    for (let i = 0; i < testImagePaths.length; i++) {
+      const expectedName = path.parse(testImagePaths[i]).name;
       const encodedName = manifest?.images[i]?.name;
       expect(encodedName).toBeTruthy();
       // Decode base64 encoded name
@@ -238,8 +238,8 @@ describe("pixzle (preserveName integration)", () => {
   });
 
   test("restored file names are original file names (with .png)", () => {
-    for (let i = 0; i < imagePaths.length; i++) {
-      const origName = path.parse(imagePaths[i]).name;
+    for (let i = 0; i < testImagePaths.length; i++) {
+      const origName = path.parse(testImagePaths[i]).name;
       const restoredPath = path.join(tmpDir, `${origName}.png`);
       expect(fs.existsSync(restoredPath)).toBe(true);
     }
@@ -312,8 +312,8 @@ describe("pixzle (error handling)", () => {
       // Try to restore with wrong number of fragments
       await expect(
         pixzle.restore({
-          imagePaths: [fragmentPath],
-          manifestPath,
+          images: [fragmentPath],
+          manifest: manifestPath,
           outputDir: tmpDir,
         }),
       ).rejects.toThrow("Fragment image count mismatch");

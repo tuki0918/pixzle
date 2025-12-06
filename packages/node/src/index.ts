@@ -22,11 +22,11 @@ export {
 };
 
 async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
-  const { imagePaths, config, outputDir } = validateShuffleOptions(options);
+  const { images, config, outputDir } = validateShuffleOptions(options);
 
   const fragmenter = new ImageFragmenter(config ?? {});
   const { manifest, fragmentedImages } =
-    await fragmenter.fragmentImages(imagePaths);
+    await fragmenter.fragmentImages(images);
 
   await createDir(outputDir, true);
   await writeFile(
@@ -46,22 +46,26 @@ async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
 }
 
 async function restore(options: RestoreOptions): Promise<void> {
-  const { imagePaths, manifestPath, manifestData, outputDir } =
-    validateRestoreOptions(options);
+  const {
+    images,
+    manifest: manifestSource,
+    manifestData,
+    outputDir,
+  } = validateRestoreOptions(options);
 
   let manifest: ManifestData;
   if (manifestData) {
     manifest = manifestData;
-  } else if (manifestPath) {
-    manifest = await loadJson<ManifestData>(manifestPath);
+  } else if (manifestSource) {
+    manifest = await loadJson<ManifestData>(manifestSource);
   } else {
     throw new Error("Manifest not provided");
   }
 
-  validateFragmentImageCount(imagePaths, manifest);
+  validateFragmentImageCount(images, manifest);
 
   const restorer = new ImageRestorer();
-  const restoredImages = await restorer.restoreImages(imagePaths, manifest);
+  const restoredImages = await restorer.restoreImages(images, manifest);
 
   await createDir(outputDir, true);
 
@@ -88,9 +92,9 @@ function validateCommonOptions<T extends ShuffleOptions | RestoreOptions>(
   context: string,
 ) {
   if (!options) throw new Error(`[${context}] Options object is required.`);
-  const { imagePaths, outputDir } = options;
-  if (!imagePaths || !Array.isArray(imagePaths) || imagePaths.length === 0)
-    throw new Error(`[${context}] imagePaths must be a non-empty array.`);
+  const { images, outputDir } = options;
+  if (!images || !Array.isArray(images) || images.length === 0)
+    throw new Error(`[${context}] images must be a non-empty array.`);
   if (!outputDir || typeof outputDir !== "string")
     throw new Error(`[${context}] outputDir is required and must be a string.`);
   return options;
@@ -101,12 +105,10 @@ function validateShuffleOptions(options: ShuffleOptions) {
 }
 
 function validateRestoreOptions(options: RestoreOptions) {
-  const { manifestPath, manifestData } = options;
-  if (!manifestPath && !manifestData)
-    throw new Error(
-      "[restore] Either manifestPath or manifestData is required.",
-    );
-  if (manifestPath && typeof manifestPath !== "string")
-    throw new Error("[restore] manifestPath must be a string.");
+  const { manifest, manifestData } = options;
+  if (!manifest && !manifestData)
+    throw new Error("[restore] Either manifest or manifestData is required.");
+  if (manifest && typeof manifest !== "string")
+    throw new Error("[restore] manifest must be a string.");
   return validateCommonOptions(options, "restore");
 }

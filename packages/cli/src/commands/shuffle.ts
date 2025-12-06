@@ -2,7 +2,7 @@ import type { FragmentationConfig } from "@pixzle/core";
 import Pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { ShuffleOptions } from "../types";
-import { validateImagePaths, validateOutputDirectory } from "../validators";
+import { validateImageSources, validateOutputDirectory } from "../validators";
 
 /**
  * Configures and registers the shuffle command
@@ -49,7 +49,7 @@ async function handleShuffleCommand(
   try {
     console.log("🔀 Starting image fragmentation...");
 
-    const imagePaths = validateImagePaths(images);
+    const validatedImages = validateImageSources(images);
     const outputDir = validateOutputDirectory(options.output);
 
     const config: FragmentationConfig = {};
@@ -60,7 +60,7 @@ async function handleShuffleCommand(
     if (options.crossImageShuffle) config.crossImageShuffle = true;
 
     await Pixzle.shuffle({
-      imagePaths,
+      images: validatedImages,
       outputDir,
       config: Object.keys(config).length > 0 ? config : undefined,
     });
