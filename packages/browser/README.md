@@ -11,9 +11,9 @@ npm i @pixzle/browser
 ## Usage
 
 ```typescript
-import { BrowserImageRestorer } from '@pixzle/browser';
+import { ImageRestorer } from '@pixzle/browser';
 
-const restorer = new BrowserImageRestorer();
+const restorer = new ImageRestorer();
 
 const restoredBitmap = await restorer.restoreImage(
   'path/to/fragmented/image.png', // or URL, Blob, HTMLImageElement, ImageBitmap
