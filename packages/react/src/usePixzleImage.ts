@@ -1,4 +1,4 @@
-import { ImageRestorer } from "@pixzle/browser";
+import pixzle from "@pixzle/browser";
 import type { ImageInfo } from "@pixzle/core";
 import { useEffect, useState } from "react";
 
@@ -30,16 +30,14 @@ export const usePixzleImage = ({
     setIsLoading(true);
     setError(null);
 
-    const restorer = new ImageRestorer();
-
     const restore = async () => {
       try {
-        const restoredBitmap = await restorer.restoreImage(
+        const restoredBitmap = await pixzle.restoreImage({
           image,
           blockSize,
           seed,
           imageInfo,
-        );
+        });
 
         if (!active) return;
 
