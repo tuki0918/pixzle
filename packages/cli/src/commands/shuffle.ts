@@ -1,5 +1,5 @@
 import type { FragmentationConfig } from "@pixzle/core";
-import Pixzle from "@pixzle/node";
+import pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { ShuffleOptions } from "../types";
 import { validateImageSources, validateOutputDirectory } from "../validators";
@@ -59,7 +59,7 @@ async function handleShuffleCommand(
     if (options.preserveName) config.preserveName = true;
     if (options.crossImageShuffle) config.crossImageShuffle = true;
 
-    await Pixzle.shuffle({
+    await pixzle.shuffle({
       images: validatedImages,
       outputDir,
       config: Object.keys(config).length > 0 ? config : undefined,

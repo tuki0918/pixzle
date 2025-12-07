@@ -1,6 +1,6 @@
 import type { RestoreOptions as CoreRestoreOptions } from "@pixzle/core";
 import { createSingleImageManifest } from "@pixzle/core";
-import Pixzle from "@pixzle/node";
+import pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { RestoreOptions } from "../types";
 import {
@@ -73,7 +73,7 @@ async function handleRestoreCommand(
       );
     }
 
-    await Pixzle.restore(restoreOptions);
+    await pixzle.restore(restoreOptions);
 
     console.log(`✅ Images restored successfully to: ${outputDir}`);
   } catch (error) {
