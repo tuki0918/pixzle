@@ -1,13 +1,9 @@
-import type { ImageInfo } from "@pixzle/core";
+import type { ImageInfo, ManifestData } from "@pixzle/core";
 import React, { useEffect } from "react";
-import { usePixzleImage } from "./usePixzleImage";
+import { type UsePixzleImageProps, usePixzleImage } from "./usePixzleImage";
 
-export interface PixzleImageProps
+interface PixzleImageBaseProps
   extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "src" | "onError"> {
-  blockSize: number;
-  seed: number;
-  imageInfo: ImageInfo;
-  image: string | Blob;
   /**
    * Element to render while the image is being restored.
    */
@@ -27,28 +23,27 @@ export interface PixzleImageProps
   onError?: (error: Error) => void;
 }
 
+export type PixzleImageProps = PixzleImageBaseProps & UsePixzleImageProps;
+
 export const PixzleImage = React.forwardRef<HTMLImageElement, PixzleImageProps>(
-  (
-    {
-      blockSize,
-      seed,
-      imageInfo,
+  (props, ref) => {
+    const {
       image,
       alt = "",
       fallback = null,
       errorFallback = null,
       protected: isProtected = true,
       onError,
-      ...props
-    },
-    ref,
-  ) => {
-    const { src, isLoading, error } = usePixzleImage({
-      blockSize,
-      seed,
-      imageInfo,
-      image,
-    });
+      // Extract variant-specific props to exclude from imgProps
+      blockSize: _blockSize,
+      seed: _seed,
+      imageInfo: _imageInfo,
+      manifest: _manifest,
+      manifestData: _manifestData,
+      ...imgProps
+    } = props;
+
+    const { src, isLoading, error } = usePixzleImage(props);
 
     useEffect(() => {
       if (error) {
@@ -80,14 +75,14 @@ export const PixzleImage = React.forwardRef<HTMLImageElement, PixzleImageProps>(
         ref={ref}
         src={src}
         alt={alt}
-        {...props}
+        {...imgProps}
         onContextMenu={(e) => {
           if (isProtected) e.preventDefault();
-          props.onContextMenu?.(e);
+          imgProps.onContextMenu?.(e);
         }}
         onDragStart={(e) => {
           if (isProtected) e.preventDefault();
-          props.onDragStart?.(e);
+          imgProps.onDragStart?.(e);
         }}
         style={
           {
@@ -98,7 +93,7 @@ export const PixzleImage = React.forwardRef<HTMLImageElement, PixzleImageProps>(
                   WebkitTouchCallout: "none",
                 }
               : {}),
-            ...props.style,
+            ...imgProps.style,
           } as React.CSSProperties
         }
       />
