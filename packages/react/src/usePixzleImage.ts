@@ -1,6 +1,7 @@
 import pixzle from "@pixzle/browser";
 import type { ImageInfo } from "@pixzle/core";
 import { useEffect, useState } from "react";
+import { imageBitmapToBlobUrl } from "./utils";
 
 export interface UsePixzleImageProps {
   blockSize: number;
@@ -41,29 +42,15 @@ export const usePixzleImage = ({
 
         if (!active) return;
 
-        // Convert ImageBitmap to Blob URL to display in <img>
-        const canvas = document.createElement("canvas");
-        canvas.width = restoredBitmap.width;
-        canvas.height = restoredBitmap.height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) throw new Error("Could not get 2D context");
+        const url = await imageBitmapToBlobUrl(restoredBitmap);
 
-        ctx.drawImage(restoredBitmap, 0, 0);
+        if (!active) return;
 
-        canvas.toBlob((blob) => {
-          if (!active) return;
-          if (blob) {
-            const url = URL.createObjectURL(blob);
-            setSrc((prev) => {
-              if (prev) URL.revokeObjectURL(prev);
-              return url;
-            });
-            setIsLoading(false);
-          } else {
-            setError(new Error("Failed to create blob from canvas"));
-            setIsLoading(false);
-          }
+        setSrc((prev) => {
+          if (prev) URL.revokeObjectURL(prev);
+          return url;
         });
+        setIsLoading(false);
       } catch (err) {
         if (active) {
           setError(err instanceof Error ? err : new Error(String(err)));
