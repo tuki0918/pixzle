@@ -11,13 +11,13 @@ npm i @pixzle/node
 ## Usage
 
 ```ts
-import Pixzle from "@pixzle/node";
+import pixzle from "@pixzle/node";
 ```
 
 **Shuffle**
 
 ```ts
-await Pixzle.shuffle({
+await pixzle.shuffle({
   // config: { /** FragmentationConfig */ },
   images: [
     "./input_1.png",
@@ -55,7 +55,7 @@ output
 **Restore**
 
 ```ts
-await Pixzle.restore({
+await pixzle.restore({
   manifest: "./output/fragmented/manifest.json",
   images: [
     "./output/fragmented/img_1_fragmented.png",
