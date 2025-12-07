@@ -6,6 +6,9 @@ import { ImageRestorer } from "./restorer";
 vi.mock("./block", () => ({
   splitImageToBlocks: vi.fn(),
   blocksToImageBitmap: vi.fn(),
+  blocksPerImage: vi.fn((blocks, _counts, _seed, processFunc) =>
+    processFunc(blocks, _seed),
+  ),
 }));
 
 // Mock ImageBitmap class

@@ -1,7 +1,5 @@
-import type {
-  RestoreOptions as CoreRestoreOptions,
-  ManifestData,
-} from "@pixzle/core";
+import type { RestoreOptions as CoreRestoreOptions } from "@pixzle/core";
+import { createSingleImageManifest } from "@pixzle/core";
 import Pixzle from "@pixzle/node";
 import type { Command } from "commander";
 import type { RestoreOptions } from "../types";
@@ -63,20 +61,11 @@ async function handleRestoreCommand(
         );
       }
 
-      const { width, height } = options;
-      const manifestData: ManifestData = {
-        id: "cli-restore",
-        version: "0.0.0",
-        timestamp: new Date().toISOString(),
-        config: {
-          blockSize: options.blockSize,
-          seed: options.seed,
-          prefix: "img",
-          preserveName: false,
-          crossImageShuffle: false,
-        },
-        images: [{ w: width, h: height }],
-      };
+      const manifestData = createSingleImageManifest({
+        blockSize: options.blockSize,
+        seed: options.seed,
+        imageInfo: { w: options.width, h: options.height },
+      });
       restoreOptions.manifestData = manifestData;
     } else {
       throw new Error(

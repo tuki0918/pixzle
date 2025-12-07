@@ -4,7 +4,6 @@ import {
   calculateBlockCounts,
   calculateBlockCountsForCrossImages,
   calculateBlockRange,
-  extractBlocks,
   takeBlocks,
 } from "./block-utils";
 
@@ -213,44 +212,5 @@ describe("takeBlocks", () => {
     const result = takeBlocks(blocks, 2);
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual(Buffer.from([1]));
-  });
-});
-
-describe("extractBlocks", () => {
-  test("should extract expected number of blocks", () => {
-    const blocks = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const result = extractBlocks(blocks, 200, 100, 100);
-    // 200x100 with blockSize 100 = 2x1 = 2 blocks
-    expect(result).toEqual([1, 2]);
-  });
-
-  test("should handle case where all blocks are needed", () => {
-    const blocks = [1, 2, 3, 4];
-    const result = extractBlocks(blocks, 200, 200, 100);
-    // 200x200 with blockSize 100 = 2x2 = 4 blocks
-    expect(result).toEqual([1, 2, 3, 4]);
-  });
-
-  test("should handle non-square images with padding blocks", () => {
-    // Simulating: original 800x600 (48 blocks), fragment has 49 blocks due to 7x7 grid
-    const blocks = Array.from({ length: 49 }, (_, i) => i);
-    const result = extractBlocks(blocks, 800, 600, 100);
-    // 800x600 with blockSize 100 = 8x6 = 48 blocks
-    expect(result).toHaveLength(48);
-    expect(result[result.length - 1]).toBe(47);
-  });
-
-  test("should work with Uint8Array blocks", () => {
-    const blocks = [
-      new Uint8Array([1, 2]),
-      new Uint8Array([3, 4]),
-      new Uint8Array([5, 6]),
-      new Uint8Array([7, 8]),
-      new Uint8Array([9, 10]), // padding block
-    ];
-    const result = extractBlocks(blocks, 200, 200, 100);
-    // 200x200 with blockSize 100 = 2x2 = 4 blocks
-    expect(result).toHaveLength(4);
-    expect(result[0]).toEqual(new Uint8Array([1, 2]));
   });
 });

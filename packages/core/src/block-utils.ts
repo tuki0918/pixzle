@@ -147,23 +147,3 @@ export function calculateTotalBlocks(
 export function takeBlocks<T>(blocks: T[], count: number): T[] {
   return blocks.slice(0, count);
 }
-
-/**
- * Extract the required number of blocks from an array of blocks
- * This is useful when restoring images from fragment images that may have
- * extra padding blocks due to their square-ish layout
- * @param blocks Array of blocks from the fragment image
- * @param width Original image width
- * @param height Original image height
- * @param blockSize Block size
- * @returns Array of blocks with the expected count
- */
-export function extractBlocks<T>(
-  blocks: T[],
-  width: number,
-  height: number,
-  blockSize: number,
-): T[] {
-  const expectedCount = calculateBlockCount(width, height, blockSize);
-  return takeBlocks(blocks, expectedCount);
-}

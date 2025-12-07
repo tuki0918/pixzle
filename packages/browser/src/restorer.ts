@@ -1,8 +1,50 @@
-import { type ImageInfo, extractBlocks } from "@pixzle/core";
+import {
+  type ImageInfo,
+  type ManifestData,
+  calculateBlockCountsForCrossImages,
+  calculateBlockCountsPerImage,
+  calculateBlockRange,
+  calculateTotalBlocks,
+  createSingleImageManifest,
+  takeBlocks,
+} from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksToImageBitmap, splitImageToBlocks } from "./block";
+import {
+  blocksPerImage,
+  blocksToImageBitmap,
+  splitImageToBlocks,
+} from "./block";
+
+export type ImageSource = string | URL | Blob | HTMLImageElement | ImageBitmap;
 
 export class ImageRestorer {
+  /**
+   * Restore multiple images from shuffled fragments
+   * @param fragments Array of fragment sources (URLs, Blobs, HTMLImageElements, or ImageBitmaps)
+   * @param manifest The manifest data containing restoration information
+   * @returns Promise resolving to an array of restored ImageBitmaps
+   */
+  async restoreImages(
+    fragments: ImageSource[],
+    manifest: ManifestData,
+  ): Promise<ImageBitmap[]> {
+    const { blocks, blockCountsPerImage } = await this._prepareData(
+      fragments,
+      manifest,
+    );
+
+    const restored = manifest.config.crossImageShuffle
+      ? unshuffle(blocks, manifest.config.seed)
+      : blocksPerImage(
+          blocks,
+          blockCountsPerImage,
+          manifest.config.seed,
+          unshuffle,
+        );
+
+    return await this._reconstructImages(restored, manifest);
+  }
+
   /**
    * Restore a single image from a shuffled source
    * @param imageSource The shuffled image (URL, Blob, HTMLImageElement, or ImageBitmap)
@@ -12,31 +54,15 @@ export class ImageRestorer {
    * @returns Promise resolving to the restored ImageBitmap
    */
   async restoreImage(
-    imageSource: string | URL | Blob | HTMLImageElement | ImageBitmap,
+    imageSource: ImageSource,
     blockSize: number,
     seed: number,
     imageInfo: ImageInfo,
   ): Promise<ImageBitmap> {
-    const image = await this._loadImage(imageSource);
+    const manifest = createSingleImageManifest({ blockSize, seed, imageInfo });
 
-    // Split the fragment image into blocks and take only the expected number
-    // The fragment image may have extra padding blocks due to its square-ish layout
-    const allBlocks = splitImageToBlocks(image, blockSize);
-    const blocks = extractBlocks(
-      allBlocks,
-      imageInfo.w,
-      imageInfo.h,
-      blockSize,
-    );
-
-    const restoredBlocks = unshuffle(blocks, seed) as Uint8Array[];
-
-    return blocksToImageBitmap(
-      restoredBlocks,
-      imageInfo.w,
-      imageInfo.h,
-      blockSize,
-    );
+    const [restoredImage] = await this.restoreImages([imageSource], manifest);
+    return restoredImage;
   }
 
   private async _loadImage(
@@ -79,5 +105,82 @@ export class ImageRestorer {
     }
 
     throw new Error("Unsupported image source");
+  }
+
+  private async _prepareData(
+    fragments: ImageSource[],
+    manifest: ManifestData,
+  ): Promise<{
+    blocks: Uint8Array[];
+    blockCountsPerImage: number[];
+  }> {
+    const totalBlocks = calculateTotalBlocks(
+      manifest.images,
+      manifest.config.blockSize,
+    );
+    const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
+      totalBlocks,
+      fragments.length,
+    );
+
+    // Calculate actual block counts per image for per-image unshuffle
+    const blockCountsPerImage = calculateBlockCountsPerImage(
+      manifest.images,
+      manifest.config.blockSize,
+    );
+
+    // Use blockCountsPerImage when crossImageShuffle is false
+    const blockCounts = manifest.config.crossImageShuffle
+      ? blockCountsForCrossImages
+      : blockCountsPerImage;
+
+    const blocks = await this._readBlocks(fragments, manifest, blockCounts);
+
+    return { blocks, blockCountsPerImage };
+  }
+
+  private async _readBlocksFromFragment(
+    fragment: ImageSource,
+    manifest: ManifestData,
+    expectedCount: number,
+  ): Promise<Uint8Array[]> {
+    const image = await this._loadImage(fragment);
+    const blocks = splitImageToBlocks(image, manifest.config.blockSize);
+    return takeBlocks(blocks, expectedCount);
+  }
+
+  private async _readBlocks(
+    fragments: ImageSource[],
+    manifest: ManifestData,
+    blockCounts: number[],
+  ): Promise<Uint8Array[]> {
+    const blockGroups = await Promise.all(
+      fragments.map((fragment, i) =>
+        this._readBlocksFromFragment(fragment, manifest, blockCounts[i]),
+      ),
+    );
+    return blockGroups.flat();
+  }
+
+  private async _reconstructImages(
+    blocks: Uint8Array[],
+    manifest: ManifestData,
+  ): Promise<ImageBitmap[]> {
+    const blockCountsPerImage = calculateBlockCountsPerImage(
+      manifest.images,
+      manifest.config.blockSize,
+    );
+    return await Promise.all(
+      manifest.images.map(async (imageInfo, index) => {
+        const { start, end } = calculateBlockRange(blockCountsPerImage, index);
+        const imageBlocks = blocks.slice(start, end);
+        return await blocksToImageBitmap(
+          imageBlocks,
+          imageInfo.w,
+          imageInfo.h,
+          manifest.config.blockSize,
+        );
+      }),
+    );
   }
 }

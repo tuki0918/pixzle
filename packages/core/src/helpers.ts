@@ -1,4 +1,33 @@
-import type { ManifestData } from "./types";
+import { DEFAULT_FRAGMENTATION_CONFIG } from "./constants";
+import type { ImageInfo, ManifestData } from "./types";
+
+/**
+ * Create a minimal ManifestData for single image restoration
+ * @param options - Options for the manifest
+ * @param options.blockSize - Block size used for fragmentation
+ * @param options.seed - Seed used for shuffling
+ * @param options.imageInfo - Image information (width and height)
+ * @returns ManifestData object
+ */
+export function createSingleImageManifest(options: {
+  blockSize: number;
+  seed: number;
+  imageInfo: ImageInfo;
+}): ManifestData {
+  return {
+    id: "manual",
+    version: "0.0.0",
+    timestamp: new Date().toISOString(),
+    config: {
+      blockSize: options.blockSize,
+      seed: options.seed,
+      prefix: DEFAULT_FRAGMENTATION_CONFIG.PREFIX,
+      preserveName: false,
+      crossImageShuffle: false,
+    },
+    images: [options.imageInfo],
+  };
+}
 
 /**
  * Encode file name to base64 for safe storage (cross-platform)

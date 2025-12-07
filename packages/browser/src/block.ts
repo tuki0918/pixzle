@@ -61,3 +61,30 @@ export async function blocksToImageBitmap(
 
   return createImageBitmap(imageData);
 }
+
+/**
+ * Process blocks per image using a provided function (shuffle/unshuffle)
+ * @param allBlocks - All blocks to process
+ * @param fragmentBlocksCount - Number of blocks per fragment
+ * @param seed - Seed for the processing function
+ * @param processFunc - Function to apply to blocks (shuffle or unshuffle)
+ * @returns Processed blocks
+ */
+export function blocksPerImage(
+  allBlocks: Uint8Array[],
+  fragmentBlocksCount: number[],
+  seed: number | string,
+  processFunc: (blocks: Uint8Array[], seed: number | string) => Uint8Array[],
+): Uint8Array[] {
+  const processedBlocks: Uint8Array[] = [];
+  let offset = 0;
+
+  for (const blockCount of fragmentBlocksCount) {
+    const imageBlocks = allBlocks.slice(offset, offset + blockCount);
+    const processed = processFunc(imageBlocks, seed);
+    processedBlocks.push(...processed);
+    offset += blockCount;
+  }
+
+  return processedBlocks;
+}
