@@ -4,7 +4,6 @@ import path from "node:path";
 import {
   DEFAULT_FRAGMENTATION_CONFIG,
   type FragmentationConfig,
-  type ManifestData,
 } from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import { ImageFragmenter } from "./fragmenter";

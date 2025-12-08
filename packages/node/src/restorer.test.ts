@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { ManifestData } from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import { ImageFragmenter } from "./fragmenter";
 import { ImageRestorer } from "./restorer";

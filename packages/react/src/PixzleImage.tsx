@@ -1,4 +1,3 @@
-import type { ImageInfo, ManifestData } from "@pixzle/core";
 import React, { useEffect } from "react";
 import { type UsePixzleImageProps, usePixzleImage } from "./usePixzleImage";
 
