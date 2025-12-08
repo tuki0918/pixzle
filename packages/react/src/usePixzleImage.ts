@@ -22,6 +22,8 @@ export interface UsePixzleImageManifestUrlProps {
   image: string | Blob;
   manifest: string;
   manifestData?: never;
+  /** Index of the image in the manifest (default: 0) */
+  imageIndex?: number;
   blockSize?: never;
   seed?: never;
   imageInfo?: never;
@@ -34,6 +36,8 @@ export interface UsePixzleImageManifestDataProps {
   image: string | Blob;
   manifestData: ManifestData;
   manifest?: never;
+  /** Index of the image in the manifest (default: 0) */
+  imageIndex?: number;
   blockSize?: never;
   seed?: never;
   imageInfo?: never;
@@ -85,6 +89,10 @@ export const usePixzleImage = (
   const manifestData = isManifestDataProps(props)
     ? props.manifestData
     : undefined;
+  const imageIndex =
+    isManifestUrlProps(props) || isManifestDataProps(props)
+      ? (props.imageIndex ?? 0)
+      : 0;
 
   useEffect(() => {
     let active = true;
@@ -107,12 +115,12 @@ export const usePixzleImage = (
           const fetchedManifest = await fetchManifest(manifest);
           resolvedBlockSize = fetchedManifest.config.blockSize;
           resolvedSeed = fetchedManifest.config.seed;
-          resolvedImageInfo = fetchedManifest.images[0];
+          resolvedImageInfo = fetchedManifest.images[imageIndex];
         } else if (manifestData) {
           // Use provided manifest data
           resolvedBlockSize = manifestData.config.blockSize;
           resolvedSeed = manifestData.config.seed;
-          resolvedImageInfo = manifestData.images[0];
+          resolvedImageInfo = manifestData.images[imageIndex];
         } else {
           throw new Error(
             "Either (blockSize, seed, imageInfo) or manifest/manifestData is required",
@@ -150,7 +158,7 @@ export const usePixzleImage = (
     return () => {
       active = false;
     };
-  }, [blockSize, seed, imageInfo, image, manifest, manifestData]);
+  }, [blockSize, seed, imageInfo, image, manifest, manifestData, imageIndex]);
 
   // Cleanup URL on unmount
   useEffect(() => {
