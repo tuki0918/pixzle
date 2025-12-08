@@ -41,6 +41,7 @@ export class ImageRestorer {
       manifest.images,
       manifest.config.blockSize,
     );
+    const format = manifest.config.output?.format || "png";
     return await Promise.all(
       manifest.images.map(async (imageInfo, index) => {
         const { start, end } = calculateBlockRange(blockCountsPerImage, index);
@@ -49,6 +50,7 @@ export class ImageRestorer {
           imageBlocks,
           manifest.config.blockSize,
           imageInfo,
+          format,
         );
       }),
     );
@@ -117,8 +119,9 @@ export class ImageRestorer {
     blocks: Buffer[],
     blockSize: number,
     imageInfo: ImageInfo,
+    format: "png" | "jpeg" = "png",
   ): Promise<Buffer> {
     const { w, h } = imageInfo;
-    return await blocksToImage(blocks, w, h, blockSize);
+    return await blocksToImage(blocks, w, h, blockSize, { format });
   }
 }

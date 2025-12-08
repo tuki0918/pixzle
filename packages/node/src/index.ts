@@ -72,9 +72,10 @@ async function restore(options: RestoreOptions): Promise<void> {
   const imageInfos = manifest.images;
   await Promise.all(
     restoredImages.map((img, i) => {
+      const format = manifest.config.output?.format || "png";
       const filename =
         generateRestoredOriginalFileName(imageInfos[i]) ??
-        generateRestoredFileName(manifest, i);
+        generateRestoredFileName(manifest, i, format);
       return writeFile(outputDir, filename, img);
     }),
   );

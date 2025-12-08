@@ -149,12 +149,21 @@ export function generateFragmentFileName(
  * @param index - Index number (0-based, but output is 1-based)
  * @returns Restored file name (e.g., img_1.png)
  */
+/**
+ * Generate restored file name with dynamic format
+ * @param manifest Manifest data
+ * @param index Image index
+ * @param format Output format (e.g. "png" | "jpeg")
+ * @returns Restored file name (e.g., img_1.png or img_1.jpg)
+ */
 export function generateRestoredFileName(
   manifest: ManifestData,
   index: number,
+  format: ImageFormat = "png",
 ): string {
   return generateFileName(manifest, index, {
     isFragmented: false,
+    format,
   });
 }
 
