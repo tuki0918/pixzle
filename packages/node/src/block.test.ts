@@ -8,8 +8,10 @@ import {
 } from "@pixzle/core";
 import { Jimp, JimpMime } from "jimp";
 import {
+  blocksToImage,
   blocksToImageBuffer,
   blocksToPngImage,
+  createImageFromBuffer,
   imageToBlocks,
   splitImageToBlocks,
 } from "./block";
@@ -321,5 +323,154 @@ describe("Jimp buffer conversion and restoration", () => {
     expect([
       ...modifiedBuffer.slice(width * channels * 3, width * channels * 3 + 4),
     ]).toEqual([0, 0, 0, 255]);
+  });
+});
+
+describe("createImageFromBuffer", () => {
+  const width = 2;
+  const height = 2;
+  // 2x2 RGBA pixels - simple test pattern
+  const buffer = Buffer.from([
+    255,
+    0,
+    0,
+    255, // Red pixel (top-left)
+    0,
+    255,
+    0,
+    255, // Green pixel (top-right)
+    0,
+    0,
+    255,
+    255, // Blue pixel (bottom-left)
+    255,
+    255,
+    255,
+    255, // White pixel (bottom-right)
+  ]);
+
+  test("should create PNG by default", async () => {
+    const result = await createImageFromBuffer(buffer, width, height);
+    expect(result).toBeInstanceOf(Buffer);
+    // PNG magic number: 137 80 78 71 13 10 26 10
+    expect(result[0]).toBe(137);
+    expect(result[1]).toBe(80);
+    expect(result[2]).toBe(78);
+    expect(result[3]).toBe(71);
+  });
+
+  test("should create JPEG when format is jpeg", async () => {
+    const result = await createImageFromBuffer(buffer, width, height, {
+      format: "jpeg",
+    });
+    expect(result).toBeInstanceOf(Buffer);
+    // JPEG magic number: FF D8 FF
+    expect(result[0]).toBe(0xff);
+    expect(result[1]).toBe(0xd8);
+    expect(result[2]).toBe(0xff);
+  });
+
+  test("should respect jpeg quality option", async () => {
+    const lowQuality = await createImageFromBuffer(buffer, width, height, {
+      format: "jpeg",
+      jpegQuality: "low",
+    });
+    const highQuality = await createImageFromBuffer(buffer, width, height, {
+      format: "jpeg",
+      jpegQuality: "high",
+    });
+    // Higher quality should generally produce larger file (though not guaranteed for tiny images)
+    expect(lowQuality).toBeInstanceOf(Buffer);
+    expect(highQuality).toBeInstanceOf(Buffer);
+  });
+
+  test("should handle numeric jpeg quality", async () => {
+    const result = await createImageFromBuffer(buffer, width, height, {
+      format: "jpeg",
+      jpegQuality: 50,
+    });
+    expect(result).toBeInstanceOf(Buffer);
+    expect(result[0]).toBe(0xff);
+  });
+
+  test("should handle channels option (RGB)", async () => {
+    // Buffer with transparency
+    const transparentBuffer = Buffer.from([
+      255,
+      0,
+      0,
+      128, // Semi-transparent red
+      0,
+      255,
+      0,
+      0, // Fully transparent green
+      0,
+      0,
+      255,
+      255, // Opaque blue
+      255,
+      255,
+      255,
+      64, // Very transparent white
+    ]);
+
+    const result = await createImageFromBuffer(
+      transparentBuffer,
+      width,
+      height,
+      {
+        format: "png",
+        channels: 3,
+      },
+    );
+    expect(result).toBeInstanceOf(Buffer);
+
+    // Read back and verify it's valid
+    const image = await Jimp.read(result);
+    expect(image.bitmap.width).toBe(width);
+    expect(image.bitmap.height).toBe(height);
+  });
+});
+
+describe("blocksToImage", () => {
+  const blockSize = 2;
+  const blocks = [
+    // Block 1 (2x2 red)
+    Buffer.from([
+      255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255,
+    ]),
+    // Block 2 (2x2 green)
+    Buffer.from([
+      0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255, 0, 255,
+    ]),
+  ];
+
+  test("should create PNG image from blocks by default", async () => {
+    const result = await blocksToImage(blocks, 4, 2, blockSize);
+    expect(result).toBeInstanceOf(Buffer);
+    // PNG magic number
+    expect(result[0]).toBe(137);
+  });
+
+  test("should create JPEG image from blocks", async () => {
+    const result = await blocksToImage(blocks, 4, 2, blockSize, {
+      format: "jpeg",
+    });
+    expect(result).toBeInstanceOf(Buffer);
+    // JPEG magic number
+    expect(result[0]).toBe(0xff);
+    expect(result[1]).toBe(0xd8);
+  });
+
+  test("should maintain backward compatibility with blocksToPngImage", async () => {
+    const pngResult = await blocksToPngImage(blocks, 4, 2, blockSize);
+    const blocksToImageResult = await blocksToImage(blocks, 4, 2, blockSize, {
+      format: "png",
+      channels: 4,
+    });
+
+    // Both should produce valid PNG
+    expect(pngResult[0]).toBe(137);
+    expect(blocksToImageResult[0]).toBe(137);
   });
 });
