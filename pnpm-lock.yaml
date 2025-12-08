@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      '@pixzle/node':
-        specifier: workspace:*
-        version: link:packages/node
     devDependencies:
       '@biomejs/biome':
         specifier: 1.9.4
