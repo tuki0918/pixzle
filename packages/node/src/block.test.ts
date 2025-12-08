@@ -10,7 +10,6 @@ import { Jimp, JimpMime } from "jimp";
 import {
   blocksToImage,
   blocksToImageBuffer,
-  blocksToPngImage,
   createImageFromBuffer,
   imageToBlocks,
   splitImageToBlocks,
@@ -172,7 +171,7 @@ describe("calculateBlockCountsForCrossImages", () => {
   });
 });
 
-describe("imageToBlocks & blocksToPngImage (integration)", () => {
+describe("imageToBlocks & blocksToImage (integration)", () => {
   const tmpDir = path.join(tmpdir(), "block_test_tmp");
   const tmpPng = path.join(tmpDir, "test.png");
   const width = 4;
@@ -225,9 +224,9 @@ describe("imageToBlocks & blocksToPngImage (integration)", () => {
     );
   });
 
-  test("blocksToPngImage reconstructs PNG from blocks", async () => {
+  test("blocksToImage reconstructs PNG from blocks", async () => {
     const { blocks } = await imageToBlocks(tmpPng, blockSize);
-    const pngBuffer = await blocksToPngImage(blocks, width, height, blockSize);
+    const pngBuffer = await blocksToImage(blocks, width, height, blockSize);
     // Decode PNG and check raw buffer
     const jimpImage = await Jimp.read(pngBuffer);
     expect(jimpImage.bitmap.data).toEqual(buffer);
@@ -462,15 +461,10 @@ describe("blocksToImage", () => {
     expect(result[1]).toBe(0xd8);
   });
 
-  test("should maintain backward compatibility with blocksToPngImage", async () => {
-    const pngResult = await blocksToPngImage(blocks, 4, 2, blockSize);
-    const blocksToImageResult = await blocksToImage(blocks, 4, 2, blockSize, {
-      format: "png",
-      channels: 4,
-    });
+  test("should produce valid PNG with default options", async () => {
+    const result = await blocksToImage(blocks, 4, 2, blockSize);
 
-    // Both should produce valid PNG
-    expect(pngResult[0]).toBe(137);
-    expect(blocksToImageResult[0]).toBe(137);
+    // Should produce valid PNG
+    expect(result[0]).toBe(137);
   });
 });

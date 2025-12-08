@@ -8,7 +8,7 @@ import {
   takeBlocks,
 } from "@pixzle/core";
 import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
+import { blocksPerImage, blocksToImage, imageToBlocks } from "./block";
 import { loadBuffer } from "./file";
 
 export class ImageRestorer {
@@ -119,6 +119,6 @@ export class ImageRestorer {
     imageInfo: ImageInfo,
   ): Promise<Buffer> {
     const { w, h } = imageInfo;
-    return await blocksToPngImage(blocks, w, h, blockSize);
+    return await blocksToImage(blocks, w, h, blockSize);
   }
 }

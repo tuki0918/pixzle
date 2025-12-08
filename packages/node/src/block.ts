@@ -241,27 +241,6 @@ export async function blocksToImage(
 }
 
 /**
- * Reconstruct a PNG image from blocks
- * @param blocks Array of block buffers
- * @param width Target image width in pixels
- * @param height Target image height in pixels
- * @param blockSize Block size in pixels
- * @returns Promise resolving to PNG buffer
- * @deprecated Use blocksToImage instead
- */
-export async function blocksToPngImage(
-  blocks: Buffer[],
-  width: number,
-  height: number,
-  blockSize: number,
-): Promise<Buffer> {
-  return blocksToImage(blocks, width, height, blockSize, {
-    format: "png",
-    channels: 4,
-  });
-}
-
-/**
  * Extract raw RGBA image buffer from a PNG buffer using Jimp
  * @param pngBuffer PNG image buffer
  * @returns Promise resolving to image buffer and image dimensions
@@ -280,25 +259,6 @@ export async function extractImageBufferFromPng(
       formatErrorMessage("Failed to extract image buffer from PNG", error),
     );
   }
-}
-
-/**
- * Create a PNG buffer from raw RGBA image buffer using Jimp
- * @param imageBuffer Raw RGBA image buffer
- * @param width Image width in pixels
- * @param height Image height in pixels
- * @returns Promise resolving to PNG buffer
- * @deprecated Use createImageFromBuffer instead
- */
-export async function createPngFromImageBuffer(
-  imageBuffer: Buffer,
-  width: number,
-  height: number,
-): Promise<Buffer> {
-  return createImageFromBuffer(imageBuffer, width, height, {
-    format: "png",
-    channels: 4,
-  });
 }
 
 /**
