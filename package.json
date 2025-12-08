@@ -3,28 +3,22 @@
   "version": "0.0.0",
   "private": true,
   "description": "Image fragmentation and restoration.",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "workspaces": [
     "packages/*"
   ],
-  "files": [
-    "dist",
-    "packages/*/dist"
-  ],
   "scripts": {
     "cli:dev": "pnpm --filter @pixzle/cli run dev",
-    "build": "pnpm run build:packages && tsc -p tsconfig.build.json",
+    "build": "pnpm run build:packages",
     "build:packages": "pnpm run --filter @pixzle/core build && pnpm run --filter @pixzle/node build && pnpm run --filter @pixzle/cli build && pnpm run --filter @pixzle/browser build && pnpm run --filter @pixzle/react build",
-    "build:check": "pnpm run build:check:packages && tsc -p tsconfig.build.json --noEmit",
+    "build:check": "pnpm run build:check:packages",
     "build:check:packages": "pnpm run --filter @pixzle/core build:check && pnpm run --filter @pixzle/node build:check && pnpm run --filter @pixzle/cli build:check && pnpm run --filter @pixzle/browser build:check && pnpm run --filter @pixzle/react build:check",
-    "build:typecheck": "pnpm run build:check:packages && tsc -p tsconfig.build.json --noEmit",
+    "build:typecheck": "pnpm run build:check:packages",
     "changeset:add": "pnpm changeset add",
     "changeset:version": "pnpm changeset version",
     "changeset:publish": "pnpm changeset publish",
     "check": "biome check .",
     "check:fix": "biome check --write .",
-    "clean": "rimraf dist packages/*/dist",
+    "clean": "rimraf packages/*/dist",
     "prepare": "husky",
     "test": "pnpm run -r test",
     "test:ci": "pnpm run -r test",
@@ -47,8 +41,5 @@
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.1.4"
-  },
-  "dependencies": {
-    "@pixzle/node": "workspace:*"
   }
 }
