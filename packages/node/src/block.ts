@@ -204,15 +204,28 @@ export function blocksPerImage(
   seed: number | string,
   processFunc: (blocks: Buffer[], seed: number | string) => Buffer[],
 ): Buffer[] {
-  const processedBlocks: Buffer[] = [];
+  // Pre-allocate array to avoid resizing and stack overflow issues with push(...processed)
+  // This assumes that processFunc preserves the number of blocks (which shuffle/unshuffle do)
+  const processedBlocks: Buffer[] = new Array(allBlocks.length);
+  let globalOffset = 0;
   let offset = 0;
 
   for (const blockCount of fragmentBlocksCount) {
     const imageBlocks = allBlocks.slice(offset, offset + blockCount);
     const processed = processFunc(imageBlocks, seed);
-    processedBlocks.push(...processed);
+
+    // Copy processed blocks to the result array one by one to avoid stack overflow
+    for (let i = 0; i < processed.length; i++) {
+      processedBlocks[globalOffset + i] = processed[i];
+    }
+    globalOffset += processed.length;
+
     offset += blockCount;
   }
 
-  return processedBlocks;
+  // If the total size matches, return as is. Otherwise slice (safety check)
+  if (globalOffset === processedBlocks.length) {
+    return processedBlocks;
+  }
+  return processedBlocks.slice(0, globalOffset);
 }
