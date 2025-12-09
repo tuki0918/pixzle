@@ -12,6 +12,7 @@ export interface UsePixzleImageExplicitProps {
   image: string | Blob;
   manifest?: never;
   manifestData?: never;
+  imageIndex?: never;
 }
 
 /**
