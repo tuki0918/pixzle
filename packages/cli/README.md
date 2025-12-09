@@ -45,6 +45,7 @@ With `--cross-image-shuffle`, blocks are mixed across all input images, rather t
 | ![](../../.docs/output_m0.png) | ![](../../.docs/output_m1.png) | ![](../../.docs/output_m2.png) |
 
 > [!WARNING]
+> - Currently, restoration with --cross-image-shuffle is only supported in Node.js and CLI environments.
 > - May cause memory shortage depending on the number of images and block size.
 
 
