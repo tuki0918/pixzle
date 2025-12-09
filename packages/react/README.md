@@ -12,66 +12,58 @@ npm i @pixzle/react
 
 ### PixzleImage
 
-Single image restoration component.
-
 ```tsx
 import { PixzleImage } from '@pixzle/react';
+```
 
-// Using manifest URL
-const MyComponentWithManifest = () => {
-  return (
-    <PixzleImage
-      manifest="https://example.com/manifest.json"
-      image="https://example.com/fragment.png"
-    />
-  );
-};
+### Using manifest URL
 
-// Using manifest URL (with multiple images)
-const MyComponentWithMultipleImages = () => {
-  return (
-    <>
-      {/* #1 */}
-      <PixzleImage
-        manifest="https://example.com/manifest.json"
-        image="https://example.com/fragment1.png"
-        // imageIndex={0}
-      />
-      {/* #2 */}
-      <PixzleImage
-        manifest="https://example.com/manifest.json"
-        image="https://example.com/fragment2.png"
-        imageIndex={1}
-      />
-      {/* #3 */}
-      <PixzleImage
-        manifest="https://example.com/manifest.json"
-        image="https://example.com/fragment3.png"
-        imageIndex={2}
-      />
-    </>
-  );
-};
+```tsx
+<PixzleImage
+  manifest="https://example.com/manifest.json"
+  image="https://example.com/fragment.png"
+/>
+```
 
-// Using manifest data
-const MyComponentWithManifestData = () => {
-  return (
-    <PixzleImage
-      manifestData={manifestData}
-      image="https://example.com/fragment.png"
-    />
-  );
-};
+### Using manifest URL with multiple images
 
-// Using explicit parameters
-const MyComponent = () => {
-  return (
-    <PixzleImage
-      blockSize={2}
-      seed={72411}
-      imageInfo={{ w: 500, h: 500 }}
-      image="https://example.com/fragment.png"
-    />
-  );
-};
+```tsx
+{/* #1 */}
+<PixzleImage
+  manifest="https://example.com/manifest.json"
+  image="https://example.com/fragment1.png"
+  // imageIndex={0}
+/>
+
+{/* #2 */}
+<PixzleImage
+  manifest="https://example.com/manifest.json"
+  image="https://example.com/fragment2.png"
+  imageIndex={1}
+/>
+
+{/* #3 */}
+<PixzleImage
+  manifest="https://example.com/manifest.json"
+  image="https://example.com/fragment3.png"
+  imageIndex={2}
+/>
+```
+
+### Using manifest data
+```tsx
+<PixzleImage
+  manifestData={manifestData}
+  image="https://example.com/fragment.png"
+/>
+```
+
+### Using explicit parameters
+```tsx
+<PixzleImage
+  blockSize={2}
+  seed={72411}
+  imageInfo={{ w: 500, h: 500 }}
+  image="https://example.com/fragment.png"
+/>
 ```
