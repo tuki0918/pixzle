@@ -32,6 +32,22 @@ pixzle shuffle <images...> -o <output_directory> [options]
 pixzle shuffle input.png -o ./output
 ```
 
+### Input multiple images
+
+With `--cross-image-shuffle`, blocks are mixed across all input images, rather than being shuffled independently within each image.
+
+| input 1 | input 2 | input 3 |
+|:-------:|:---------------:|:---------------:|
+| ![](../../.docs/input_sample.png) | ![](../../.docs/input_sample_mono.png) | ![](../../.docs/input_sample_blue.png) |
+
+| output 1 | output 2 | output 3 |
+|:-------:|:---------------:|:---------------:|
+| ![](../../.docs/output_m0.png) | ![](../../.docs/output_m1.png) | ![](../../.docs/output_m2.png) |
+
+> [!WARNING]
+> - May cause memory shortage depending on the number of images and block size.
+
+
 ### Restore
 
 Restore fragmented images.
