@@ -76,15 +76,27 @@ export function blocksPerImage(
   seed: number | string,
   processFunc: (blocks: Uint8Array[], seed: number | string) => Uint8Array[],
 ): Uint8Array[] {
-  const processedBlocks: Uint8Array[] = [];
+  // Pre-allocate array to avoid resizing and stack overflow issues with push(...processed)
+  const processedBlocks: Uint8Array[] = new Array(allBlocks.length);
+  let globalOffset = 0;
   let offset = 0;
 
   for (const blockCount of fragmentBlocksCount) {
     const imageBlocks = allBlocks.slice(offset, offset + blockCount);
     const processed = processFunc(imageBlocks, seed);
-    processedBlocks.push(...processed);
+
+    // Copy processed blocks to the result array one by one to avoid stack overflow
+    for (let i = 0; i < processed.length; i++) {
+      processedBlocks[globalOffset + i] = processed[i];
+    }
+    globalOffset += processed.length;
+
     offset += blockCount;
   }
 
-  return processedBlocks;
+  // If the total size matches, return as is. Otherwise slice (safety check)
+  if (globalOffset === processedBlocks.length) {
+    return processedBlocks;
+  }
+  return processedBlocks.slice(0, globalOffset);
 }
