@@ -1,6 +1,6 @@
 {
   "name": "@pixzle/browser",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Browser implementation of image fragmentation and restoration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
