@@ -49,33 +49,3 @@ const MyComponent = () => {
   );
 };
 ```
-
----
-
-### PixzleImages
-
-Multiple images restoration component using manifest.
-
-```tsx
-import { PixzleImages } from '@pixzle/react';
-
-const MyGallery = () => {
-  return (
-    <PixzleImages
-      images={[
-        'https://example.com/fragment1.png',
-        'https://example.com/fragment2.png',
-      ]}
-      manifest="https://example.com/manifest.json"
-    >
-      {({ sources }) => (
-        <div>
-          {sources.map((src, i) => (
-            <img key={i} src={src} />
-          ))}
-        </div>
-      )}
-    </PixzleImages>
-  );
-};
-```
