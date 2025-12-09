@@ -47,3 +47,6 @@ You can change the block size with `-b` or `--block-size <number>`.
 | blockSize: 8 (default) | blockSize: 16 | blockSize: 32 | blockSize: 50 | blockSize: 128 |
 |:-------:|:---------------:|:---------------:|:---------------:|:----------------:|
 | ![](.docs/output_8.png) | ![](.docs/output_16.png) | ![](.docs/output_32.png) | ![](.docs/output_50.png) | ![](.docs/output_128.png) |
+
+> [!WARNING]
+> - May cause memory shortage depending on the number of  block size.
