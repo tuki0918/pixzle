@@ -27,6 +27,32 @@ const MyComponentWithManifest = () => {
   );
 };
 
+// Using manifest URL (with multiple images)
+const MyComponentWithMultipleImages = () => {
+  return (
+    <>
+      {/* #1 */}
+      <PixzleImage
+        manifest="https://example.com/manifest.json"
+        image="https://example.com/fragment1.png"
+        // imageIndex={0}
+      />
+      {/* #2 */}
+      <PixzleImage
+        manifest="https://example.com/manifest.json"
+        image="https://example.com/fragment2.png"
+        imageIndex={1}
+      />
+      {/* #3 */}
+      <PixzleImage
+        manifest="https://example.com/manifest.json"
+        image="https://example.com/fragment3.png"
+        imageIndex={2}
+      />
+    </>
+  );
+};
+
 // Using manifest data
 const MyComponentWithManifestData = () => {
   return (
