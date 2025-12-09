@@ -42,11 +42,11 @@ You can change the block size with `-b` or `--block-size <number>`.
 
 | input | blockSize: 1 | blockSize: 2 | blockSize: 3 | blockSize: 4 |
 |:-------:|:---------------:|:---------------:|:---------------:|:----------------:|
-| ![](.docs/input_sample.png) | Error - Maximum call stack size exceeded | ![](.docs/output_2.png) | ![](.docs/output_3.png) | ![](.docs/output_4.png) |
+| ![](.docs/input_sample.png) | ![](.docs/output_1.png) | ![](.docs/output_2.png) | ![](.docs/output_3.png) | ![](.docs/output_4.png) |
 
 | blockSize: 8 (default) | blockSize: 16 | blockSize: 32 | blockSize: 50 | blockSize: 128 |
 |:-------:|:---------------:|:---------------:|:---------------:|:----------------:|
 | ![](.docs/output_8.png) | ![](.docs/output_16.png) | ![](.docs/output_32.png) | ![](.docs/output_50.png) | ![](.docs/output_128.png) |
 
 > [!WARNING]
-> - May cause memory shortage depending on the number of  block size.
+> - May cause memory shortage depending on the value of block size.
