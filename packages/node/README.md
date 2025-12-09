@@ -28,9 +28,6 @@ await pixzle.shuffle({
 });
 ```
 
-<details>
-<summary>Output:</summary>
-
 ```
 output
 └── fragmented
@@ -39,6 +36,9 @@ output
     ├── img_3_fragmented.png
     └── manifest.json
 ```
+
+<details>
+<summary>Output:</summary>
 
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
@@ -51,6 +51,8 @@ output
 | 504 x 504px (159KB) | 496 x 488px (39KB) | 496 x 488px (35KB) |
 
 </details>
+
+----
 
 **Restore**
 
@@ -66,9 +68,6 @@ await pixzle.restore({
 });
 ```
 
-<details>
-<summary>Output:</summary>
-
 ```
 output
 └── restored
@@ -76,6 +75,9 @@ output
     ├── img_2.png
     └── img_3.png
 ```
+
+<details>
+<summary>Output:</summary>
 
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
