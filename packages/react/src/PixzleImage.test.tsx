@@ -1,5 +1,5 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { PixzleImage } from "./PixzleImage";
 
 // Mock pixzle default export
@@ -31,6 +31,7 @@ global.URL.revokeObjectURL = vi.fn();
 // Mock Canvas
 const mockGetContext = vi.fn().mockReturnValue({
   drawImage: vi.fn(),
+  clearRect: vi.fn(),
   // biome-ignore lint/suspicious/noExplicitAny: Mocking canvas context
 } as any);
 
@@ -38,11 +39,17 @@ const mockToBlob = vi.fn((callback) => {
   callback(new Blob(["mock"], { type: "image/png" }));
 });
 
-// biome-ignore lint/suspicious/noExplicitAny: Mocking HTMLCanvasElement
-HTMLCanvasElement.prototype.getContext = mockGetContext as any;
-HTMLCanvasElement.prototype.toBlob = mockToBlob;
-
 describe("PixzleImage", () => {
+  beforeAll(() => {
+    // Mock URL.createObjectURL and revokeObjectURL
+    global.URL.createObjectURL = vi.fn(() => "blob:mock-url");
+    global.URL.revokeObjectURL = vi.fn();
+
+    // biome-ignore lint/suspicious/noExplicitAny: Mocking HTMLCanvasElement
+    HTMLCanvasElement.prototype.getContext = mockGetContext as any;
+    HTMLCanvasElement.prototype.toBlob = mockToBlob;
+  });
+
   afterEach(() => {
     cleanup();
   });
@@ -71,9 +78,9 @@ describe("PixzleImage", () => {
       if (consoleSpy.mock.calls.length > 0) {
         console.log("Console error called:", consoleSpy.mock.calls);
       }
-      const img = screen.getByAltText("Restored Image");
-      expect(img).toBeDefined();
-      expect(img.getAttribute("src")).toBe("blob:mock-url");
+      const element = screen.getByRole("img", { name: "Restored Image" });
+      expect(element).toBeDefined();
+      expect(element.tagName).toBe("CANVAS");
     });
 
     consoleSpy.mockRestore();

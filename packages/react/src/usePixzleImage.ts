@@ -1,7 +1,6 @@
 import pixzle, { fetchManifest } from "@pixzle/browser";
 import type { ImageInfo, ManifestData } from "@pixzle/core";
 import { useEffect, useState } from "react";
-import { imageBitmapToBlobUrl } from "./utils";
 
 /**
  * Props for usePixzleImage hook with explicit parameters
@@ -49,7 +48,7 @@ export type UsePixzleImageProps =
   | UsePixzleImageManifestDataProps;
 
 export interface UsePixzleImageResult {
-  src: string | undefined;
+  bitmap: ImageBitmap | undefined;
   isLoading: boolean;
   error: Error | null;
 }
@@ -75,7 +74,7 @@ function isManifestDataProps(
 export const usePixzleImage = (
   props: UsePixzleImageProps,
 ): UsePixzleImageResult => {
-  const [src, setSrc] = useState<string | undefined>(undefined);
+  const [bitmap, setBitmap] = useState<ImageBitmap | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -134,16 +133,12 @@ export const usePixzleImage = (
           imageInfo: resolvedImageInfo,
         });
 
-        if (!active) return;
+        if (!active) {
+          restoredBitmap.close();
+          return;
+        }
 
-        const url = await imageBitmapToBlobUrl(restoredBitmap);
-
-        if (!active) return;
-
-        setSrc((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return url;
-        });
+        setBitmap(restoredBitmap);
         setIsLoading(false);
       } catch (err) {
         if (active) {
@@ -160,14 +155,12 @@ export const usePixzleImage = (
     };
   }, [blockSize, seed, imageInfo, image, manifest, manifestData, imageIndex]);
 
-  // Cleanup URL on unmount
+  // Cleanup bitmap on unmount or change
   useEffect(() => {
     return () => {
-      if (src) {
-        URL.revokeObjectURL(src);
-      }
+      bitmap?.close();
     };
-  }, [src]);
+  }, [bitmap]);
 
-  return { src, isLoading, error };
+  return { bitmap, isLoading, error };
 };
