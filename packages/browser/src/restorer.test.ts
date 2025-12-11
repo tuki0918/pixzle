@@ -104,7 +104,7 @@ describe("ImageRestorer", () => {
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
-    expect(global.fetch).toHaveBeenCalledWith(mockUrl);
+    expect(global.fetch).toHaveBeenCalledWith(mockUrl, undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
     expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
   });
@@ -131,7 +131,7 @@ describe("ImageRestorer", () => {
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
-    expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString());
+    expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString(), undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
     expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
   });

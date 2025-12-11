@@ -10,6 +10,7 @@ export interface UsePixzleImageExplicitProps {
   seed: number;
   imageInfo: ImageInfo;
   image: ImageSource;
+  fetchOptions?: RequestInit;
   manifest?: never;
   manifestData?: never;
   imageIndex?: never;
@@ -21,6 +22,7 @@ export interface UsePixzleImageExplicitProps {
 export interface UsePixzleImageManifestUrlProps {
   image: ImageSource;
   manifest: string;
+  fetchOptions?: RequestInit;
   manifestData?: never;
   /** Index of the image in the manifest (default: 0) */
   imageIndex?: number;
@@ -35,6 +37,7 @@ export interface UsePixzleImageManifestUrlProps {
 export interface UsePixzleImageManifestDataProps {
   image: ImageSource;
   manifestData: ManifestData;
+  fetchOptions?: RequestInit;
   manifest?: never;
   /** Index of the image in the manifest (default: 0) */
   imageIndex?: number;
@@ -79,7 +82,7 @@ export const usePixzleImage = (
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const { image } = props;
+  const { image, fetchOptions } = props;
 
   // Extract dependencies based on props type
   const blockSize = isExplicitProps(props) ? props.blockSize : undefined;
@@ -112,7 +115,7 @@ export const usePixzleImage = (
           resolvedImageInfo = imageInfo;
         } else if (manifest) {
           // Fetch manifest from URL
-          const fetchedManifest = await fetchManifest(manifest);
+          const fetchedManifest = await fetchManifest(manifest, fetchOptions);
           resolvedBlockSize = fetchedManifest.config.blockSize;
           resolvedSeed = fetchedManifest.config.seed;
           resolvedImageInfo = fetchedManifest.images[imageIndex];
@@ -132,6 +135,7 @@ export const usePixzleImage = (
           blockSize: resolvedBlockSize,
           seed: resolvedSeed,
           imageInfo: resolvedImageInfo,
+          fetchOptions,
         });
 
         if (!active) {
@@ -154,7 +158,16 @@ export const usePixzleImage = (
     return () => {
       active = false;
     };
-  }, [blockSize, seed, imageInfo, image, manifest, manifestData, imageIndex]);
+  }, [
+    blockSize,
+    seed,
+    imageInfo,
+    image,
+    manifest,
+    manifestData,
+    imageIndex,
+    fetchOptions,
+  ]);
 
   // Cleanup bitmap on unmount or change
   useEffect(() => {

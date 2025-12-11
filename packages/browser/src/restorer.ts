@@ -27,10 +27,12 @@ export class ImageRestorer {
   async restoreImages(
     fragments: ImageSource[],
     manifest: ManifestData,
+    fetchOptions?: RequestInit,
   ): Promise<ImageBitmap[]> {
     const { blocks, blockCountsPerImage } = await this._prepareData(
       fragments,
       manifest,
+      fetchOptions,
     );
 
     const restored = manifest.config.crossImageShuffle
@@ -58,15 +60,21 @@ export class ImageRestorer {
     blockSize: number,
     seed: number,
     imageInfo: ImageInfo,
+    fetchOptions?: RequestInit,
   ): Promise<ImageBitmap> {
     const manifest = createSingleImageManifest({ blockSize, seed, imageInfo });
 
-    const [restoredImage] = await this.restoreImages([imageSource], manifest);
+    const [restoredImage] = await this.restoreImages(
+      [imageSource],
+      manifest,
+      fetchOptions,
+    );
     return restoredImage;
   }
 
   private async _loadImage(
     sourceInput: string | URL | Blob | HTMLImageElement | ImageBitmap,
+    fetchOptions?: RequestInit,
   ): Promise<HTMLImageElement | ImageBitmap> {
     let source = sourceInput;
     if (typeof URL !== "undefined" && source instanceof URL) {
@@ -94,7 +102,7 @@ export class ImageRestorer {
     }
 
     if (typeof source === "string") {
-      const response = await fetch(source);
+      const response = await fetch(source, fetchOptions);
       if (!response.ok) {
         throw new Error(
           `Failed to fetch image: ${response.status} ${response.statusText}`,
@@ -110,6 +118,7 @@ export class ImageRestorer {
   private async _prepareData(
     fragments: ImageSource[],
     manifest: ManifestData,
+    fetchOptions?: RequestInit,
   ): Promise<{
     blocks: Uint8Array[];
     blockCountsPerImage: number[];
@@ -134,7 +143,12 @@ export class ImageRestorer {
       ? blockCountsForCrossImages
       : blockCountsPerImage;
 
-    const blocks = await this._readBlocks(fragments, manifest, blockCounts);
+    const blocks = await this._readBlocks(
+      fragments,
+      manifest,
+      blockCounts,
+      fetchOptions,
+    );
 
     return { blocks, blockCountsPerImage };
   }
@@ -143,8 +157,9 @@ export class ImageRestorer {
     fragment: ImageSource,
     manifest: ManifestData,
     expectedCount: number,
+    fetchOptions?: RequestInit,
   ): Promise<Uint8Array[]> {
-    const image = await this._loadImage(fragment);
+    const image = await this._loadImage(fragment, fetchOptions);
     const blocks = splitImageToBlocks(image, manifest.config.blockSize);
     return takeBlocks(blocks, expectedCount);
   }
@@ -153,10 +168,16 @@ export class ImageRestorer {
     fragments: ImageSource[],
     manifest: ManifestData,
     blockCounts: number[],
+    fetchOptions?: RequestInit,
   ): Promise<Uint8Array[]> {
     const blockGroups = await Promise.all(
       fragments.map((fragment, i) =>
-        this._readBlocksFromFragment(fragment, manifest, blockCounts[i]),
+        this._readBlocksFromFragment(
+          fragment,
+          manifest,
+          blockCounts[i],
+          fetchOptions,
+        ),
       ),
     );
     return blockGroups.flat();

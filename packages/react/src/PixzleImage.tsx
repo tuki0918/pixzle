@@ -46,6 +46,7 @@ export const PixzleImage = React.forwardRef<
     manifest: _manifest,
     manifestData: _manifestData,
     imageIndex: _imageIndex,
+    fetchOptions: _fetchOptions,
     ...canvasProps
   } = props;
 
