@@ -34,9 +34,11 @@ pixzle restore ./output/*.png -m ./output/manifest.json -o ./restored
 
 ### Result Example
 
-| Original | Fragmented | Restored |
-|:---:|:---:|:---:|
-| ![](.docs/input_sample.png) | ![](.docs/output_8.png) | ![](.docs/restored1/img_1.png) |
+| Fragmented | Restored |
+|:---:|:---:|
+| ![](.docs/fragmented1/img_2_fragmented.png) | ![](.docs/restored1/img_2.png) |
+| ![](.docs/fragmented1/img_3_fragmented.png) | ![](.docs/restored1/img_3.png) |
+| ![](.docs/fragmented1/img_1_fragmented.png) | ![](.docs/restored1/img_1.png) |
 
 ### List by blockSize
 
