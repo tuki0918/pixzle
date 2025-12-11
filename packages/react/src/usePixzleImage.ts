@@ -1,4 +1,4 @@
-import pixzle, { fetchManifest } from "@pixzle/browser";
+import pixzle, { fetchManifest, type ImageSource } from "@pixzle/browser";
 import type { ImageInfo, ManifestData } from "@pixzle/core";
 import { useEffect, useState } from "react";
 
@@ -9,7 +9,7 @@ export interface UsePixzleImageExplicitProps {
   blockSize: number;
   seed: number;
   imageInfo: ImageInfo;
-  image: string | Blob;
+  image: ImageSource;
   manifest?: never;
   manifestData?: never;
   imageIndex?: never;
@@ -19,7 +19,7 @@ export interface UsePixzleImageExplicitProps {
  * Props for usePixzleImage hook with manifest URL
  */
 export interface UsePixzleImageManifestUrlProps {
-  image: string | Blob;
+  image: ImageSource;
   manifest: string;
   manifestData?: never;
   /** Index of the image in the manifest (default: 0) */
@@ -33,7 +33,7 @@ export interface UsePixzleImageManifestUrlProps {
  * Props for usePixzleImage hook with manifest data
  */
 export interface UsePixzleImageManifestDataProps {
-  image: string | Blob;
+  image: ImageSource;
   manifestData: ManifestData;
   manifest?: never;
   /** Index of the image in the manifest (default: 0) */
