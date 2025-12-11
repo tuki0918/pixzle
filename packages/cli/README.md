@@ -18,14 +18,14 @@ Fragments images into blocks and shuffles them.
 pixzle shuffle <images...> -o <output_directory> [options]
 ```
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `-o, --output <dir>` | Output directory (Required) | - |
-| `-b, --block-size <number>` | Pixel block size | 8 |
-| `-p, --prefix <prefix>` | Prefix for fragment files | "img" |
-| `-s, --seed <seed>` | Random seed | auto |
-| `--preserve-name` | Preserve original file names | false |
-| `--cross-image-shuffle` | Shuffle blocks across all images | false |
+| Option | Description | Required | Default |
+|--------|-------------|:---------:|---------|
+| `-o, --output <dir>` | Output directory (Required) | ✅ | - |
+| `-b, --block-size <number>` | Pixel block size | ー | 8 |
+| `-p, --prefix <prefix>` | Prefix for fragment files | ー | "img" |
+| `-s, --seed <seed>` | Random seed | ー | auto |
+| `--preserve-name` | Preserve original file names | ー | false |
+| `--cross-image-shuffle` | Shuffle blocks across all images | ー | false |
 
 **Example:**
 ```bash
@@ -61,7 +61,7 @@ pixzle restore <fragments...> -m <manifest_path> -o <output_directory>
 ```
 
 | Option | Description | Required |
-|--------|-------------|----------|
+|--------|-------------|:----------:|
 | `-m, --manifest <path>` | Path to manifest.json | ✅ |
 | `-o, --output <dir>` | Output directory | ✅ |
 
@@ -81,7 +81,7 @@ pixzle restore <fragment> -o <output_directory> -b <size> -s <seed> -w <width> -
 ```
 
 | Option | Description | Required |
-|--------|-------------|----------|
+|--------|-------------|:----------:|
 | `-o, --output <dir>` | Output directory | ✅ |
 | `-b, --block-size <number>` | Pixel block size | ✅ |
 | `-s, --seed <number>` | Random seed | ✅ |
