@@ -12,7 +12,7 @@ npm install @pixzle/cli
 
 ### Shuffle
 
-Fragment images into multiple pieces.
+Fragments images into blocks and shuffles them.
 
 ```bash
 pixzle shuffle <images...> -o <output_directory> [options]
@@ -48,6 +48,7 @@ With `--cross-image-shuffle`, blocks are mixed across all input images, rather t
 > - Currently, restoration with --cross-image-shuffle is only supported in Node.js and CLI environments.
 > - May cause memory shortage depending on the number of images and block size.
 
+----
 
 ### Restore
 
@@ -68,6 +69,8 @@ pixzle restore <fragments...> -m <manifest_path> -o <output_directory>
 ```bash
 pixzle restore ./output/*.png -m ./output/manifest.json -o ./restored
 ```
+
+----
 
 #### Manual Configuration (Single Image)
 
