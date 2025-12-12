@@ -1,5 +1,6 @@
 import {
   type FragmentationConfig,
+  DEFAULT_IMAGE_OUTPUT_OPTIONS,
   MANIFEST_FILE_NAME,
   type ManifestData,
   type RestoreOptions,
@@ -72,9 +73,11 @@ async function restore(options: RestoreOptions): Promise<void> {
   const imageInfos = manifest.images;
   await Promise.all(
     restoredImages.map((img, i) => {
+      const format =
+        manifest.config.output?.format || DEFAULT_IMAGE_OUTPUT_OPTIONS.FORMAT;
       const filename =
-        generateRestoredOriginalFileName(imageInfos[i]) ??
-        generateRestoredFileName(manifest, i);
+        generateRestoredOriginalFileName(imageInfos[i], format) ??
+        generateRestoredFileName(manifest, i, format);
       return writeFile(outputDir, filename, img);
     }),
   );

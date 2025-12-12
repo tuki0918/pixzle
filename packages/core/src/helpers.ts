@@ -1,5 +1,35 @@
-import { DEFAULT_FRAGMENTATION_CONFIG } from "./constants";
-import type { ImageInfo, ManifestData } from "./types";
+import {
+  DEFAULT_FRAGMENTATION_CONFIG,
+  IMAGE_FORMAT_EXTENSIONS,
+  JPEG_QUALITY,
+} from "./constants";
+import type {
+  ImageFormat,
+  ImageInfo,
+  JpegQuality,
+  ManifestData,
+} from "./types";
+
+/**
+ * Convert JpegQuality to numeric value (0-100)
+ * @param quality Quality setting (preset name or number)
+ * @returns Numeric quality value
+ */
+export function resolveJpegQuality(quality: JpegQuality): number {
+  if (typeof quality === "number") {
+    return Math.max(0, Math.min(100, quality));
+  }
+  return JPEG_QUALITY[quality];
+}
+
+/**
+ * Get file extension for image format
+ * @param format Image format
+ * @returns File extension (without dot)
+ */
+export function getImageFormatExtension(format: ImageFormat): string {
+  return IMAGE_FORMAT_EXTENSIONS[format];
+}
 
 /**
  * Create a minimal ManifestData for single image restoration
@@ -24,6 +54,7 @@ export function createSingleImageManifest(options: {
       prefix: DEFAULT_FRAGMENTATION_CONFIG.PREFIX,
       preserveName: false,
       crossImageShuffle: false,
+      output: {},
     },
     images: [options.imageInfo],
   };
@@ -69,20 +100,24 @@ export function decodeFileName(encodedName: string): string {
  * @param index - Index number (0-based, but output is 1-based)
  * @param options - Options for the file name
  * @param options.isFragmented - Whether the fragment is fragmented
- * @returns File name (e.g., img_1.png.enc)
+ * @param options.format - Image format (determines extension)
+ * @returns File name (e.g., img_1.png or img_1.jpg)
  */
 export function generateFileName(
   manifest: ManifestData,
   index: number,
   options: {
     isFragmented: boolean;
+    format?: ImageFormat;
   } = {
     isFragmented: false,
   },
 ): string {
   const prefix = manifest.config.prefix;
   const totalLength = manifest.images.length;
-  const extension = "png";
+  // Determine extension from format option or manifest config
+  const format = options.format ?? manifest.config.output?.format ?? "png";
+  const extension = IMAGE_FORMAT_EXTENSIONS[format];
   const numDigits = String(totalLength).length;
   const paddedIndex = String(index + 1).padStart(numDigits, "0");
   const filenameSuffix = options.isFragmented ? "_fragmented" : "";
@@ -94,14 +129,17 @@ export function generateFileName(
  * Generate a fragment file name
  * @param manifest - Manifest data
  * @param index - Index number (0-based, but output is 1-based)
- * @returns Fragment file name (e.g., img_1_fragmented.png)
+ * @param format - Optional image format override
+ * @returns Fragment file name (e.g., img_1_fragmented.png or img_1_fragmented.jpg)
  */
 export function generateFragmentFileName(
   manifest: ManifestData,
   index: number,
+  format?: ImageFormat,
 ): string {
   return generateFileName(manifest, index, {
     isFragmented: true,
+    format,
   });
 }
 
@@ -111,31 +149,43 @@ export function generateFragmentFileName(
  * @param index - Index number (0-based, but output is 1-based)
  * @returns Restored file name (e.g., img_1.png)
  */
+/**
+ * Generate restored file name with dynamic format
+ * @param manifest Manifest data
+ * @param index Image index
+ * @param format Output format (e.g. "png" | "jpeg")
+ * @returns Restored file name (e.g., img_1.png or img_1.jpg)
+ */
 export function generateRestoredFileName(
   manifest: ManifestData,
   index: number,
+  format: ImageFormat = "png",
 ): string {
   return generateFileName(manifest, index, {
     isFragmented: false,
+    format,
   });
 }
 
 /**
  * Generate a restored original file name
  * @param imageInfo - Image information
+ * @param format - Image format (determines extension)
  * @returns Restored original file name
  */
 export function generateRestoredOriginalFileName(
   imageInfo: ManifestData["images"][number],
+  format: ImageFormat = "png",
 ): string | undefined {
   if (!imageInfo.name) {
     return undefined;
   }
+  const extension = getImageFormatExtension(format);
   try {
     const decodedName = decodeFileName(imageInfo.name);
-    return decodedName ? `${decodedName}.png` : undefined;
+    return decodedName ? `${decodedName}.${extension}` : undefined;
   } catch {
     // Fallback: if decoding fails, treat as already decoded (backward compatibility)
-    return `${imageInfo.name}.png`;
+    return `${imageInfo.name}.${extension}`;
   }
 }

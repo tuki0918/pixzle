@@ -18,6 +18,26 @@ export interface RestoreOptions {
   outputDir: string;
 }
 
+export type ImageFormat = "png" | "jpeg";
+export type ImageChannels = 3 | 4; // 3=RGB, 4=RGBA
+
+/** JPEG quality: 'low', 'normal', 'high', or 0-100 */
+export type JpegQuality = "low" | "normal" | "high" | number;
+
+/** PNG compression level: 0-9 (0=no compression, 9=max compression) */
+export type PngCompressionLevel = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
+
+export interface ImageOutputOptions {
+  /** Output format: 'png' (default) or 'jpeg' */
+  format?: ImageFormat;
+  /** Color channels: 4=RGBA (default), 3=RGB */
+  channels?: ImageChannels;
+  /** JPEG quality: 'low', 'normal' (default), 'high', or 0-100 (only for JPEG) */
+  jpegQuality?: JpegQuality;
+  /** PNG compression level: 0-9, default 6 (only for PNG) */
+  pngCompressionLevel?: PngCompressionLevel;
+}
+
 export interface FragmentationConfig {
   /**
    * Pixel block size (e.g., 10x10 to 10)
@@ -32,6 +52,8 @@ export interface FragmentationConfig {
   preserveName?: boolean;
   /** Shuffle blocks across all images instead of within each image independently (optional, default: false) */
   crossImageShuffle?: boolean;
+  /** Image output options for generated fragment images */
+  output?: ImageOutputOptions;
 }
 
 /**

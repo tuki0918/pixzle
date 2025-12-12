@@ -1,8 +1,10 @@
 import {
   DEFAULT_FRAGMENTATION_CONFIG,
+  DEFAULT_IMAGE_OUTPUT_OPTIONS,
   type FragmentationConfig,
   type FragmentationResult,
   type ImageInfo,
+  type ImageOutputOptions,
   type ManifestData,
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
@@ -11,16 +13,18 @@ import {
   validateFileNames,
 } from "@pixzle/core";
 import { SeededRandom, shuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
+import { blocksPerImage, blocksToImage, imageToBlocks } from "./block";
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { generateManifestId } from "./utils";
 
 export class ImageFragmenter {
   private config: Required<FragmentationConfig>;
+  private outputOptions: Required<ImageOutputOptions>;
 
   constructor(config: FragmentationConfig) {
     this.config = this._initializeConfig(config);
+    this.outputOptions = this._initializeOutputOptions(config.output);
   }
 
   private _initializeConfig(
@@ -35,6 +39,21 @@ export class ImageFragmenter {
       crossImageShuffle:
         config.crossImageShuffle ??
         DEFAULT_FRAGMENTATION_CONFIG.CROSS_IMAGE_SHUFFLE,
+      output: config.output ?? {},
+    };
+  }
+
+  private _initializeOutputOptions(
+    options?: ImageOutputOptions,
+  ): Required<ImageOutputOptions> {
+    return {
+      format: options?.format ?? DEFAULT_IMAGE_OUTPUT_OPTIONS.FORMAT,
+      channels: options?.channels ?? DEFAULT_IMAGE_OUTPUT_OPTIONS.CHANNELS,
+      jpegQuality:
+        options?.jpegQuality ?? DEFAULT_IMAGE_OUTPUT_OPTIONS.JPEG_QUALITY,
+      pngCompressionLevel:
+        options?.pngCompressionLevel ??
+        DEFAULT_IMAGE_OUTPUT_OPTIONS.PNG_COMPRESSION_LEVEL,
     };
   }
 
@@ -167,6 +186,12 @@ export class ImageFragmenter {
     const imageWidth = blocksPerRow * blockSize;
     const imageHeight = Math.ceil(blockCount / blocksPerRow) * blockSize;
 
-    return await blocksToPngImage(blocks, imageWidth, imageHeight, blockSize);
+    return await blocksToImage(
+      blocks,
+      imageWidth,
+      imageHeight,
+      blockSize,
+      this.outputOptions,
+    );
   }
 }

@@ -92,6 +92,7 @@ describe("pixzle (integration)", () => {
               }),
             } as unknown as ManifestData,
             i,
+            "png",
           ),
         ),
       );
