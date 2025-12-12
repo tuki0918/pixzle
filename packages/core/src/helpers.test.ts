@@ -139,11 +139,36 @@ describe("generateRestoredOriginalFileName", () => {
     expect(generateRestoredOriginalFileName(imageInfo)).toBe("original.png");
   });
 
+  test("should use provided format for extension", () => {
+    const originalName = "original";
+    const encodedName = encodeFileName(originalName);
+    const imageInfo = {
+      name: encodedName,
+    } as ManifestData["images"][number];
+    expect(generateRestoredOriginalFileName(imageInfo, "jpeg")).toBe(
+      "original.jpg",
+    );
+    expect(generateRestoredOriginalFileName(imageInfo, "png")).toBe(
+      "original.png",
+    );
+  });
+
+  test("should handle format with backward compatibility fallback", () => {
+    const imageInfo = {
+      name: "b3JpZ2luYWw=",
+    } as ManifestData["images"][number];
+    expect(generateRestoredOriginalFileName(imageInfo, "jpeg")).toBe(
+      "original.jpg",
+    );
+  });
+
   test("should return undefined when name is null or undefined", () => {
     expect(
-      generateRestoredOriginalFileName({
-        name: null,
-      } as unknown as ManifestData["images"][number]),
+      generateRestoredOriginalFileName(
+        {
+          name: null,
+        } as unknown as ManifestData["images"][number],
+      ),
     ).toBeUndefined();
     expect(
       generateRestoredOriginalFileName({

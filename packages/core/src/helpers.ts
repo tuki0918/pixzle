@@ -170,19 +170,22 @@ export function generateRestoredFileName(
 /**
  * Generate a restored original file name
  * @param imageInfo - Image information
+ * @param format - Image format (determines extension)
  * @returns Restored original file name
  */
 export function generateRestoredOriginalFileName(
   imageInfo: ManifestData["images"][number],
+  format: ImageFormat = "png",
 ): string | undefined {
   if (!imageInfo.name) {
     return undefined;
   }
+  const extension = getImageFormatExtension(format);
   try {
     const decodedName = decodeFileName(imageInfo.name);
-    return decodedName ? `${decodedName}.png` : undefined;
+    return decodedName ? `${decodedName}.${extension}` : undefined;
   } catch {
     // Fallback: if decoding fails, treat as already decoded (backward compatibility)
-    return `${imageInfo.name}.png`;
+    return `${imageInfo.name}.${extension}`;
   }
 }
