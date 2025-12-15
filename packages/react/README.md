@@ -2,6 +2,8 @@
 
 React components for Pixzle.
 
+For examples, see [Storybook](https://main--6933042708fdfa4c737476b2.chromatic.com/).
+
 ## Installation
 
 ```bash
