@@ -34,7 +34,7 @@
   "dependencies": {
     "@pixzle/core": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0",
-    "jimp": "^1.6.0"
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

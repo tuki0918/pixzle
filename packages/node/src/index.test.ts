@@ -7,10 +7,22 @@ import {
   generateFragmentFileName,
   generateRestoredFileName,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
+import sharp from "sharp";
 import { VERSION } from "./constants";
 import { ImageFragmenter } from "./fragmenter";
 import pixzle from "./index";
+
+async function readPngToRgba(input: string | Buffer): Promise<{
+  data: Buffer;
+  width: number;
+  height: number;
+}> {
+  const { data, info } = await sharp(input)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return { data, width: info.width, height: info.height };
+}
 
 describe("pixzle (integration)", () => {
   // Use OS temp directory for test files
@@ -40,12 +52,11 @@ describe("pixzle (integration)", () => {
     testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
-      const image = Jimp.fromBitmap({
-        data: originalImages[i],
-        width,
-        height,
-      });
-      await image.write(filePath, JimpMime.png);
+      await sharp(originalImages[i], {
+        raw: { width, height, channels: 4 },
+      })
+        .png()
+        .toFile(filePath);
       testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle
@@ -119,10 +130,10 @@ describe("pixzle (integration)", () => {
     for (const fragmentPath of fragmentPaths) {
       expect(fs.existsSync(fragmentPath)).toBe(true);
       // Should be openable as PNG
-      const jimpImage = await Jimp.read(fragmentPath);
-      expect(jimpImage.mime).toBe("image/png");
-      expect(jimpImage.bitmap.width).toBeGreaterThan(0);
-      expect(jimpImage.bitmap.height).toBeGreaterThan(0);
+      const meta = await sharp(fragmentPath).metadata();
+      expect(meta.format).toBe("png");
+      expect(meta.width).toBeGreaterThan(0);
+      expect(meta.height).toBeGreaterThan(0);
     }
 
     // Check that restored images exist before comparing content
@@ -132,9 +143,11 @@ describe("pixzle (integration)", () => {
 
     // Check that restored images match original images
     for (let i = 0; i < originalImages.length; i++) {
-      const orig = await Jimp.read(testImagePaths[i]);
-      const restored = await Jimp.read(restoredPaths[i]);
-      expect(restored.bitmap.data).toEqual(orig.bitmap.data);
+      const orig = await readPngToRgba(testImagePaths[i]);
+      const restored = await readPngToRgba(restoredPaths[i]);
+      expect(restored.width).toBe(orig.width);
+      expect(restored.height).toBe(orig.height);
+      expect(restored.data).toEqual(orig.data);
     }
   });
 });
@@ -167,12 +180,11 @@ describe("pixzle (preserveName integration)", () => {
     testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
-      const image = Jimp.fromBitmap({
-        data: originalImages[i],
-        width,
-        height,
-      });
-      await image.write(filePath, JimpMime.png);
+      await sharp(originalImages[i], {
+        raw: { width, height, channels: 4 },
+      })
+        .png()
+        .toFile(filePath);
       testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle (with preserveName)
@@ -275,12 +287,9 @@ describe("pixzle (error handling)", () => {
     ]);
 
     testImagePath = path.join(tmpDir, "test_image.png");
-    const image = Jimp.fromBitmap({
-      data: imageData,
-      width: 2,
-      height: 2,
-    });
-    await image.write(testImagePath, JimpMime.png);
+    await sharp(imageData, { raw: { width: 2, height: 2, channels: 4 } })
+      .png()
+      .toFile(testImagePath);
   });
 
   afterAll(() => {

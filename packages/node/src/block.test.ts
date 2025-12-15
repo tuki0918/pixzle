@@ -6,7 +6,7 @@ import {
   extractBlock,
   placeBlock,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
+import sharp from "sharp";
 import {
   blocksToImageBuffer,
   blocksToPngImage,
@@ -192,8 +192,9 @@ describe("imageToBlocks & blocksToPngImage (integration)", () => {
   beforeAll(async () => {
     // Create tmp directory and PNG file
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-    const image = new Jimp({ data: buffer, width, height });
-    await image.write(tmpPng as `${string}.${string}`);
+    await sharp(buffer, { raw: { width, height, channels } })
+      .png()
+      .toFile(tmpPng);
   });
 
   afterAll(() => {
@@ -227,12 +228,17 @@ describe("imageToBlocks & blocksToPngImage (integration)", () => {
     const { blocks } = await imageToBlocks(tmpPng, blockSize);
     const pngBuffer = await blocksToPngImage(blocks, width, height, blockSize);
     // Decode PNG and check raw buffer
-    const jimpImage = await Jimp.read(pngBuffer);
-    expect(jimpImage.bitmap.data).toEqual(buffer);
+    const { data, info } = await sharp(pngBuffer)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    expect(info.width).toBe(width);
+    expect(info.height).toBe(height);
+    expect(data).toEqual(buffer);
   });
 });
 
-describe("Jimp buffer conversion and restoration", () => {
+describe("sharp buffer conversion and restoration", () => {
   const width = 4;
   const height = 4;
   const channels = 4;
@@ -249,14 +255,18 @@ describe("Jimp buffer conversion and restoration", () => {
     255,
   ]);
 
-  test("buffer to Jimp and back maintains pixel data", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
-    expect(image.bitmap.width).toBe(width);
-    expect(image.bitmap.height).toBe(height);
+  test("buffer to raw and back maintains pixel data", async () => {
+    const { data, info } = await sharp(buffer, {
+      raw: { width, height, channels },
+    })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    expect(info.width).toBe(width);
+    expect(info.height).toBe(height);
+    expect(info.channels).toBe(channels);
 
     // Convert back to buffer and verify data
-    const restoredBuffer = image.bitmap.data;
+    const restoredBuffer = data;
     expect(restoredBuffer).toEqual(buffer);
 
     // Verify specific pixel colors
@@ -278,33 +288,34 @@ describe("Jimp buffer conversion and restoration", () => {
   });
 
   test("buffer to PNG and back maintains pixel data", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
-
     // Convert to PNG buffer
-    const pngBuffer = await image.getBuffer(JimpMime.png);
+    const pngBuffer = await sharp(buffer, {
+      raw: { width, height, channels },
+    })
+      .png()
+      .toBuffer();
 
-    // Read PNG buffer back to Jimp
-    const restoredImage = await Jimp.read(pngBuffer);
-    const restoredBuffer = restoredImage.bitmap.data;
+    const { data: restoredBuffer, info } = await sharp(pngBuffer)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
     // Verify dimensions
-    expect(restoredImage.bitmap.width).toBe(width);
-    expect(restoredImage.bitmap.height).toBe(height);
+    expect(info.width).toBe(width);
+    expect(info.height).toBe(height);
 
     // Verify pixel data
     expect(restoredBuffer).toEqual(buffer);
   });
 
-  test("buffer modification through Jimp operations", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
-
-    // Modify image - invert colors
-    image.invert();
-
-    // Get modified buffer
-    const modifiedBuffer = image.bitmap.data;
+  test("buffer modification through sharp operations", async () => {
+    // Modify image - invert colors (keep alpha)
+    const { data: modifiedBuffer } = await sharp(buffer, {
+      raw: { width, height, channels },
+    })
+      .negate({ alpha: false })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
 
     // Verify first pixel of each row is inverted
     // Inverted Red pixel (first row) -> Cyan

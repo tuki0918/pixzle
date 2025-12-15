@@ -5,7 +5,7 @@ import {
   DEFAULT_FRAGMENTATION_CONFIG,
   type FragmentationConfig,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
+import sharp from "sharp";
 import { ImageFragmenter } from "./fragmenter";
 
 describe("ImageFragmenter", () => {
@@ -89,12 +89,9 @@ describe("ImageFragmenter", () => {
     ]);
 
     testImagePath = path.join(tmpDir, "test_image.png");
-    const image = Jimp.fromBitmap({
-      data: testImageData,
-      width: 4,
-      height: 4,
-    });
-    await image.write(testImagePath, JimpMime.png);
+    await sharp(testImageData, { raw: { width: 4, height: 4, channels: 4 } })
+      .png()
+      .toFile(testImagePath);
   });
 
   afterAll(() => {
@@ -187,8 +184,8 @@ describe("ImageFragmenter", () => {
         expect(fragmentBuffer.length).toBeGreaterThan(0);
 
         // Should be able to read as PNG
-        const jimpImage = await Jimp.read(fragmentBuffer);
-        expect(jimpImage.mime).toBe("image/png");
+        const meta = await sharp(fragmentBuffer).metadata();
+        expect(meta.format).toBe("png");
       }
     });
 
@@ -370,12 +367,9 @@ describe("ImageFragmenter", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await sharp(smallImageData, { raw: { width: 2, height: 2, channels: 4 } })
+        .png()
+        .toFile(smallImagePath);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -385,12 +379,9 @@ describe("ImageFragmenter", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await sharp(largeImageData, { raw: { width: 6, height: 6, channels: 4 } })
+        .png()
+        .toFile(largeImagePath);
 
       try {
         const fragmenter = new ImageFragmenter({
@@ -475,12 +466,9 @@ describe("ImageFragmenter", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await sharp(smallImageData, { raw: { width: 2, height: 2, channels: 4 } })
+        .png()
+        .toFile(smallImagePath);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -490,12 +478,9 @@ describe("ImageFragmenter", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await sharp(largeImageData, { raw: { width: 6, height: 6, channels: 4 } })
+        .png()
+        .toFile(largeImagePath);
 
       try {
         const fragmenter = new ImageFragmenter({
