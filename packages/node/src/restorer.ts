@@ -1,124 +1,181 @@
 import {
-  type ImageInfo,
   type ManifestData,
+  RGBA_CHANNELS,
+  calculateBlockCounts,
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
-  calculateBlockRange,
   calculateTotalBlocks,
-  takeBlocks,
 } from "@pixzle/core";
-import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
+import {
+  copyBlockFromImageBuffer,
+  createPngFromImageBuffer,
+  loadImageBuffer,
+} from "./block";
+import {
+  buildCumulativeCounts,
+  createPermutation,
+  findIndexInCumulative,
+  invertPermutation,
+} from "./block-permutation";
 import { loadBuffer } from "./file";
+
+interface FragmentImageData {
+  buffer: Buffer;
+  width: number;
+  height: number;
+}
 
 export class ImageRestorer {
   async restoreImages(
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
-    const { blocks, blockCountsPerImage } = await this._prepareData(
-      fragments,
-      manifest,
-    );
-
-    const restored = manifest.config.crossImageShuffle
-      ? unshuffle(blocks, manifest.config.seed)
-      : blocksPerImage(
-          blocks,
-          blockCountsPerImage,
-          manifest.config.seed,
-          unshuffle,
-        );
-
-    return await this._reconstructImages(restored, manifest);
+    if (manifest.config.crossImageShuffle) {
+      return await this._restoreCrossImage(fragments, manifest);
+    }
+    return await this._restorePerImage(fragments, manifest);
   }
 
-  private async _reconstructImages(
-    blocks: Buffer[],
+  private async _restorePerImage(
+    fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
     const blockCountsPerImage = calculateBlockCountsPerImage(
       manifest.images,
       manifest.config.blockSize,
     );
-    return await Promise.all(
-      manifest.images.map(async (imageInfo, index) => {
-        const { start, end } = calculateBlockRange(blockCountsPerImage, index);
-        const imageBlocks = blocks.slice(start, end);
-        return await this._createImage(
-          imageBlocks,
+    const restoredImages: Buffer[] = [];
+
+    for (let i = 0; i < fragments.length; i++) {
+      const fragment = await this._loadFragment(fragments[i]);
+      const imageInfo = manifest.images[i];
+      const blockCount = blockCountsPerImage[i];
+
+      const permutation = createPermutation(blockCount, manifest.config.seed);
+      const inverse = invertPermutation(permutation);
+
+      const outputBuffer = Buffer.alloc(
+        imageInfo.w * imageInfo.h * RGBA_CHANNELS,
+      );
+      const targetBlocksPerRow = calculateBlockCounts(
+        imageInfo.w,
+        imageInfo.h,
+        manifest.config.blockSize,
+      ).blockCountX;
+
+      for (let blockIndex = 0; blockIndex < blockCount; blockIndex++) {
+        const sourceIndex = inverse[blockIndex];
+        copyBlockFromImageBuffer(
+          fragment.buffer,
+          fragment.width,
+          fragment.height,
           manifest.config.blockSize,
-          imageInfo,
+          sourceIndex,
+          outputBuffer,
+          imageInfo.w,
+          imageInfo.h,
+          blockIndex,
+          targetBlocksPerRow,
         );
-      }),
-    );
+      }
+
+      restoredImages.push(
+        await createPngFromImageBuffer(outputBuffer, imageInfo.w, imageInfo.h),
+      );
+    }
+
+    return restoredImages;
   }
 
-  private async _prepareData(
+  private async _restoreCrossImage(
     fragments: (string | Buffer)[],
     manifest: ManifestData,
-  ): Promise<{
-    blocks: Buffer[];
-    blockCountsPerImage: number[];
-  }> {
+  ): Promise<Buffer[]> {
     const totalBlocks = calculateTotalBlocks(
       manifest.images,
       manifest.config.blockSize,
     );
+
     const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
       totalBlocks,
       fragments.length,
     );
 
-    // Calculate actual block counts per image for per-image unshuffle
     const blockCountsPerImage = calculateBlockCountsPerImage(
       manifest.images,
       manifest.config.blockSize,
     );
 
-    // Use blockCountsPerImage when crossImageShuffle is false
-    const blockCounts = manifest.config.crossImageShuffle
-      ? blockCountsForCrossImages
-      : blockCountsPerImage;
+    const fragmentImages = await Promise.all(
+      fragments.map((fragment) => this._loadFragment(fragment)),
+    );
 
-    const blocks = await this._readBlocks(fragments, manifest, blockCounts);
+    const fragmentEnds = buildCumulativeCounts(blockCountsForCrossImages);
+    const imageEnds = buildCumulativeCounts(blockCountsPerImage);
 
-    return { blocks, blockCountsPerImage };
+    const permutation = createPermutation(totalBlocks, manifest.config.seed);
+    const inverse = invertPermutation(permutation);
+
+    const restoredImages: Buffer[] = [];
+
+    for (
+      let imageIndex = 0;
+      imageIndex < manifest.images.length;
+      imageIndex++
+    ) {
+      const imageInfo = manifest.images[imageIndex];
+      const blockCount = blockCountsPerImage[imageIndex];
+      const imageStart = imageEnds[imageIndex] - blockCount;
+
+      const outputBuffer = Buffer.alloc(
+        imageInfo.w * imageInfo.h * RGBA_CHANNELS,
+      );
+      const targetBlocksPerRow = calculateBlockCounts(
+        imageInfo.w,
+        imageInfo.h,
+        manifest.config.blockSize,
+      ).blockCountX;
+
+      for (let localIndex = 0; localIndex < blockCount; localIndex++) {
+        const globalIndex = imageStart + localIndex;
+        const sourceIndex = inverse[globalIndex];
+        const { rangeIndex, localIndex: fragmentLocalIndex } =
+          findIndexInCumulative(
+            fragmentEnds,
+            blockCountsForCrossImages,
+            sourceIndex,
+          );
+        const fragment = fragmentImages[rangeIndex];
+
+        copyBlockFromImageBuffer(
+          fragment.buffer,
+          fragment.width,
+          fragment.height,
+          manifest.config.blockSize,
+          fragmentLocalIndex,
+          outputBuffer,
+          imageInfo.w,
+          imageInfo.h,
+          localIndex,
+          targetBlocksPerRow,
+        );
+      }
+
+      restoredImages.push(
+        await createPngFromImageBuffer(outputBuffer, imageInfo.w, imageInfo.h),
+      );
+    }
+
+    return restoredImages;
   }
 
-  // Extract an array of blocks (Buffer) from a fragment image
-  private async _readBlocksFromFragment(
+  private async _loadFragment(
     fragment: string | Buffer,
-    manifest: ManifestData,
-    expectedCount: number,
-  ): Promise<Buffer[]> {
+  ): Promise<FragmentImageData> {
     const buffer = Buffer.isBuffer(fragment)
       ? fragment
       : await loadBuffer(fragment);
-
-    const { blocks } = await imageToBlocks(buffer, manifest.config.blockSize);
-    return takeBlocks(blocks, expectedCount);
-  }
-
-  private async _readBlocks(
-    fragments: (string | Buffer)[],
-    manifest: ManifestData,
-    blockCounts: number[],
-  ): Promise<Buffer[]> {
-    const blockGroups = await Promise.all(
-      fragments.map((fragment, i) =>
-        this._readBlocksFromFragment(fragment, manifest, blockCounts[i]),
-      ),
-    );
-    return blockGroups.flat();
-  }
-
-  private async _createImage(
-    blocks: Buffer[],
-    blockSize: number,
-    imageInfo: ImageInfo,
-  ): Promise<Buffer> {
-    const { w, h } = imageInfo;
-    return await blocksToPngImage(blocks, w, h, blockSize);
+    const { imageBuffer, width, height } = await loadImageBuffer(buffer);
+    return { buffer: imageBuffer, width, height };
   }
 }

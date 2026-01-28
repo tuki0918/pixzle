@@ -15,6 +15,12 @@ interface ImageToBlocksResult {
   blockCountY: number;
 }
 
+interface ImageBufferResult {
+  imageBuffer: Buffer;
+  width: number;
+  height: number;
+}
+
 /**
  * Format error message consistently
  * @param operation Description of the operation that failed
@@ -124,6 +130,24 @@ export async function imageToBlocks(
 }
 
 /**
+ * Load an image and return its raw RGBA buffer and dimensions
+ * @param input Path to the image file or Buffer containing image data
+ * @returns Promise resolving to image buffer and dimensions
+ */
+export async function loadImageBuffer(
+  input: string | Buffer,
+): Promise<ImageBufferResult> {
+  try {
+    const image = await Jimp.read(input);
+    const { width, height } = image.bitmap;
+    const imageBuffer = image.bitmap.data;
+    return { imageBuffer, width, height };
+  } catch (error) {
+    throw new Error(formatErrorMessage("Failed to load image buffer", error));
+  }
+}
+
+/**
  * Reconstruct a PNG image from blocks
  * @param blocks Array of block buffers
  * @param width Target image width in pixels
@@ -186,6 +210,69 @@ export async function createPngFromImageBuffer(
   } catch (error) {
     throw new Error(
       formatErrorMessage("Failed to create PNG from image buffer", error),
+    );
+  }
+}
+
+/**
+ * Copy a block from a source image buffer into a target image buffer.
+ * This avoids allocating intermediate block buffers.
+ */
+export function copyBlockFromImageBuffer(
+  sourceBuffer: Uint8Array,
+  sourceWidth: number,
+  sourceHeight: number,
+  blockSize: number,
+  sourceBlockIndex: number,
+  targetBuffer: Uint8Array,
+  targetWidth: number,
+  targetHeight: number,
+  targetBlockIndex: number,
+  targetBlocksPerRow: number,
+): void {
+  if (blockSize <= 0) return;
+
+  const sourceBlocksPerRow = Math.ceil(sourceWidth / blockSize);
+  if (sourceBlocksPerRow <= 0 || targetBlocksPerRow <= 0) return;
+
+  const sourceBlockX = sourceBlockIndex % sourceBlocksPerRow;
+  const sourceBlockY = Math.floor(sourceBlockIndex / sourceBlocksPerRow);
+  const sourceStartX = sourceBlockX * blockSize;
+  const sourceStartY = sourceBlockY * blockSize;
+
+  const targetBlockX = targetBlockIndex % targetBlocksPerRow;
+  const targetBlockY = Math.floor(targetBlockIndex / targetBlocksPerRow);
+  const targetStartX = targetBlockX * blockSize;
+  const targetStartY = targetBlockY * blockSize;
+
+  const availableSourceWidth = sourceWidth - sourceStartX;
+  const availableSourceHeight = sourceHeight - sourceStartY;
+  const availableTargetWidth = targetWidth - targetStartX;
+  const availableTargetHeight = targetHeight - targetStartY;
+
+  const actualWidth = Math.min(
+    blockSize,
+    availableSourceWidth,
+    availableTargetWidth,
+  );
+  const actualHeight = Math.min(
+    blockSize,
+    availableSourceHeight,
+    availableTargetHeight,
+  );
+
+  if (actualWidth <= 0 || actualHeight <= 0) return;
+
+  const rowLength = actualWidth * RGBA_CHANNELS;
+
+  for (let y = 0; y < actualHeight; y++) {
+    const srcRowStart =
+      ((sourceStartY + y) * sourceWidth + sourceStartX) * RGBA_CHANNELS;
+    const destRowStart =
+      ((targetStartY + y) * targetWidth + targetStartX) * RGBA_CHANNELS;
+    targetBuffer.set(
+      sourceBuffer.subarray(srcRowStart, srcRowStart + rowLength),
+      destRowStart,
     );
   }
 }

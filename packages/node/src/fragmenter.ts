@@ -4,17 +4,36 @@ import {
   type FragmentationResult,
   type ImageInfo,
   type ManifestData,
+  RGBA_CHANNELS,
+  calculateBlockCounts,
   calculateBlockCountsForCrossImages,
-  calculateBlockCountsPerImage,
-  calculateBlockRange,
   encodeFileName,
   validateFileNames,
 } from "@pixzle/core";
-import { SeededRandom, shuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
+import { SeededRandom } from "@tuki0918/seeded-shuffle";
+import {
+  copyBlockFromImageBuffer,
+  createPngFromImageBuffer,
+  loadImageBuffer,
+} from "./block";
+import {
+  buildCumulativeCounts,
+  calculateFragmentGrid,
+  createPermutation,
+  findIndexInCumulative,
+} from "./block-permutation";
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { generateManifestId } from "./utils";
+
+interface SourceImageData {
+  buffer: Buffer;
+  width: number;
+  height: number;
+  blockCountX: number;
+  blockCountY: number;
+  blockCount: number;
+}
 
 export class ImageFragmenter {
   private config: Required<FragmentationConfig>;
@@ -39,46 +58,117 @@ export class ImageFragmenter {
   }
 
   async fragmentImages(paths: string[]): Promise<FragmentationResult> {
-    const { manifest, blocks, blockCountsForCrossImages, blockCountsPerImage } =
-      await this._prepareData(paths);
-
-    const shuffled = this.config.crossImageShuffle
-      ? shuffle(blocks, manifest.config.seed)
-      : blocksPerImage(
-          blocks,
-          blockCountsPerImage,
-          manifest.config.seed,
-          shuffle,
-        );
-
-    const blockCounts = this.config.crossImageShuffle
-      ? blockCountsForCrossImages
-      : blockCountsPerImage;
-
-    const fragmentedImages = await this._createImages(
-      shuffled,
-      blockCounts,
-      manifest,
-    );
-
-    return {
-      manifest,
-      fragmentedImages,
-    };
+    if (this.config.crossImageShuffle) {
+      return await this._fragmentCrossImage(paths);
+    }
+    return await this._fragmentPerImage(paths);
   }
 
-  private async _createImages(
-    blocks: Buffer[],
-    blockCounts: number[],
-    manifest: ManifestData,
-  ): Promise<Buffer[]> {
-    return await Promise.all(
-      manifest.images.map(async (_, index) => {
-        const { start, end } = calculateBlockRange(blockCounts, index);
-        const imageBlocks = blocks.slice(start, end);
-        return await this._createImage(imageBlocks, manifest.config.blockSize);
-      }),
+  private async _fragmentPerImage(
+    paths: string[],
+  ): Promise<FragmentationResult> {
+    const manifestId = generateManifestId();
+    const imageInfos: ImageInfo[] = [];
+    const fragmentedImages: Buffer[] = [];
+
+    for (const path of paths) {
+      const source = await this._loadSourceImage(path);
+      const imageInfo = this._createImageInfo(
+        path,
+        source.width,
+        source.height,
+      );
+      imageInfos.push(imageInfo);
+
+      const permutation = createPermutation(
+        source.blockCount,
+        this.config.seed,
+      );
+      const fragment = await this._renderFragmentFromSource(
+        source,
+        permutation,
+      );
+      fragmentedImages.push(fragment);
+    }
+
+    validateFileNames(imageInfos, this.config.preserveName);
+    const manifest = this._createManifest(manifestId, imageInfos);
+
+    return { manifest, fragmentedImages };
+  }
+
+  private async _fragmentCrossImage(
+    paths: string[],
+  ): Promise<FragmentationResult> {
+    const manifestId = generateManifestId();
+    const imageInfos: ImageInfo[] = [];
+    const sources: SourceImageData[] = [];
+
+    for (const path of paths) {
+      const source = await this._loadSourceImage(path);
+      sources.push(source);
+      imageInfos.push(this._createImageInfo(path, source.width, source.height));
+    }
+
+    validateFileNames(imageInfos, this.config.preserveName);
+    const manifest = this._createManifest(manifestId, imageInfos);
+
+    const totalBlocks = sources.reduce(
+      (sum, source) => sum + source.blockCount,
+      0,
     );
+    const permutation = createPermutation(totalBlocks, manifest.config.seed);
+
+    const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
+      totalBlocks,
+      paths.length,
+    );
+
+    const sourceCounts = sources.map((source) => source.blockCount);
+    const sourceEnds = buildCumulativeCounts(sourceCounts);
+
+    const fragmentedImages: Buffer[] = [];
+    let offset = 0;
+
+    for (const fragmentBlockCount of blockCountsForCrossImages) {
+      const { blocksPerRow, width, height } = calculateFragmentGrid(
+        fragmentBlockCount,
+        this.config.blockSize,
+      );
+
+      const outputBuffer = Buffer.alloc(width * height * RGBA_CHANNELS);
+
+      for (let i = 0; i < fragmentBlockCount; i++) {
+        const globalIndex = offset + i;
+        const sourceGlobalIndex = permutation[globalIndex];
+        const { rangeIndex, localIndex } = findIndexInCumulative(
+          sourceEnds,
+          sourceCounts,
+          sourceGlobalIndex,
+        );
+        const source = sources[rangeIndex];
+
+        copyBlockFromImageBuffer(
+          source.buffer,
+          source.width,
+          source.height,
+          this.config.blockSize,
+          localIndex,
+          outputBuffer,
+          width,
+          height,
+          i,
+          blocksPerRow,
+        );
+      }
+
+      fragmentedImages.push(
+        await createPngFromImageBuffer(outputBuffer, width, height),
+      );
+      offset += fragmentBlockCount;
+    }
+
+    return { manifest, fragmentedImages };
   }
 
   private _createManifest(
@@ -94,79 +184,68 @@ export class ImageFragmenter {
     };
   }
 
-  private async _prepareData(paths: string[]): Promise<{
-    manifest: ManifestData;
-    blocks: Buffer[];
-    blockCountsForCrossImages: number[];
-    blockCountsPerImage: number[];
-  }> {
-    const manifestId = generateManifestId();
-
-    const { imageInfos, blocks } = await this._processImages(paths);
-
-    validateFileNames(imageInfos, this.config.preserveName);
-
-    const manifest = this._createManifest(manifestId, imageInfos);
-
-    const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
-      blocks.length,
-      paths.length,
-    );
-
-    // Calculate actual block counts per image for per-image shuffle
-    const blockCountsPerImage = calculateBlockCountsPerImage(
-      imageInfos,
-      this.config.blockSize,
-    );
-
-    return { manifest, blocks, blockCountsForCrossImages, blockCountsPerImage };
-  }
-
-  private async _processImages(paths: string[]): Promise<{
-    imageInfos: ImageInfo[];
-    blocks: Buffer[];
-  }> {
-    const results = await Promise.all(
-      paths.map((path) => this._processImage(path)),
-    );
-
-    const imageInfos = results.map((r) => r.imageInfo);
-    const blocks = results.flatMap((r) => r.blocks);
-
-    return { imageInfos, blocks };
-  }
-
-  private async _processImage(path: string): Promise<{
-    imageInfo: ImageInfo;
-    blocks: Buffer[];
-  }> {
+  private async _loadSourceImage(path: string): Promise<SourceImageData> {
     const buffer = await loadBuffer(path);
-
-    const { blocks, width, height } = await imageToBlocks(
-      buffer,
+    const { imageBuffer, width, height } = await loadImageBuffer(buffer);
+    const blockCounts = calculateBlockCounts(
+      width,
+      height,
       this.config.blockSize,
     );
+    const blockCount = blockCounts.blockCountX * blockCounts.blockCountY;
 
-    const imageInfo: ImageInfo = {
+    return {
+      buffer: imageBuffer,
+      width,
+      height,
+      blockCountX: blockCounts.blockCountX,
+      blockCountY: blockCounts.blockCountY,
+      blockCount,
+    };
+  }
+
+  private _createImageInfo(
+    path: string,
+    width: number,
+    height: number,
+  ): ImageInfo {
+    return {
       w: width,
       h: height,
       name: this.config.preserveName
         ? encodeFileName(fileNameWithoutExtension(path))
         : undefined,
     };
-
-    return { imageInfo, blocks };
   }
 
-  private async _createImage(
-    blocks: Buffer[],
-    blockSize: number,
+  private async _renderFragmentFromSource(
+    source: SourceImageData,
+    permutation: number[],
   ): Promise<Buffer> {
-    const blockCount = blocks.length;
-    const blocksPerRow = Math.ceil(Math.sqrt(blockCount));
-    const imageWidth = blocksPerRow * blockSize;
-    const imageHeight = Math.ceil(blockCount / blocksPerRow) * blockSize;
+    const blockCount = permutation.length;
+    const { blocksPerRow, width, height } = calculateFragmentGrid(
+      blockCount,
+      this.config.blockSize,
+    );
 
-    return await blocksToPngImage(blocks, imageWidth, imageHeight, blockSize);
+    const outputBuffer = Buffer.alloc(width * height * RGBA_CHANNELS);
+
+    for (let i = 0; i < blockCount; i++) {
+      const sourceIndex = permutation[i];
+      copyBlockFromImageBuffer(
+        source.buffer,
+        source.width,
+        source.height,
+        this.config.blockSize,
+        sourceIndex,
+        outputBuffer,
+        width,
+        height,
+        i,
+        blocksPerRow,
+      );
+    }
+
+    return await createPngFromImageBuffer(outputBuffer, width, height);
   }
 }

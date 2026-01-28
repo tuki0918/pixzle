@@ -1,4 +1,5 @@
 import {
+  RGBA_CHANNELS,
   blocksToImageBuffer as coreBlocksToImageBuffer,
   splitImageToBlocks as coreSplitImageToBlocks,
 } from "@pixzle/core";
@@ -38,6 +39,58 @@ export function splitImageToBlocks(
 }
 
 /**
+ * Extract a raw RGBA buffer from an image
+ */
+export function imageToImageBuffer(image: HTMLImageElement | ImageBitmap): {
+  buffer: Uint8Array;
+  width: number;
+  height: number;
+} {
+  const width =
+    image instanceof HTMLImageElement ? image.naturalWidth : image.width;
+  const height =
+    image instanceof HTMLImageElement ? image.naturalHeight : image.height;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not get 2D context");
+
+  ctx.drawImage(image, 0, 0);
+  const imageData = ctx.getImageData(0, 0, width, height);
+
+  const buffer = new Uint8Array(
+    imageData.data.buffer,
+    imageData.data.byteOffset,
+    imageData.data.byteLength,
+  );
+
+  return { buffer, width, height };
+}
+
+/**
+ * Create an ImageBitmap from a raw RGBA buffer
+ */
+export async function imageBufferToImageBitmap(
+  buffer: Uint8Array,
+  width: number,
+  height: number,
+): Promise<ImageBitmap> {
+  const imageData = new ImageData(
+    new Uint8ClampedArray(
+      buffer.buffer as ArrayBuffer,
+      buffer.byteOffset,
+      buffer.byteLength,
+    ),
+    width,
+    height,
+  );
+
+  return createImageBitmap(imageData);
+}
+
+/**
  * Create an ImageBitmap from blocks
  */
 export async function blocksToImageBitmap(
@@ -60,6 +113,69 @@ export async function blocksToImageBitmap(
   );
 
   return createImageBitmap(imageData);
+}
+
+/**
+ * Copy a block from a source image buffer into a target image buffer.
+ * This avoids allocating intermediate block buffers.
+ */
+export function copyBlockFromImageBuffer(
+  sourceBuffer: Uint8Array,
+  sourceWidth: number,
+  sourceHeight: number,
+  blockSize: number,
+  sourceBlockIndex: number,
+  targetBuffer: Uint8Array,
+  targetWidth: number,
+  targetHeight: number,
+  targetBlockIndex: number,
+  targetBlocksPerRow: number,
+): void {
+  if (blockSize <= 0) return;
+
+  const sourceBlocksPerRow = Math.ceil(sourceWidth / blockSize);
+  if (sourceBlocksPerRow <= 0 || targetBlocksPerRow <= 0) return;
+
+  const sourceBlockX = sourceBlockIndex % sourceBlocksPerRow;
+  const sourceBlockY = Math.floor(sourceBlockIndex / sourceBlocksPerRow);
+  const sourceStartX = sourceBlockX * blockSize;
+  const sourceStartY = sourceBlockY * blockSize;
+
+  const targetBlockX = targetBlockIndex % targetBlocksPerRow;
+  const targetBlockY = Math.floor(targetBlockIndex / targetBlocksPerRow);
+  const targetStartX = targetBlockX * blockSize;
+  const targetStartY = targetBlockY * blockSize;
+
+  const availableSourceWidth = sourceWidth - sourceStartX;
+  const availableSourceHeight = sourceHeight - sourceStartY;
+  const availableTargetWidth = targetWidth - targetStartX;
+  const availableTargetHeight = targetHeight - targetStartY;
+
+  const actualWidth = Math.min(
+    blockSize,
+    availableSourceWidth,
+    availableTargetWidth,
+  );
+  const actualHeight = Math.min(
+    blockSize,
+    availableSourceHeight,
+    availableTargetHeight,
+  );
+
+  if (actualWidth <= 0 || actualHeight <= 0) return;
+
+  const rowLength = actualWidth * RGBA_CHANNELS;
+
+  for (let y = 0; y < actualHeight; y++) {
+    const srcRowStart =
+      ((sourceStartY + y) * sourceWidth + sourceStartX) * RGBA_CHANNELS;
+    const destRowStart =
+      ((targetStartY + y) * targetWidth + targetStartX) * RGBA_CHANNELS;
+    targetBuffer.set(
+      sourceBuffer.subarray(srcRowStart, srcRowStart + rowLength),
+      destRowStart,
+    );
+  }
 }
 
 /**

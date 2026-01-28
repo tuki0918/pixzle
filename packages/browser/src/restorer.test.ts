@@ -4,11 +4,9 @@ import { ImageRestorer } from "./restorer";
 
 // Mock the block module
 vi.mock("./block", () => ({
-  splitImageToBlocks: vi.fn(),
-  blocksToImageBitmap: vi.fn(),
-  blocksPerImage: vi.fn((blocks, _counts, _seed, processFunc) =>
-    processFunc(blocks, _seed),
-  ),
+  imageToImageBuffer: vi.fn(),
+  imageBufferToImageBitmap: vi.fn(),
+  copyBlockFromImageBuffer: vi.fn(),
 }));
 
 // Mock ImageBitmap class
@@ -37,14 +35,17 @@ describe("ImageRestorer", () => {
     const seed = 123;
     const imageInfo = { w: 100, h: 100 };
 
-    const mockBlocks = [new Uint8Array(10)];
     const mockRestoredImage = new MockImageBitmap(
       100,
       100,
     ) as unknown as ImageBitmap;
 
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue(mockBlocks);
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
 
@@ -55,12 +56,8 @@ describe("ImageRestorer", () => {
       imageInfo,
     );
 
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalledWith(
-      mockImage,
-      blockSize,
-    );
-    // unshuffle is called internally, we assume it works or mock it if we want to test exact order
-    expect(blockModule.blocksToImageBitmap).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalledWith(mockImage);
+    expect(blockModule.imageBufferToImageBitmap).toHaveBeenCalled();
     expect(result).toBe(mockRestoredImage);
   });
 
@@ -72,10 +69,14 @@ describe("ImageRestorer", () => {
     const imageInfo = { w: 100, h: 100 };
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockBlob, blockSize, seed, imageInfo);
 
@@ -97,16 +98,20 @@ describe("ImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
     expect(global.fetch).toHaveBeenCalledWith(mockUrl, undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalled();
   });
 
   it("should restore image from URL object", async () => {
@@ -124,15 +129,19 @@ describe("ImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
     expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString(), undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalled();
   });
 });
