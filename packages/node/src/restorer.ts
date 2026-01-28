@@ -5,6 +5,7 @@ import {
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
+  validateFragmentImageCount,
 } from "@pixzle/core";
 import {
   copyBlockFromImageBuffer,
@@ -30,6 +31,7 @@ export class ImageRestorer {
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
+    validateFragmentImageCount(fragments, manifest);
     if (manifest.config.crossImageShuffle) {
       return await this._restoreCrossImage(fragments, manifest);
     }

@@ -74,6 +74,7 @@ export class ImageRestorer {
     manifest: ManifestData,
     fetchOptions?: RequestInit,
   ): Promise<ImageBitmap[]> {
+    this._validateFragmentImageCount(fragments, manifest);
     if (manifest.config.crossImageShuffle) {
       return await this._restoreCrossImage(fragments, manifest, fetchOptions);
     }
@@ -286,5 +287,19 @@ export class ImageRestorer {
     }
 
     throw new Error("Unsupported image source");
+  }
+
+  private _validateFragmentImageCount(
+    fragments: ImageSource[],
+    manifest: ManifestData,
+  ): void {
+    const manifestImageCount = manifest.images.length;
+    const fragmentImageCount = fragments.length;
+
+    if (manifestImageCount !== fragmentImageCount) {
+      throw new Error(
+        `Fragment image count mismatch: expected ${manifestImageCount} but got ${fragmentImageCount}`,
+      );
+    }
   }
 }
