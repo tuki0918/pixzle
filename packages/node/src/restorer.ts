@@ -1,10 +1,14 @@
 import {
   type ManifestData,
   RGBA_CHANNELS,
+  buildCumulativeCounts,
   calculateBlockCounts,
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
+  createPermutation,
+  findIndexInCumulative,
+  invertPermutation,
   validateFragmentImageCount,
 } from "@pixzle/core";
 import {
@@ -12,12 +16,6 @@ import {
   createPngFromImageBuffer,
   loadImageBuffer,
 } from "./block";
-import {
-  buildCumulativeCounts,
-  createPermutation,
-  findIndexInCumulative,
-  invertPermutation,
-} from "./block-permutation";
 import { loadBuffer } from "./file";
 
 interface FragmentImageData {

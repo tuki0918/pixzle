@@ -2,13 +2,16 @@ import {
   type ImageInfo,
   type ManifestData,
   RGBA_CHANNELS,
+  buildCumulativeCounts,
   calculateBlockCounts,
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
+  createPermutation,
   createSingleImageManifest,
+  findIndexInCumulative,
+  invertPermutation,
 } from "@pixzle/core";
-import { shuffle } from "@tuki0918/seeded-shuffle";
 import {
   copyBlockFromImageBuffer,
   imageBufferToImageBitmap,
@@ -16,51 +19,6 @@ import {
 } from "./block";
 
 export type ImageSource = string | URL | Blob | HTMLImageElement | ImageBitmap;
-
-function createPermutation(length: number, seed: number | string): number[] {
-  if (length <= 0) return [];
-  const indices = Array.from({ length }, (_, i) => i);
-  return shuffle(indices, seed);
-}
-
-function invertPermutation(permutation: number[]): number[] {
-  const inverse = new Array<number>(permutation.length);
-  for (let i = 0; i < permutation.length; i++) {
-    inverse[permutation[i]] = i;
-  }
-  return inverse;
-}
-
-function buildCumulativeCounts(counts: number[]): number[] {
-  const ends: number[] = [];
-  let sum = 0;
-  for (const count of counts) {
-    sum += count;
-    ends.push(sum);
-  }
-  return ends;
-}
-
-function findIndexInCumulative(
-  cumulativeEnds: number[],
-  counts: number[],
-  index: number,
-): { rangeIndex: number; localIndex: number } {
-  let low = 0;
-  let high = cumulativeEnds.length - 1;
-
-  while (low < high) {
-    const mid = Math.floor((low + high) / 2);
-    if (index < cumulativeEnds[mid]) {
-      high = mid;
-    } else {
-      low = mid + 1;
-    }
-  }
-
-  const start = cumulativeEnds[low] - counts[low];
-  return { rangeIndex: low, localIndex: index - start };
-}
 
 export class ImageRestorer {
   /**

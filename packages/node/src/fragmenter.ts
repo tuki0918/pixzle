@@ -5,9 +5,12 @@ import {
   type ImageInfo,
   type ManifestData,
   RGBA_CHANNELS,
+  buildCumulativeCounts,
   calculateBlockCounts,
   calculateBlockCountsForCrossImages,
+  createPermutation,
   encodeFileName,
+  findIndexInCumulative,
   validateFileNames,
 } from "@pixzle/core";
 import { SeededRandom } from "@tuki0918/seeded-shuffle";
@@ -16,12 +19,6 @@ import {
   createPngFromImageBuffer,
   loadImageBuffer,
 } from "./block";
-import {
-  buildCumulativeCounts,
-  calculateFragmentGrid,
-  createPermutation,
-  findIndexInCumulative,
-} from "./block-permutation";
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { generateManifestId } from "./utils";
@@ -30,8 +27,6 @@ interface SourceImageData {
   buffer: Buffer;
   width: number;
   height: number;
-  blockCountX: number;
-  blockCountY: number;
   blockCount: number;
 }
 
@@ -198,8 +193,6 @@ export class ImageFragmenter {
       buffer: imageBuffer,
       width,
       height,
-      blockCountX: blockCounts.blockCountX,
-      blockCountY: blockCounts.blockCountY,
       blockCount,
     };
   }
@@ -248,4 +241,23 @@ export class ImageFragmenter {
 
     return await createPngFromImageBuffer(outputBuffer, width, height);
   }
+}
+
+function calculateFragmentGrid(
+  blockCount: number,
+  blockSize: number,
+): {
+  blocksPerRow: number;
+  width: number;
+  height: number;
+} {
+  if (blockCount <= 0 || blockSize <= 0) {
+    return { blocksPerRow: 0, width: 0, height: 0 };
+  }
+
+  const blocksPerRow = Math.ceil(Math.sqrt(blockCount));
+  const width = blocksPerRow * blockSize;
+  const height = Math.ceil(blockCount / blocksPerRow) * blockSize;
+
+  return { blocksPerRow, width, height };
 }

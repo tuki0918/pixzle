@@ -47,22 +47,3 @@ export function findIndexInCumulative(
   const start = cumulativeEnds[low] - counts[low];
   return { rangeIndex: low, localIndex: index - start };
 }
-
-export function calculateFragmentGrid(
-  blockCount: number,
-  blockSize: number,
-): {
-  blocksPerRow: number;
-  width: number;
-  height: number;
-} {
-  if (blockCount <= 0 || blockSize <= 0) {
-    return { blocksPerRow: 0, width: 0, height: 0 };
-  }
-
-  const blocksPerRow = Math.ceil(Math.sqrt(blockCount));
-  const width = blocksPerRow * blockSize;
-  const height = Math.ceil(blockCount / blocksPerRow) * blockSize;
-
-  return { blocksPerRow, width, height };
-}
