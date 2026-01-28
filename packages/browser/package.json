@@ -41,8 +41,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@pixzle/core": "workspace:*",
-    "@tuki0918/seeded-shuffle": "^1.0.0"
+    "@pixzle/core": "workspace:*"
   },
   "devDependencies": {
     "happy-dom": "^20.0.11",

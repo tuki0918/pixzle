@@ -41,9 +41,6 @@ importers:
       '@pixzle/core':
         specifier: workspace:*
         version: link:../core
-      '@tuki0918/seeded-shuffle':
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       happy-dom:
         specifier: ^20.0.11
@@ -902,9 +899,6 @@ packages:
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
-
-  '@tuki0918/seeded-shuffle@1.0.0':
-    resolution: {integrity: sha512-OFS1H2l4n/jOndSROK06yyMQfUIB5YIqKq9X++8kSq6C1u7sWdca9fVBMRIpSfb1yNGStgL3RVeq4jMFZP/bnQ==}
 
   '@tuki0918/seeded-shuffle@1.0.1':
     resolution: {integrity: sha512-fu3SgjBZs2+KTCsgZjtdjyYSdLnUlVN1DoiX5WTkcxVWtP8E7O9xJ6y/ig4vkuB8ZD70LwA1F8eCUeuN5q2yiQ==}
@@ -2784,8 +2778,6 @@ snapshots:
       '@types/react-dom': 18.3.7(@types/react@18.3.27)
 
   '@tokenizer/token@0.3.0': {}
-
-  '@tuki0918/seeded-shuffle@1.0.0': {}
 
   '@tuki0918/seeded-shuffle@1.0.1': {}
 
