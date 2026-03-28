@@ -1,6 +1,6 @@
 import pixzle, { fetchManifest, type ImageSource } from "@pixzle/browser";
 import type { ImageInfo, ManifestData } from "@pixzle/core";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Props for usePixzleImage hook with explicit parameters
@@ -81,6 +81,7 @@ export const usePixzleImage = (
   const [bitmap, setBitmap] = useState<ImageBitmap | undefined>(undefined);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const bitmapRef = useRef<ImageBitmap | undefined>(undefined);
 
   const { image, fetchOptions } = props;
 
@@ -99,6 +100,11 @@ export const usePixzleImage = (
 
   useEffect(() => {
     let active = true;
+    setBitmap((current) => {
+      current?.close();
+      bitmapRef.current = undefined;
+      return undefined;
+    });
     setIsLoading(true);
     setError(null);
 
@@ -143,10 +149,19 @@ export const usePixzleImage = (
           return;
         }
 
-        setBitmap(restoredBitmap);
+        setBitmap((current) => {
+          current?.close();
+          bitmapRef.current = restoredBitmap;
+          return restoredBitmap;
+        });
         setIsLoading(false);
       } catch (err) {
         if (active) {
+          setBitmap((current) => {
+            current?.close();
+            bitmapRef.current = undefined;
+            return undefined;
+          });
           setError(err instanceof Error ? err : new Error(String(err)));
           setIsLoading(false);
         }
@@ -169,12 +184,12 @@ export const usePixzleImage = (
     fetchOptions,
   ]);
 
-  // Cleanup bitmap on unmount or change
   useEffect(() => {
     return () => {
-      bitmap?.close();
+      bitmapRef.current?.close();
+      bitmapRef.current = undefined;
     };
-  }, [bitmap]);
+  }, []);
 
   return { bitmap, isLoading, error };
 };

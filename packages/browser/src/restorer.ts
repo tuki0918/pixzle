@@ -7,16 +7,13 @@ import {
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
+  copyBlockFromImageBuffer,
   createPermutation,
   createSingleImageManifest,
   findIndexInCumulative,
   invertPermutation,
 } from "@pixzle/core";
-import {
-  copyBlockFromImageBuffer,
-  imageBufferToImageBitmap,
-  imageToImageBuffer,
-} from "./block";
+import { imageBufferToImageBitmap, imageToImageBuffer } from "./block";
 
 export type ImageSource = string | URL | Blob | HTMLImageElement | ImageBitmap;
 
@@ -218,9 +215,22 @@ export class ImageRestorer {
       source instanceof HTMLImageElement
     ) {
       if (source.complete) return source;
-      await new Promise((resolve, reject) => {
-        source.onload = resolve;
-        source.onerror = reject;
+      await new Promise<void>((resolve, reject) => {
+        const handleLoad = () => {
+          cleanup();
+          resolve();
+        };
+        const handleError = () => {
+          cleanup();
+          reject(new Error("Failed to load image"));
+        };
+        const cleanup = () => {
+          source.removeEventListener("load", handleLoad);
+          source.removeEventListener("error", handleError);
+        };
+
+        source.addEventListener("load", handleLoad, { once: true });
+        source.addEventListener("error", handleError, { once: true });
       });
       return source;
     }

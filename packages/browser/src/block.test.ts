@@ -1,7 +1,7 @@
+import { copyBlockFromImageBuffer } from "@pixzle/core";
 import { describe, expect, it, vi } from "vitest";
 import {
   blocksToImageBitmap,
-  copyBlockFromImageBuffer,
   imageBufferToImageBitmap,
   imageToImageBuffer,
   splitImageToBlocks,

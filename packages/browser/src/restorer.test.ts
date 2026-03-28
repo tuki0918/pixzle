@@ -6,7 +6,6 @@ import { ImageRestorer } from "./restorer";
 vi.mock("./block", () => ({
   imageToImageBuffer: vi.fn(),
   imageBufferToImageBitmap: vi.fn(),
-  copyBlockFromImageBuffer: vi.fn(),
 }));
 
 // Mock ImageBitmap class
@@ -143,5 +142,60 @@ describe("ImageRestorer", () => {
     expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString(), undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
     expect(blockModule.imageToImageBuffer).toHaveBeenCalled();
+  });
+
+  it("should wait for HTMLImageElement load without overwriting handlers", async () => {
+    const restorer = new ImageRestorer();
+    const image = new Image();
+    const existingOnLoad = vi.fn();
+    const existingOnError = vi.fn();
+    image.onload = existingOnLoad;
+    image.onerror = existingOnError;
+    Object.defineProperty(image, "complete", {
+      configurable: true,
+      value: false,
+    });
+
+    const addEventListenerSpy = vi.spyOn(image, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(image, "removeEventListener");
+
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
+      new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+    );
+
+    const restorePromise = restorer.restoreImage(image, 10, 123, {
+      w: 100,
+      h: 100,
+    });
+
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "load",
+      expect.any(Function),
+      { once: true },
+    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "error",
+      expect.any(Function),
+      { once: true },
+    );
+
+    image.dispatchEvent(new Event("load"));
+    await restorePromise;
+
+    expect(image.onload).toBe(existingOnLoad);
+    expect(image.onerror).toBe(existingOnError);
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "load",
+      expect.any(Function),
+    );
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "error",
+      expect.any(Function),
+    );
   });
 });

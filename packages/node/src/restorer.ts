@@ -6,16 +6,13 @@ import {
   calculateBlockCountsForCrossImages,
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
+  copyBlockFromImageBuffer,
   createPermutation,
   findIndexInCumulative,
   invertPermutation,
   validateFragmentImageCount,
 } from "@pixzle/core";
-import {
-  copyBlockFromImageBuffer,
-  createPngFromImageBuffer,
-  loadImageBuffer,
-} from "./block";
+import { createPngFromImageBuffer, loadImageBuffer } from "./block";
 import { loadBuffer } from "./file";
 
 interface FragmentImageData {
