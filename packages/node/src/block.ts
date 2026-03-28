@@ -4,7 +4,7 @@ import {
   blocksToImageBuffer as coreBlocksToImageBuffer,
   splitImageToBlocks as coreSplitImageToBlocks,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
+import { decodeImage, encodePng } from "./image-codec";
 
 interface ImageToBlocksResult {
   blocks: Buffer[];
@@ -30,25 +30,6 @@ interface ImageBufferResult {
 function formatErrorMessage(operation: string, error: unknown): string {
   const errorMessage = error instanceof Error ? error.message : "Unknown error";
   return `${operation}: ${errorMessage}`;
-}
-
-/**
- * Create a Jimp image from raw RGBA image buffer
- * @param imageBuffer Raw RGBA image buffer
- * @param width Image width in pixels
- * @param height Image height in pixels
- * @returns Jimp image instance
- */
-function createJimpFromImageBuffer(
-  imageBuffer: Buffer,
-  width: number,
-  height: number,
-): InstanceType<typeof Jimp> {
-  return new Jimp({
-    data: imageBuffer,
-    width,
-    height,
-  });
 }
 
 /**
@@ -104,11 +85,10 @@ export async function imageToBlocks(
   blockSize: number,
 ): Promise<ImageToBlocksResult> {
   try {
-    // Load and process image with Jimp (automatically converts to RGBA)
-    const image = await Jimp.read(input);
-    const { width, height } = image.bitmap;
+    const image = await decodeImage(input);
+    const { width, height } = image;
     const channels = RGBA_CHANNELS;
-    const imageBuffer = image.bitmap.data;
+    const imageBuffer = image.imageBuffer;
 
     // Split image into blocks
     const blocks = splitImageToBlocks(imageBuffer, width, height, blockSize);
@@ -138,9 +118,8 @@ export async function loadImageBuffer(
   input: string | Buffer,
 ): Promise<ImageBufferResult> {
   try {
-    const image = await Jimp.read(input);
-    const { width, height } = image.bitmap;
-    const imageBuffer = image.bitmap.data;
+    const image = await decodeImage(input);
+    const { width, height, imageBuffer } = image;
     return { imageBuffer, width, height };
   } catch (error) {
     throw new Error(formatErrorMessage("Failed to load image buffer", error));
@@ -172,7 +151,7 @@ export async function blocksToPngImage(
 }
 
 /**
- * Extract raw RGBA image buffer from a PNG buffer using Jimp
+ * Extract raw RGBA image buffer from a PNG buffer
  * @param pngBuffer PNG image buffer
  * @returns Promise resolving to image buffer and image dimensions
  */
@@ -180,9 +159,8 @@ export async function extractImageBufferFromPng(
   pngBuffer: Buffer,
 ): Promise<{ imageBuffer: Buffer; width: number; height: number }> {
   try {
-    const image = await Jimp.read(pngBuffer);
-    const { width, height } = image.bitmap;
-    const imageBuffer = Buffer.from(image.bitmap.data);
+    const image = await decodeImage(pngBuffer);
+    const { width, height, imageBuffer } = image;
 
     return { imageBuffer, width, height };
   } catch (error) {
@@ -193,7 +171,7 @@ export async function extractImageBufferFromPng(
 }
 
 /**
- * Create a PNG buffer from raw RGBA image buffer using Jimp
+ * Create a PNG buffer from raw RGBA image buffer
  * @param imageBuffer Raw RGBA image buffer
  * @param width Image width in pixels
  * @param height Image height in pixels
@@ -205,8 +183,7 @@ export async function createPngFromImageBuffer(
   height: number,
 ): Promise<Buffer> {
   try {
-    const image = createJimpFromImageBuffer(imageBuffer, width, height);
-    return await image.getBuffer(JimpMime.png);
+    return await encodePng(imageBuffer, width, height);
   } catch (error) {
     throw new Error(
       formatErrorMessage("Failed to create PNG from image buffer", error),
