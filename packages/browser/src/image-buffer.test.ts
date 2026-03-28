@@ -1,5 +1,11 @@
+import { copyBlockFromImageBuffer } from "@pixzle/core";
 import { describe, expect, it, vi } from "vitest";
-import { blocksToImageBitmap, splitImageToBlocks } from "./block";
+import {
+  blocksToImageBitmap,
+  imageBufferToImageBitmap,
+  imageToImageBuffer,
+  splitImageToBlocks,
+} from "./image-buffer";
 
 // Mock createImageBitmap since it's not available in happy-dom/jsdom usually
 global.createImageBitmap = vi.fn().mockImplementation(async (imageData) => {
@@ -110,5 +116,101 @@ describe("block operations", () => {
     expect(imageData.data.length).toBe(width * height * 4);
 
     expect(result).toBeDefined();
+  });
+
+  it("should read image buffer from image", () => {
+    const width = 3;
+    const height = 2;
+    const data = new Uint8ClampedArray(width * height * 4).map((_, i) => i);
+
+    const mockContext = {
+      drawImage: vi.fn(),
+      getImageData: vi.fn().mockReturnValue({
+        data,
+        width,
+        height,
+      }),
+    };
+
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi
+      .fn()
+      .mockReturnValue(mockContext);
+
+    const img = new Image();
+    Object.defineProperty(img, "naturalWidth", { value: width });
+    Object.defineProperty(img, "naturalHeight", { value: height });
+
+    const result = imageToImageBuffer(img);
+
+    expect(mockContext.drawImage).toHaveBeenCalledWith(img, 0, 0);
+    expect(mockContext.getImageData).toHaveBeenCalledWith(0, 0, width, height);
+    expect(result.width).toBe(width);
+    expect(result.height).toBe(height);
+    expect(result.buffer.length).toBe(width * height * 4);
+    expect(result.buffer[0]).toBe(0);
+    expect(result.buffer[5]).toBe(5);
+
+    HTMLCanvasElement.prototype.getContext = originalGetContext;
+  });
+
+  it("should convert image buffer to ImageBitmap", async () => {
+    const width = 2;
+    const height = 2;
+    const buffer = new Uint8Array(width * height * 4).fill(7);
+
+    await imageBufferToImageBitmap(buffer, width, height);
+
+    expect(global.createImageBitmap).toHaveBeenCalled();
+    // biome-ignore lint/suspicious/noExplicitAny: Accessing mock calls
+    const callArgs = (global.createImageBitmap as any).mock.calls.at(-1);
+    const imageData = callArgs[0] as ImageData;
+
+    expect(imageData.width).toBe(width);
+    expect(imageData.height).toBe(height);
+    expect(imageData.data.length).toBe(width * height * 4);
+  });
+
+  it("should copy blocks between buffers", () => {
+    const width = 4;
+    const height = 4;
+    const blockSize = 2;
+    const source = new Uint8Array(width * height * 4);
+    const target = new Uint8Array(width * height * 4).fill(0);
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const value = y * width + x + 1;
+        const index = (y * width + x) * 4;
+        source[index] = value;
+        source[index + 1] = value;
+        source[index + 2] = value;
+        source[index + 3] = value;
+      }
+    }
+
+    // Copy top-left block (index 0) to bottom-right block (index 3)
+    copyBlockFromImageBuffer(
+      source,
+      width,
+      height,
+      blockSize,
+      0,
+      target,
+      width,
+      height,
+      3,
+      2,
+    );
+
+    // Bottom-right block starts at (2,2)
+    const targetIndex = (2 * width + 2) * 4;
+    expect(target[targetIndex]).toBe(1);
+    expect(target[targetIndex + 1]).toBe(1);
+    expect(target[targetIndex + 2]).toBe(1);
+    expect(target[targetIndex + 3]).toBe(1);
+
+    const targetIndex2 = (2 * width + 3) * 4;
+    expect(target[targetIndex2]).toBe(2);
   });
 });

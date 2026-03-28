@@ -6,6 +6,10 @@ This npm package provides functionality for image fragmentation and restoration.
 
 Please note that this does not guarantee strong security.
 
+## Requirements
+
+- Node >= 20
+
 ## Packages
 
 Please refer to each package's README for usage instructions.

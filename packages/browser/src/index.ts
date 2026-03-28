@@ -1,4 +1,10 @@
-import type { ImageInfo, ManifestData } from "@pixzle/core";
+import {
+  type ImageInfo,
+  type ManifestData,
+  validateRestoreImageOptions as validateCoreRestoreImageOptions,
+  validateManifestOptions,
+  validateOptionsWithImages,
+} from "@pixzle/core";
 import { ImageRestorer, type ImageSource } from "./restorer";
 
 export { ImageRestorer, type ImageSource };
@@ -59,20 +65,6 @@ export async function fetchManifest(
   return fetchJson<ManifestData>(url, fetchOptions);
 }
 
-function validateFragmentImageCount(
-  fragmentImages: ImageSource[],
-  manifest: ManifestData,
-): void {
-  const manifestImageCount = manifest.images.length;
-  const fragmentImageCount = fragmentImages.length;
-
-  if (manifestImageCount !== fragmentImageCount) {
-    throw new Error(
-      `Fragment image count mismatch: expected ${manifestImageCount} but got ${fragmentImageCount}`,
-    );
-  }
-}
-
 async function restore(options: BrowserRestoreOptions): Promise<ImageBitmap[]> {
   const {
     images,
@@ -89,8 +81,6 @@ async function restore(options: BrowserRestoreOptions): Promise<ImageBitmap[]> {
   } else {
     throw new Error("Manifest not provided");
   }
-
-  validateFragmentImageCount(images, manifest);
 
   const restorer = new ImageRestorer();
   return await restorer.restoreImages(images, manifest, fetchOptions);
@@ -120,30 +110,12 @@ const pixzle = {
 export default pixzle;
 
 function validateRestoreOptions(options: BrowserRestoreOptions) {
-  if (!options) throw new Error("[restore] Options object is required.");
-  const { images, manifest, manifestData } = options;
-  if (!images || !Array.isArray(images) || images.length === 0)
-    throw new Error("[restore] images must be a non-empty array.");
-  if (!manifest && !manifestData)
-    throw new Error("[restore] Either manifest or manifestData is required.");
-  if (manifest && typeof manifest !== "string")
-    throw new Error("[restore] manifest must be a string.");
+  validateOptionsWithImages(options, "restore");
+  validateManifestOptions(options, "restore");
   return options;
 }
 
 function validateRestoreImageOptions(options: BrowserRestoreImageOptions) {
-  if (!options) throw new Error("[restoreImage] Options object is required.");
-  const { image, blockSize, seed, imageInfo } = options;
-  if (!image) throw new Error("[restoreImage] image is required.");
-  if (typeof blockSize !== "number" || blockSize <= 0)
-    throw new Error("[restoreImage] blockSize must be a positive number.");
-  if (typeof seed !== "number")
-    throw new Error("[restoreImage] seed must be a number.");
-  if (
-    !imageInfo ||
-    typeof imageInfo.w !== "number" ||
-    typeof imageInfo.h !== "number"
-  )
-    throw new Error("[restoreImage] imageInfo with valid w and h is required.");
+  validateCoreRestoreImageOptions(options, "restoreImage");
   return options;
 }

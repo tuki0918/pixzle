@@ -6,13 +6,13 @@ import {
   extractBlock,
   placeBlock,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
 import {
   blocksToImageBuffer,
   blocksToPngImage,
   imageToBlocks,
   splitImageToBlocks,
-} from "./block";
+} from "./image-buffer";
+import { decodeImage, encodePng, writePngFile } from "./image-codec";
 
 describe("extractBlock", () => {
   const imageWidth = 4;
@@ -192,8 +192,7 @@ describe("imageToBlocks & blocksToPngImage (integration)", () => {
   beforeAll(async () => {
     // Create tmp directory and PNG file
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
-    const image = new Jimp({ data: buffer, width, height });
-    await image.write(tmpPng as `${string}.${string}`);
+    await writePngFile(tmpPng, buffer, width, height);
   });
 
   afterAll(() => {
@@ -227,12 +226,12 @@ describe("imageToBlocks & blocksToPngImage (integration)", () => {
     const { blocks } = await imageToBlocks(tmpPng, blockSize);
     const pngBuffer = await blocksToPngImage(blocks, width, height, blockSize);
     // Decode PNG and check raw buffer
-    const jimpImage = await Jimp.read(pngBuffer);
-    expect(jimpImage.bitmap.data).toEqual(buffer);
+    const image = await decodeImage(pngBuffer);
+    expect(image.imageBuffer).toEqual(buffer);
   });
 });
 
-describe("Jimp buffer conversion and restoration", () => {
+describe("PNG buffer conversion and restoration", () => {
   const width = 4;
   const height = 4;
   const channels = 4;
@@ -249,14 +248,13 @@ describe("Jimp buffer conversion and restoration", () => {
     255,
   ]);
 
-  test("buffer to Jimp and back maintains pixel data", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
-    expect(image.bitmap.width).toBe(width);
-    expect(image.bitmap.height).toBe(height);
+  test("buffer to PNG and back maintains pixel data", async () => {
+    const pngBuffer = await encodePng(buffer, width, height);
+    const restoredImage = await decodeImage(pngBuffer);
+    const restoredBuffer = restoredImage.imageBuffer;
 
-    // Convert back to buffer and verify data
-    const restoredBuffer = image.bitmap.data;
+    expect(restoredImage.width).toBe(width);
+    expect(restoredImage.height).toBe(height);
     expect(restoredBuffer).toEqual(buffer);
 
     // Verify specific pixel colors
@@ -277,34 +275,14 @@ describe("Jimp buffer conversion and restoration", () => {
     ]).toEqual([255, 255, 255, 255]);
   });
 
-  test("buffer to PNG and back maintains pixel data", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
+  test("buffer modification through direct RGBA operations", () => {
+    const modifiedBuffer = Buffer.from(buffer);
 
-    // Convert to PNG buffer
-    const pngBuffer = await image.getBuffer(JimpMime.png);
-
-    // Read PNG buffer back to Jimp
-    const restoredImage = await Jimp.read(pngBuffer);
-    const restoredBuffer = restoredImage.bitmap.data;
-
-    // Verify dimensions
-    expect(restoredImage.bitmap.width).toBe(width);
-    expect(restoredImage.bitmap.height).toBe(height);
-
-    // Verify pixel data
-    expect(restoredBuffer).toEqual(buffer);
-  });
-
-  test("buffer modification through Jimp operations", async () => {
-    // Create Jimp image from buffer
-    const image = new Jimp({ data: buffer, width, height });
-
-    // Modify image - invert colors
-    image.invert();
-
-    // Get modified buffer
-    const modifiedBuffer = image.bitmap.data;
+    for (let i = 0; i < modifiedBuffer.length; i += channels) {
+      modifiedBuffer[i] = 255 - modifiedBuffer[i];
+      modifiedBuffer[i + 1] = 255 - modifiedBuffer[i + 1];
+      modifiedBuffer[i + 2] = 255 - modifiedBuffer[i + 2];
+    }
 
     // Verify first pixel of each row is inverted
     // Inverted Red pixel (first row) -> Cyan

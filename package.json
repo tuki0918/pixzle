@@ -31,6 +31,9 @@
     "url": "https://github.com/tuki0918/pixzle.git"
   },
   "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@changesets/cli": "^2.29.7",

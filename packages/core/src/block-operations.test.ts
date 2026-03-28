@@ -1,5 +1,6 @@
 import {
   blocksToImageBuffer,
+  copyBlockFromImageBuffer,
   extractBlock,
   placeBlock,
   splitImageToBlocks,
@@ -107,6 +108,49 @@ describe("placeBlock", () => {
     expect(buf[1]).toBe(255);
     expect(buf[2]).toBe(255);
     expect(buf[3]).toBe(255);
+  });
+});
+
+describe("copyBlockFromImageBuffer", () => {
+  test("copies a block between buffers", () => {
+    const width = 4;
+    const height = 4;
+    const blockSize = 2;
+    const source = new Uint8Array(width * height * RGBA_CHANNELS);
+    const target = new Uint8Array(width * height * RGBA_CHANNELS).fill(0);
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const value = y * width + x + 1;
+        const index = (y * width + x) * RGBA_CHANNELS;
+        source[index] = value;
+        source[index + 1] = value;
+        source[index + 2] = value;
+        source[index + 3] = value;
+      }
+    }
+
+    copyBlockFromImageBuffer(
+      source,
+      width,
+      height,
+      blockSize,
+      0,
+      target,
+      width,
+      height,
+      3,
+      2,
+    );
+
+    const bottomRightIndex = (2 * width + 2) * RGBA_CHANNELS;
+    expect(target[bottomRightIndex]).toBe(1);
+    expect(target[bottomRightIndex + 1]).toBe(1);
+    expect(target[bottomRightIndex + 2]).toBe(1);
+    expect(target[bottomRightIndex + 3]).toBe(1);
+
+    const nextPixelIndex = (2 * width + 3) * RGBA_CHANNELS;
+    expect(target[nextPixelIndex]).toBe(2);
   });
 });
 

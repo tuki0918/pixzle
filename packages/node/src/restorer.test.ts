@@ -1,9 +1,40 @@
 import fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { Jimp, JimpMime } from "jimp";
 import { ImageFragmenter } from "./fragmenter";
+import { decodeImage, writePngFile } from "./image-codec";
 import { ImageRestorer } from "./restorer";
+
+async function expectPngImage(
+  input: string | Buffer,
+  width?: number,
+  height?: number,
+) {
+  const image = await decodeImage(input);
+  expect(image.format).toBe("png");
+  if (width !== undefined) {
+    expect(image.width).toBe(width);
+  }
+  if (height !== undefined) {
+    expect(image.height).toBe(height);
+  }
+  return image;
+}
+
+async function expectImagesToMatch(
+  original: string | Buffer,
+  restored: string | Buffer,
+) {
+  const originalImage = await decodeImage(original);
+  const restoredImage = await decodeImage(restored);
+
+  expect(restoredImage.width).toBe(originalImage.width);
+  expect(restoredImage.height).toBe(originalImage.height);
+  expect(restoredImage.imageBuffer.length).toBe(
+    originalImage.imageBuffer.length,
+  );
+  expect(restoredImage.imageBuffer).toEqual(originalImage.imageBuffer);
+}
 
 describe("ImageRestorer", () => {
   const tmpDir = path.join(tmpdir(), "restorer_test_tmp");
@@ -87,12 +118,7 @@ describe("ImageRestorer", () => {
     ]);
 
     testImagePath = path.join(tmpDir, "test_image.png");
-    const image = Jimp.fromBitmap({
-      data: originalImageData,
-      width: 4,
-      height: 4,
-    });
-    await image.write(testImagePath, JimpMime.png);
+    await writePngFile(testImagePath, originalImageData, 4, 4);
   });
 
   afterAll(() => {
@@ -130,10 +156,7 @@ describe("ImageRestorer", () => {
       expect(Buffer.isBuffer(restoredImages[0])).toBe(true);
 
       // Should be able to read as PNG
-      const jimpImage = await Jimp.read(restoredImages[0]);
-      expect(jimpImage.mime).toBe("image/png");
-      expect(jimpImage.bitmap.width).toBe(4);
-      expect(jimpImage.bitmap.height).toBe(4);
+      await expectPngImage(restoredImages[0], 4, 4);
     });
 
     test("restores multiple images", async () => {
@@ -157,11 +180,7 @@ describe("ImageRestorer", () => {
       expect(restoredImages).toHaveLength(2);
       for (const restoredImage of restoredImages) {
         expect(Buffer.isBuffer(restoredImage)).toBe(true);
-
-        const jimpImage = await Jimp.read(restoredImage);
-        expect(jimpImage.mime).toBe("image/png");
-        expect(jimpImage.bitmap.width).toBe(4);
-        expect(jimpImage.bitmap.height).toBe(4);
+        await expectPngImage(restoredImage, 4, 4);
       }
     });
 
@@ -185,9 +204,7 @@ describe("ImageRestorer", () => {
       );
 
       expect(restoredImages).toHaveLength(1);
-      const jimpImage = await Jimp.read(restoredImages[0]);
-      expect(jimpImage.bitmap.width).toBe(4);
-      expect(jimpImage.bitmap.height).toBe(4);
+      await expectPngImage(restoredImages[0], 4, 4);
     });
 
     test("accepts fragment images as file paths", async () => {
@@ -270,38 +287,7 @@ describe("ImageRestorer", () => {
         manifest,
       );
 
-      // Compare the restored image data with original
-      const originalJimp = await Jimp.read(testImagePath);
-      const restoredJimp = await Jimp.read(restoredImages[0]);
-
-      expect(restoredJimp.bitmap.width).toBe(originalJimp.bitmap.width);
-      expect(restoredJimp.bitmap.height).toBe(originalJimp.bitmap.height);
-
-      // The bitmap data should be very similar (allowing for PNG compression differences)
-      expect(restoredJimp.bitmap.data.length).toBe(
-        originalJimp.bitmap.data.length,
-      );
-
-      // Verify pixel RGBA values match
-      for (let y = 0; y < originalJimp.bitmap.height; y++) {
-        for (let x = 0; x < originalJimp.bitmap.width; x++) {
-          const pixelIndex = (y * originalJimp.bitmap.width + x) * 4;
-          const originalR = originalJimp.bitmap.data[pixelIndex];
-          const originalG = originalJimp.bitmap.data[pixelIndex + 1];
-          const originalB = originalJimp.bitmap.data[pixelIndex + 2];
-          const originalA = originalJimp.bitmap.data[pixelIndex + 3];
-
-          const restoredR = restoredJimp.bitmap.data[pixelIndex];
-          const restoredG = restoredJimp.bitmap.data[pixelIndex + 1];
-          const restoredB = restoredJimp.bitmap.data[pixelIndex + 2];
-          const restoredA = restoredJimp.bitmap.data[pixelIndex + 3];
-
-          expect(restoredR).toBe(originalR);
-          expect(restoredG).toBe(originalG);
-          expect(restoredB).toBe(originalB);
-          expect(restoredA).toBe(originalA);
-        }
-      }
+      await expectImagesToMatch(testImagePath, restoredImages[0]);
     });
   });
 
@@ -405,9 +391,7 @@ describe("ImageRestorer", () => {
       expect(restoredImages).toHaveLength(1);
       expect(manifest.config.crossImageShuffle).toBe(false);
 
-      const jimpImage = await Jimp.read(restoredImages[0]);
-      expect(jimpImage.bitmap.width).toBe(4);
-      expect(jimpImage.bitmap.height).toBe(4);
+      await expectPngImage(restoredImages[0], 4, 4);
     });
 
     test("restores multiple images with per-image shuffle (default)", async () => {
@@ -430,9 +414,7 @@ describe("ImageRestorer", () => {
       expect(manifest.config.crossImageShuffle).toBe(false);
 
       for (const restoredImage of restoredImages) {
-        const jimpImage = await Jimp.read(restoredImage);
-        expect(jimpImage.bitmap.width).toBe(4);
-        expect(jimpImage.bitmap.height).toBe(4);
+        await expectPngImage(restoredImage, 4, 4);
       }
     });
 
@@ -453,35 +435,7 @@ describe("ImageRestorer", () => {
         manifest,
       );
 
-      const originalJimp = await Jimp.read(testImagePath);
-      const restoredJimp = await Jimp.read(restoredImages[0]);
-
-      expect(restoredJimp.bitmap.width).toBe(originalJimp.bitmap.width);
-      expect(restoredJimp.bitmap.height).toBe(originalJimp.bitmap.height);
-      expect(restoredJimp.bitmap.data.length).toBe(
-        originalJimp.bitmap.data.length,
-      );
-
-      // Verify pixel RGBA values match
-      for (let y = 0; y < originalJimp.bitmap.height; y++) {
-        for (let x = 0; x < originalJimp.bitmap.width; x++) {
-          const pixelIndex = (y * originalJimp.bitmap.width + x) * 4;
-          const originalR = originalJimp.bitmap.data[pixelIndex];
-          const originalG = originalJimp.bitmap.data[pixelIndex + 1];
-          const originalB = originalJimp.bitmap.data[pixelIndex + 2];
-          const originalA = originalJimp.bitmap.data[pixelIndex + 3];
-
-          const restoredR = restoredJimp.bitmap.data[pixelIndex];
-          const restoredG = restoredJimp.bitmap.data[pixelIndex + 1];
-          const restoredB = restoredJimp.bitmap.data[pixelIndex + 2];
-          const restoredA = restoredJimp.bitmap.data[pixelIndex + 3];
-
-          expect(restoredR).toBe(originalR);
-          expect(restoredG).toBe(originalG);
-          expect(restoredB).toBe(originalB);
-          expect(restoredA).toBe(originalA);
-        }
-      }
+      await expectImagesToMatch(testImagePath, restoredImages[0]);
     });
 
     test("round-trip with multiple images and per-image shuffle", async () => {
@@ -504,35 +458,8 @@ describe("ImageRestorer", () => {
 
       expect(restoredImages).toHaveLength(2);
 
-      const originalJimp = await Jimp.read(testImagePath);
       for (const restoredImage of restoredImages) {
-        const restoredJimp = await Jimp.read(restoredImage);
-        expect(restoredJimp.bitmap.width).toBe(originalJimp.bitmap.width);
-        expect(restoredJimp.bitmap.height).toBe(originalJimp.bitmap.height);
-        expect(restoredJimp.bitmap.data.length).toBe(
-          originalJimp.bitmap.data.length,
-        );
-
-        // Verify pixel RGBA values match
-        for (let y = 0; y < originalJimp.bitmap.height; y++) {
-          for (let x = 0; x < originalJimp.bitmap.width; x++) {
-            const pixelIndex = (y * originalJimp.bitmap.width + x) * 4;
-            const originalR = originalJimp.bitmap.data[pixelIndex];
-            const originalG = originalJimp.bitmap.data[pixelIndex + 1];
-            const originalB = originalJimp.bitmap.data[pixelIndex + 2];
-            const originalA = originalJimp.bitmap.data[pixelIndex + 3];
-
-            const restoredR = restoredJimp.bitmap.data[pixelIndex];
-            const restoredG = restoredJimp.bitmap.data[pixelIndex + 1];
-            const restoredB = restoredJimp.bitmap.data[pixelIndex + 2];
-            const restoredA = restoredJimp.bitmap.data[pixelIndex + 3];
-
-            expect(restoredR).toBe(originalR);
-            expect(restoredG).toBe(originalG);
-            expect(restoredB).toBe(originalB);
-            expect(restoredA).toBe(originalA);
-          }
-        }
+        await expectImagesToMatch(testImagePath, restoredImage);
       }
     });
 
@@ -560,12 +487,7 @@ describe("ImageRestorer", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await writePngFile(smallImagePath, smallImageData, 2, 2);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -575,12 +497,7 @@ describe("ImageRestorer", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await writePngFile(largeImagePath, largeImageData, 6, 6);
 
       try {
         const fragmenter = new ImageFragmenter({
@@ -603,13 +520,8 @@ describe("ImageRestorer", () => {
         expect(restoredImages).toHaveLength(2);
 
         // Verify restored dimensions match originals
-        const smallJimp = await Jimp.read(restoredImages[0]);
-        const largeJimp = await Jimp.read(restoredImages[1]);
-
-        expect(smallJimp.bitmap.width).toBe(2);
-        expect(smallJimp.bitmap.height).toBe(2);
-        expect(largeJimp.bitmap.width).toBe(6);
-        expect(largeJimp.bitmap.height).toBe(6);
+        await expectPngImage(restoredImages[0], 2, 2);
+        await expectPngImage(restoredImages[1], 6, 6);
       } finally {
         // Clean up
         if (fs.existsSync(smallImagePath)) fs.unlinkSync(smallImagePath);
@@ -636,9 +548,7 @@ describe("ImageRestorer", () => {
       expect(restoredImages).toHaveLength(1);
       expect(manifest.config.crossImageShuffle).toBe(true);
 
-      const jimpImage = await Jimp.read(restoredImages[0]);
-      expect(jimpImage.bitmap.width).toBe(4);
-      expect(jimpImage.bitmap.height).toBe(4);
+      await expectPngImage(restoredImages[0], 4, 4);
     });
 
     test("restores multiple images with cross-image shuffle", async () => {
@@ -662,9 +572,7 @@ describe("ImageRestorer", () => {
       expect(manifest.config.crossImageShuffle).toBe(true);
 
       for (const restoredImage of restoredImages) {
-        const jimpImage = await Jimp.read(restoredImage);
-        expect(jimpImage.bitmap.width).toBe(4);
-        expect(jimpImage.bitmap.height).toBe(4);
+        await expectPngImage(restoredImage, 4, 4);
       }
     });
 
@@ -685,35 +593,7 @@ describe("ImageRestorer", () => {
         manifest,
       );
 
-      const originalJimp = await Jimp.read(testImagePath);
-      const restoredJimp = await Jimp.read(restoredImages[0]);
-
-      expect(restoredJimp.bitmap.width).toBe(originalJimp.bitmap.width);
-      expect(restoredJimp.bitmap.height).toBe(originalJimp.bitmap.height);
-      expect(restoredJimp.bitmap.data.length).toBe(
-        originalJimp.bitmap.data.length,
-      );
-
-      // Verify pixel RGBA values match
-      for (let y = 0; y < originalJimp.bitmap.height; y++) {
-        for (let x = 0; x < originalJimp.bitmap.width; x++) {
-          const pixelIndex = (y * originalJimp.bitmap.width + x) * 4;
-          const originalR = originalJimp.bitmap.data[pixelIndex];
-          const originalG = originalJimp.bitmap.data[pixelIndex + 1];
-          const originalB = originalJimp.bitmap.data[pixelIndex + 2];
-          const originalA = originalJimp.bitmap.data[pixelIndex + 3];
-
-          const restoredR = restoredJimp.bitmap.data[pixelIndex];
-          const restoredG = restoredJimp.bitmap.data[pixelIndex + 1];
-          const restoredB = restoredJimp.bitmap.data[pixelIndex + 2];
-          const restoredA = restoredJimp.bitmap.data[pixelIndex + 3];
-
-          expect(restoredR).toBe(originalR);
-          expect(restoredG).toBe(originalG);
-          expect(restoredB).toBe(originalB);
-          expect(restoredA).toBe(originalA);
-        }
-      }
+      await expectImagesToMatch(testImagePath, restoredImages[0]);
     });
 
     test("round-trip with multiple images and cross-image shuffle", async () => {
@@ -736,35 +616,8 @@ describe("ImageRestorer", () => {
 
       expect(restoredImages).toHaveLength(2);
 
-      const originalJimp = await Jimp.read(testImagePath);
       for (const restoredImage of restoredImages) {
-        const restoredJimp = await Jimp.read(restoredImage);
-        expect(restoredJimp.bitmap.width).toBe(originalJimp.bitmap.width);
-        expect(restoredJimp.bitmap.height).toBe(originalJimp.bitmap.height);
-        expect(restoredJimp.bitmap.data.length).toBe(
-          originalJimp.bitmap.data.length,
-        );
-
-        // Verify pixel RGBA values match
-        for (let y = 0; y < originalJimp.bitmap.height; y++) {
-          for (let x = 0; x < originalJimp.bitmap.width; x++) {
-            const pixelIndex = (y * originalJimp.bitmap.width + x) * 4;
-            const originalR = originalJimp.bitmap.data[pixelIndex];
-            const originalG = originalJimp.bitmap.data[pixelIndex + 1];
-            const originalB = originalJimp.bitmap.data[pixelIndex + 2];
-            const originalA = originalJimp.bitmap.data[pixelIndex + 3];
-
-            const restoredR = restoredJimp.bitmap.data[pixelIndex];
-            const restoredG = restoredJimp.bitmap.data[pixelIndex + 1];
-            const restoredB = restoredJimp.bitmap.data[pixelIndex + 2];
-            const restoredA = restoredJimp.bitmap.data[pixelIndex + 3];
-
-            expect(restoredR).toBe(originalR);
-            expect(restoredG).toBe(originalG);
-            expect(restoredB).toBe(originalB);
-            expect(restoredA).toBe(originalA);
-          }
-        }
+        await expectImagesToMatch(testImagePath, restoredImage);
       }
     });
 
@@ -792,12 +645,7 @@ describe("ImageRestorer", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await writePngFile(smallImagePath, smallImageData, 2, 2);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -807,12 +655,7 @@ describe("ImageRestorer", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await writePngFile(largeImagePath, largeImageData, 6, 6);
 
       try {
         const fragmenter = new ImageFragmenter({
@@ -836,13 +679,8 @@ describe("ImageRestorer", () => {
         expect(manifest.config.crossImageShuffle).toBe(true);
 
         // Verify restored dimensions match originals
-        const smallJimp = await Jimp.read(restoredImages[0]);
-        const largeJimp = await Jimp.read(restoredImages[1]);
-
-        expect(smallJimp.bitmap.width).toBe(2);
-        expect(smallJimp.bitmap.height).toBe(2);
-        expect(largeJimp.bitmap.width).toBe(6);
-        expect(largeJimp.bitmap.height).toBe(6);
+        await expectPngImage(restoredImages[0], 2, 2);
+        await expectPngImage(restoredImages[1], 6, 6);
       } finally {
         // Clean up
         if (fs.existsSync(smallImagePath)) fs.unlinkSync(smallImagePath);

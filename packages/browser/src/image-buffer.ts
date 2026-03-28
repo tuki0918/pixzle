@@ -3,13 +3,11 @@ import {
   splitImageToBlocks as coreSplitImageToBlocks,
 } from "@pixzle/core";
 
-/**
- * Split an image (HTMLImageElement or ImageBitmap) into blocks
- */
-export function splitImageToBlocks(
-  image: HTMLImageElement | ImageBitmap,
-  blockSize: number,
-): Uint8Array[] {
+function drawImageToBuffer(image: HTMLImageElement | ImageBitmap): {
+  buffer: Uint8Array;
+  width: number;
+  height: number;
+} {
   const width =
     image instanceof HTMLImageElement ? image.naturalWidth : image.width;
   const height =
@@ -24,17 +22,58 @@ export function splitImageToBlocks(
   ctx.drawImage(image, 0, 0);
   const imageData = ctx.getImageData(0, 0, width, height);
 
-  // imageData.data is Uint8ClampedArray, we need Uint8Array
-  // We create a copy to avoid issues if the canvas is reused or garbage collected in weird ways,
-  // though here it's local.
-  // coreSplitImageToBlocks expects Uint8Array.
-  const buffer = new Uint8Array(
-    imageData.data.buffer,
-    imageData.data.byteOffset,
-    imageData.data.byteLength,
+  return {
+    buffer: new Uint8Array(
+      imageData.data.buffer,
+      imageData.data.byteOffset,
+      imageData.data.byteLength,
+    ),
+    width,
+    height,
+  };
+}
+
+/**
+ * Split an image (HTMLImageElement or ImageBitmap) into blocks
+ */
+export function splitImageToBlocks(
+  image: HTMLImageElement | ImageBitmap,
+  blockSize: number,
+): Uint8Array[] {
+  const { buffer, width, height } = drawImageToBuffer(image);
+  return coreSplitImageToBlocks(buffer, width, height, blockSize);
+}
+
+/**
+ * Extract a raw RGBA buffer from an image
+ */
+export function imageToImageBuffer(image: HTMLImageElement | ImageBitmap): {
+  buffer: Uint8Array;
+  width: number;
+  height: number;
+} {
+  return drawImageToBuffer(image);
+}
+
+/**
+ * Create an ImageBitmap from a raw RGBA buffer
+ */
+export async function imageBufferToImageBitmap(
+  buffer: Uint8Array,
+  width: number,
+  height: number,
+): Promise<ImageBitmap> {
+  const imageData = new ImageData(
+    new Uint8ClampedArray(
+      buffer.buffer as ArrayBuffer,
+      buffer.byteOffset,
+      buffer.byteLength,
+    ),
+    width,
+    height,
   );
 
-  return coreSplitImageToBlocks(buffer, width, height, blockSize);
+  return createImageBitmap(imageData);
 }
 
 /**

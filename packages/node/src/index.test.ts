@@ -7,10 +7,16 @@ import {
   generateFragmentFileName,
   generateRestoredFileName,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
 import { VERSION } from "./constants";
 import { ImageFragmenter } from "./fragmenter";
+import { decodeImage, writePngFile } from "./image-codec";
 import pixzle from "./index";
+
+async function expectPngImage(input: string | Buffer) {
+  const image = await decodeImage(input);
+  expect(image.format).toBe("png");
+  return image;
+}
 
 describe("pixzle (integration)", () => {
   // Use OS temp directory for test files
@@ -40,12 +46,7 @@ describe("pixzle (integration)", () => {
     testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
-      const image = Jimp.fromBitmap({
-        data: originalImages[i],
-        width,
-        height,
-      });
-      await image.write(filePath, JimpMime.png);
+      await writePngFile(filePath, originalImages[i], width, height);
       testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle
@@ -119,10 +120,9 @@ describe("pixzle (integration)", () => {
     for (const fragmentPath of fragmentPaths) {
       expect(fs.existsSync(fragmentPath)).toBe(true);
       // Should be openable as PNG
-      const jimpImage = await Jimp.read(fragmentPath);
-      expect(jimpImage.mime).toBe("image/png");
-      expect(jimpImage.bitmap.width).toBeGreaterThan(0);
-      expect(jimpImage.bitmap.height).toBeGreaterThan(0);
+      const image = await expectPngImage(fragmentPath);
+      expect(image.width).toBeGreaterThan(0);
+      expect(image.height).toBeGreaterThan(0);
     }
 
     // Check that restored images exist before comparing content
@@ -132,9 +132,9 @@ describe("pixzle (integration)", () => {
 
     // Check that restored images match original images
     for (let i = 0; i < originalImages.length; i++) {
-      const orig = await Jimp.read(testImagePaths[i]);
-      const restored = await Jimp.read(restoredPaths[i]);
-      expect(restored.bitmap.data).toEqual(orig.bitmap.data);
+      const orig = await decodeImage(testImagePaths[i]);
+      const restored = await decodeImage(restoredPaths[i]);
+      expect(restored.imageBuffer).toEqual(orig.imageBuffer);
     }
   });
 });
@@ -167,12 +167,7 @@ describe("pixzle (preserveName integration)", () => {
     testImagePaths = [];
     for (let i = 0; i < originalImages.length; i++) {
       const filePath = path.join(tmpDir, `original_${i}.png`);
-      const image = Jimp.fromBitmap({
-        data: originalImages[i],
-        width,
-        height,
-      });
-      await image.write(filePath, JimpMime.png);
+      await writePngFile(filePath, originalImages[i], width, height);
       testImagePaths.push(filePath);
     }
     // Fragment images using pixzle.shuffle (with preserveName)
@@ -275,12 +270,7 @@ describe("pixzle (error handling)", () => {
     ]);
 
     testImagePath = path.join(tmpDir, "test_image.png");
-    const image = Jimp.fromBitmap({
-      data: imageData,
-      width: 2,
-      height: 2,
-    });
-    await image.write(testImagePath, JimpMime.png);
+    await writePngFile(testImagePath, imageData, 2, 2);
   });
 
   afterAll(() => {

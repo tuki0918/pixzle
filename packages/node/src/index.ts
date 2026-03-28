@@ -8,6 +8,9 @@ import {
   generateRestoredFileName,
   generateRestoredOriginalFileName,
   validateFragmentImageCount,
+  validateManifestOptions,
+  validateOptionsWithImages,
+  validateOutputDirectoryOption,
 } from "@pixzle/core";
 import { createDir, isUrl, loadJson, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
@@ -91,12 +94,8 @@ function validateCommonOptions<T extends ShuffleOptions | RestoreOptions>(
   options: T,
   context: string,
 ) {
-  if (!options) throw new Error(`[${context}] Options object is required.`);
-  const { images, outputDir } = options;
-  if (!images || !Array.isArray(images) || images.length === 0)
-    throw new Error(`[${context}] images must be a non-empty array.`);
-  if (!outputDir || typeof outputDir !== "string")
-    throw new Error(`[${context}] outputDir is required and must be a string.`);
+  validateOptionsWithImages(options, context);
+  validateOutputDirectoryOption(options, context);
   return options;
 }
 
@@ -105,10 +104,6 @@ function validateShuffleOptions(options: ShuffleOptions) {
 }
 
 function validateRestoreOptions(options: RestoreOptions) {
-  const { manifest, manifestData } = options;
-  if (!manifest && !manifestData)
-    throw new Error("[restore] Either manifest or manifestData is required.");
-  if (manifest && typeof manifest !== "string")
-    throw new Error("[restore] manifest must be a string.");
+  validateManifestOptions(options, "restore");
   return validateCommonOptions(options, "restore");
 }

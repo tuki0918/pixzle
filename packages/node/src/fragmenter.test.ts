@@ -5,8 +5,14 @@ import {
   DEFAULT_FRAGMENTATION_CONFIG,
   type FragmentationConfig,
 } from "@pixzle/core";
-import { Jimp, JimpMime } from "jimp";
 import { ImageFragmenter } from "./fragmenter";
+import { decodeImage, writePngFile } from "./image-codec";
+
+async function expectPngImage(input: string | Buffer) {
+  const image = await decodeImage(input);
+  expect(image.format).toBe("png");
+  return image;
+}
 
 describe("ImageFragmenter", () => {
   const tmpDir = path.join(tmpdir(), "fragmenter_test_tmp");
@@ -89,12 +95,7 @@ describe("ImageFragmenter", () => {
     ]);
 
     testImagePath = path.join(tmpDir, "test_image.png");
-    const image = Jimp.fromBitmap({
-      data: testImageData,
-      width: 4,
-      height: 4,
-    });
-    await image.write(testImagePath, JimpMime.png);
+    await writePngFile(testImagePath, testImageData, 4, 4);
   });
 
   afterAll(() => {
@@ -187,8 +188,7 @@ describe("ImageFragmenter", () => {
         expect(fragmentBuffer.length).toBeGreaterThan(0);
 
         // Should be able to read as PNG
-        const jimpImage = await Jimp.read(fragmentBuffer);
-        expect(jimpImage.mime).toBe("image/png");
+        await expectPngImage(fragmentBuffer);
       }
     });
 
@@ -370,12 +370,7 @@ describe("ImageFragmenter", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await writePngFile(smallImagePath, smallImageData, 2, 2);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -385,12 +380,7 @@ describe("ImageFragmenter", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await writePngFile(largeImagePath, largeImageData, 6, 6);
 
       try {
         const fragmenter = new ImageFragmenter({
@@ -475,12 +465,7 @@ describe("ImageFragmenter", () => {
         0,
         255, // Yellow
       ]);
-      const smallImage = Jimp.fromBitmap({
-        data: smallImageData,
-        width: 2,
-        height: 2,
-      });
-      await smallImage.write(smallImagePath, JimpMime.png);
+      await writePngFile(smallImagePath, smallImageData, 2, 2);
 
       // Create 6x6 image
       const largeImageData = Buffer.alloc(6 * 6 * 4);
@@ -490,12 +475,7 @@ describe("ImageFragmenter", () => {
         largeImageData[i + 2] = 128; // B
         largeImageData[i + 3] = 255; // A
       }
-      const largeImage = Jimp.fromBitmap({
-        data: largeImageData,
-        width: 6,
-        height: 6,
-      });
-      await largeImage.write(largeImagePath, JimpMime.png);
+      await writePngFile(largeImagePath, largeImageData, 6, 6);
 
       try {
         const fragmenter = new ImageFragmenter({

@@ -60,6 +60,15 @@ export interface ManifestData {
   images: ImageInfo[];
 }
 
+export interface ImageBufferData {
+  /** Raw RGBA pixel buffer */
+  buffer: Uint8Array;
+  /** Image width */
+  width: number;
+  /** Image height */
+  height: number;
+}
+
 export interface FragmentationResult {
   /** Manifest data */
   manifest: ManifestData;

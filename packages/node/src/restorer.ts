@@ -1,124 +1,42 @@
 import {
-  type ImageInfo,
+  type ImageBufferData,
   type ManifestData,
-  calculateBlockCountsForCrossImages,
-  calculateBlockCountsPerImage,
-  calculateBlockRange,
-  calculateTotalBlocks,
-  takeBlocks,
+  restoreImageBuffers,
+  validateFragmentImageCount,
 } from "@pixzle/core";
-import { unshuffle } from "@tuki0918/seeded-shuffle";
-import { blocksPerImage, blocksToPngImage, imageToBlocks } from "./block";
 import { loadBuffer } from "./file";
+import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
 
 export class ImageRestorer {
   async restoreImages(
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
-    const { blocks, blockCountsPerImage } = await this._prepareData(
-      fragments,
-      manifest,
+    validateFragmentImageCount(fragments, manifest);
+
+    const fragmentImages = await Promise.all(
+      fragments.map((fragment) => this.loadFragment(fragment)),
     );
+    const restoredBuffers = restoreImageBuffers(fragmentImages, manifest);
 
-    const restored = manifest.config.crossImageShuffle
-      ? unshuffle(blocks, manifest.config.seed)
-      : blocksPerImage(
-          blocks,
-          blockCountsPerImage,
-          manifest.config.seed,
-          unshuffle,
-        );
-
-    return await this._reconstructImages(restored, manifest);
-  }
-
-  private async _reconstructImages(
-    blocks: Buffer[],
-    manifest: ManifestData,
-  ): Promise<Buffer[]> {
-    const blockCountsPerImage = calculateBlockCountsPerImage(
-      manifest.images,
-      manifest.config.blockSize,
-    );
     return await Promise.all(
-      manifest.images.map(async (imageInfo, index) => {
-        const { start, end } = calculateBlockRange(blockCountsPerImage, index);
-        const imageBlocks = blocks.slice(start, end);
-        return await this._createImage(
-          imageBlocks,
-          manifest.config.blockSize,
-          imageInfo,
-        );
-      }),
+      restoredBuffers.map((buffer, index) =>
+        createPngFromImageBuffer(
+          Buffer.from(buffer),
+          manifest.images[index].w,
+          manifest.images[index].h,
+        ),
+      ),
     );
   }
 
-  private async _prepareData(
-    fragments: (string | Buffer)[],
-    manifest: ManifestData,
-  ): Promise<{
-    blocks: Buffer[];
-    blockCountsPerImage: number[];
-  }> {
-    const totalBlocks = calculateTotalBlocks(
-      manifest.images,
-      manifest.config.blockSize,
-    );
-    const blockCountsForCrossImages = calculateBlockCountsForCrossImages(
-      totalBlocks,
-      fragments.length,
-    );
-
-    // Calculate actual block counts per image for per-image unshuffle
-    const blockCountsPerImage = calculateBlockCountsPerImage(
-      manifest.images,
-      manifest.config.blockSize,
-    );
-
-    // Use blockCountsPerImage when crossImageShuffle is false
-    const blockCounts = manifest.config.crossImageShuffle
-      ? blockCountsForCrossImages
-      : blockCountsPerImage;
-
-    const blocks = await this._readBlocks(fragments, manifest, blockCounts);
-
-    return { blocks, blockCountsPerImage };
-  }
-
-  // Extract an array of blocks (Buffer) from a fragment image
-  private async _readBlocksFromFragment(
+  private async loadFragment(
     fragment: string | Buffer,
-    manifest: ManifestData,
-    expectedCount: number,
-  ): Promise<Buffer[]> {
+  ): Promise<ImageBufferData> {
     const buffer = Buffer.isBuffer(fragment)
       ? fragment
       : await loadBuffer(fragment);
-
-    const { blocks } = await imageToBlocks(buffer, manifest.config.blockSize);
-    return takeBlocks(blocks, expectedCount);
-  }
-
-  private async _readBlocks(
-    fragments: (string | Buffer)[],
-    manifest: ManifestData,
-    blockCounts: number[],
-  ): Promise<Buffer[]> {
-    const blockGroups = await Promise.all(
-      fragments.map((fragment, i) =>
-        this._readBlocksFromFragment(fragment, manifest, blockCounts[i]),
-      ),
-    );
-    return blockGroups.flat();
-  }
-
-  private async _createImage(
-    blocks: Buffer[],
-    blockSize: number,
-    imageInfo: ImageInfo,
-  ): Promise<Buffer> {
-    const { w, h } = imageInfo;
-    return await blocksToPngImage(blocks, w, h, blockSize);
+    const { imageBuffer, width, height } = await loadImageBuffer(buffer);
+    return { buffer: imageBuffer, width, height };
   }
 }

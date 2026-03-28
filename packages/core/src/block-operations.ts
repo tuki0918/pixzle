@@ -109,6 +109,69 @@ export function placeBlock(
 }
 
 /**
+ * Copy a block from a source image buffer into a target image buffer.
+ * This avoids allocating intermediate block buffers.
+ */
+export function copyBlockFromImageBuffer(
+  sourceBuffer: Uint8Array,
+  sourceWidth: number,
+  sourceHeight: number,
+  blockSize: number,
+  sourceBlockIndex: number,
+  targetBuffer: Uint8Array,
+  targetWidth: number,
+  targetHeight: number,
+  targetBlockIndex: number,
+  targetBlocksPerRow: number,
+): void {
+  if (blockSize <= 0) return;
+
+  const sourceBlocksPerRow = Math.ceil(sourceWidth / blockSize);
+  if (sourceBlocksPerRow <= 0 || targetBlocksPerRow <= 0) return;
+
+  const sourceBlockX = sourceBlockIndex % sourceBlocksPerRow;
+  const sourceBlockY = Math.floor(sourceBlockIndex / sourceBlocksPerRow);
+  const sourceStartX = sourceBlockX * blockSize;
+  const sourceStartY = sourceBlockY * blockSize;
+
+  const targetBlockX = targetBlockIndex % targetBlocksPerRow;
+  const targetBlockY = Math.floor(targetBlockIndex / targetBlocksPerRow);
+  const targetStartX = targetBlockX * blockSize;
+  const targetStartY = targetBlockY * blockSize;
+
+  const availableSourceWidth = sourceWidth - sourceStartX;
+  const availableSourceHeight = sourceHeight - sourceStartY;
+  const availableTargetWidth = targetWidth - targetStartX;
+  const availableTargetHeight = targetHeight - targetStartY;
+
+  const actualWidth = Math.min(
+    blockSize,
+    availableSourceWidth,
+    availableTargetWidth,
+  );
+  const actualHeight = Math.min(
+    blockSize,
+    availableSourceHeight,
+    availableTargetHeight,
+  );
+
+  if (actualWidth <= 0 || actualHeight <= 0) return;
+
+  const rowLength = actualWidth * RGBA_CHANNELS;
+
+  for (let y = 0; y < actualHeight; y++) {
+    const srcRowStart =
+      ((sourceStartY + y) * sourceWidth + sourceStartX) * RGBA_CHANNELS;
+    const destRowStart =
+      ((targetStartY + y) * targetWidth + targetStartX) * RGBA_CHANNELS;
+    targetBuffer.set(
+      sourceBuffer.subarray(srcRowStart, srcRowStart + rowLength),
+      destRowStart,
+    );
+  }
+}
+
+/**
  * Calculate actual block dimensions at edge positions
  * @param position Block position (x or y)
  * @param blockSize Standard block size

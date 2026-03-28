@@ -1,14 +1,24 @@
-import { describe, expect, it, vi } from "vitest";
-import * as blockModule from "./block";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import * as blockModule from "./image-buffer";
 import { ImageRestorer } from "./restorer";
 
+const { restoreImageBuffersMock } = vi.hoisted(() => ({
+  restoreImageBuffersMock: vi.fn(),
+}));
+
+vi.mock("@pixzle/core", async () => {
+  const actual =
+    await vi.importActual<typeof import("@pixzle/core")>("@pixzle/core");
+  return {
+    ...actual,
+    restoreImageBuffers: restoreImageBuffersMock,
+  };
+});
+
 // Mock the block module
-vi.mock("./block", () => ({
-  splitImageToBlocks: vi.fn(),
-  blocksToImageBitmap: vi.fn(),
-  blocksPerImage: vi.fn((blocks, _counts, _seed, processFunc) =>
-    processFunc(blocks, _seed),
-  ),
+vi.mock("./image-buffer", () => ({
+  imageToImageBuffer: vi.fn(),
+  imageBufferToImageBitmap: vi.fn(),
 }));
 
 // Mock ImageBitmap class
@@ -30,6 +40,11 @@ global.createImageBitmap = vi.fn().mockImplementation(async (source) => {
 });
 
 describe("ImageRestorer", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    restoreImageBuffersMock.mockReset();
+  });
+
   it("should restore image from ImageBitmap", async () => {
     const restorer = new ImageRestorer();
     const mockImage = new MockImageBitmap(100, 100) as unknown as ImageBitmap;
@@ -37,14 +52,17 @@ describe("ImageRestorer", () => {
     const seed = 123;
     const imageInfo = { w: 100, h: 100 };
 
-    const mockBlocks = [new Uint8Array(10)];
     const mockRestoredImage = new MockImageBitmap(
       100,
       100,
     ) as unknown as ImageBitmap;
 
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue(mockBlocks);
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
 
@@ -55,12 +73,8 @@ describe("ImageRestorer", () => {
       imageInfo,
     );
 
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalledWith(
-      mockImage,
-      blockSize,
-    );
-    // unshuffle is called internally, we assume it works or mock it if we want to test exact order
-    expect(blockModule.blocksToImageBitmap).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalledWith(mockImage);
+    expect(blockModule.imageBufferToImageBitmap).toHaveBeenCalled();
     expect(result).toBe(mockRestoredImage);
   });
 
@@ -72,10 +86,14 @@ describe("ImageRestorer", () => {
     const imageInfo = { w: 100, h: 100 };
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockBlob, blockSize, seed, imageInfo);
 
@@ -97,16 +115,20 @@ describe("ImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
     expect(global.fetch).toHaveBeenCalledWith(mockUrl, undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalled();
   });
 
   it("should restore image from URL object", async () => {
@@ -124,15 +146,122 @@ describe("ImageRestorer", () => {
     });
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
-    vi.mocked(blockModule.blocksToImageBitmap).mockResolvedValue(
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
       mockRestoredImage,
     );
-    vi.mocked(blockModule.splitImageToBlocks).mockReturnValue([]);
 
     await restorer.restoreImage(mockUrl, blockSize, seed, imageInfo);
 
     expect(global.fetch).toHaveBeenCalledWith(mockUrl.toString(), undefined);
     expect(global.createImageBitmap).toHaveBeenCalledWith(mockBlob);
-    expect(blockModule.splitImageToBlocks).toHaveBeenCalled();
+    expect(blockModule.imageToImageBuffer).toHaveBeenCalled();
+  });
+
+  it("should wait for HTMLImageElement load without overwriting handlers", async () => {
+    const restorer = new ImageRestorer();
+    const image = new Image();
+    const existingOnLoad = vi.fn();
+    const existingOnError = vi.fn();
+    image.onload = existingOnLoad;
+    image.onerror = existingOnError;
+    Object.defineProperty(image, "complete", {
+      configurable: true,
+      value: false,
+    });
+
+    const addEventListenerSpy = vi.spyOn(image, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(image, "removeEventListener");
+
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap).mockResolvedValue(
+      new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+    );
+
+    const restorePromise = restorer.restoreImage(image, 10, 123, {
+      w: 100,
+      h: 100,
+    });
+
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "load",
+      expect.any(Function),
+      { once: true },
+    );
+    expect(addEventListenerSpy).toHaveBeenCalledWith(
+      "error",
+      expect.any(Function),
+      { once: true },
+    );
+
+    image.dispatchEvent(new Event("load"));
+    await restorePromise;
+
+    expect(image.onload).toBe(existingOnLoad);
+    expect(image.onerror).toBe(existingOnError);
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "load",
+      expect.any(Function),
+    );
+    expect(removeEventListenerSpy).toHaveBeenCalledWith(
+      "error",
+      expect.any(Function),
+    );
+  });
+
+  it("should release restored raw buffers after converting cross-image results", async () => {
+    const restorer = new ImageRestorer();
+    const restoredBuffers = [
+      new Uint8Array(100 * 100 * 4),
+      new Uint8Array(50 * 50 * 4),
+    ];
+
+    restoreImageBuffersMock.mockReturnValue(restoredBuffers);
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap)
+      .mockResolvedValueOnce(
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+      )
+      .mockResolvedValueOnce(
+        new MockImageBitmap(50, 50) as unknown as ImageBitmap,
+      );
+
+    await restorer.restoreImages(
+      [
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+      ],
+      {
+        id: "test",
+        version: "0.0.0",
+        timestamp: new Date().toISOString(),
+        config: {
+          blockSize: 10,
+          seed: 123,
+          prefix: "img",
+          preserveName: false,
+          crossImageShuffle: true,
+        },
+        images: [
+          { w: 100, h: 100 },
+          { w: 50, h: 50 },
+        ],
+      },
+    );
+
+    expect(restoredBuffers[0]).toHaveLength(0);
+    expect(restoredBuffers[1]).toHaveLength(0);
   });
 });
