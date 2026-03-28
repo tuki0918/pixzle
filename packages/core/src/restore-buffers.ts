@@ -12,7 +12,12 @@ import {
   calculateBlockCountsPerImage,
   calculateTotalBlocks,
 } from "./block-utils";
-import type { ImageBufferData, ManifestData } from "./types";
+import type {
+  FragmentationConfig,
+  ImageBufferData,
+  ImageInfo,
+  ManifestData,
+} from "./types";
 import { validateFragmentImageCount } from "./validators";
 
 export function restoreImageBuffers(
@@ -28,46 +33,48 @@ export function restoreImageBuffers(
   return restoreEachImage(fragments, manifest);
 }
 
+export function restoreSingleImageBuffer(
+  fragment: ImageBufferData,
+  config: Pick<Required<FragmentationConfig>, "blockSize" | "seed">,
+  imageInfo: ImageInfo,
+): Uint8Array {
+  const { blockCountX, blockCountY } = calculateBlockCounts(
+    imageInfo.w,
+    imageInfo.h,
+    config.blockSize,
+  );
+  const blockCount = blockCountX * blockCountY;
+  const permutation = createPermutation(blockCount, config.seed);
+  const inverse = invertPermutation(permutation);
+  const outputBuffer = new Uint8Array(
+    imageInfo.w * imageInfo.h * RGBA_CHANNELS,
+  );
+
+  for (let blockIndex = 0; blockIndex < blockCount; blockIndex++) {
+    copyBlockFromImageBuffer(
+      fragment.buffer,
+      fragment.width,
+      fragment.height,
+      config.blockSize,
+      inverse[blockIndex],
+      outputBuffer,
+      imageInfo.w,
+      imageInfo.h,
+      blockIndex,
+      blockCountX,
+    );
+  }
+
+  return outputBuffer;
+}
+
 function restoreEachImage(
   fragments: ImageBufferData[],
   manifest: ManifestData,
 ): Uint8Array[] {
-  const blockCountsPerImage = calculateBlockCountsPerImage(
-    manifest.images,
-    manifest.config.blockSize,
+  return manifest.images.map((imageInfo, imageIndex) =>
+    restoreSingleImageBuffer(fragments[imageIndex], manifest.config, imageInfo),
   );
-
-  return manifest.images.map((imageInfo, imageIndex) => {
-    const fragment = fragments[imageIndex];
-    const blockCount = blockCountsPerImage[imageIndex];
-    const permutation = createPermutation(blockCount, manifest.config.seed);
-    const inverse = invertPermutation(permutation);
-    const outputBuffer = new Uint8Array(
-      imageInfo.w * imageInfo.h * RGBA_CHANNELS,
-    );
-    const targetBlocksPerRow = calculateBlockCounts(
-      imageInfo.w,
-      imageInfo.h,
-      manifest.config.blockSize,
-    ).blockCountX;
-
-    for (let blockIndex = 0; blockIndex < blockCount; blockIndex++) {
-      copyBlockFromImageBuffer(
-        fragment.buffer,
-        fragment.width,
-        fragment.height,
-        manifest.config.blockSize,
-        inverse[blockIndex],
-        outputBuffer,
-        imageInfo.w,
-        imageInfo.h,
-        blockIndex,
-        targetBlocksPerRow,
-      );
-    }
-
-    return outputBuffer;
-  });
 }
 
 function restoreAcrossImages(

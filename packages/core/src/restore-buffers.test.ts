@@ -2,7 +2,10 @@ import { blocksToImageBuffer, splitImageToBlocks } from "./block-operations";
 import { createPermutation } from "./block-permutation";
 import { calculateBlockCountsForCrossImages } from "./block-utils";
 import { createSingleImageManifest } from "./helpers";
-import { restoreImageBuffers } from "./restore-buffers";
+import {
+  restoreImageBuffers,
+  restoreSingleImageBuffer,
+} from "./restore-buffers";
 import type { ImageBufferData, ManifestData } from "./types";
 
 function createTestBuffer(
@@ -54,6 +57,39 @@ describe("restoreImageBuffers", () => {
     );
 
     expect(restored).toEqual([original]);
+  });
+
+  test("restores a single image buffer directly", () => {
+    const original = createTestBuffer(4, 4);
+    const manifest = createSingleImageManifest({
+      blockSize: 2,
+      seed: 123,
+      imageInfo: { w: 4, h: 4 },
+    });
+    const shuffledManifest: ManifestData = {
+      ...manifest,
+      config: {
+        ...manifest.config,
+        crossImageShuffle: false,
+      },
+    };
+    const blocks = splitImageToBlocks(original, 4, 4, 2);
+    const permutation = createPermutation(blocks.length, manifest.config.seed);
+    const shuffledBlocks = permutation.map((index) => blocks[index]);
+    const shuffled = blocksToImageBuffer(
+      shuffledBlocks,
+      4,
+      4,
+      manifest.config.blockSize,
+    );
+
+    const restored = restoreSingleImageBuffer(
+      { buffer: shuffled, width: 4, height: 4 },
+      shuffledManifest.config,
+      shuffledManifest.images[0],
+    );
+
+    expect(restored).toEqual(original);
   });
 
   test("restores multiple images with cross-image shuffle", () => {

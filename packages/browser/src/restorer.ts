@@ -4,6 +4,7 @@ import {
   type ManifestData,
   createSingleImageManifest,
   restoreImageBuffers,
+  restoreSingleImageBuffer,
   validateFragmentImageCount,
 } from "@pixzle/core";
 import { imageBufferToImageBitmap, imageToImageBuffer } from "./image-buffer";
@@ -24,23 +25,32 @@ export class ImageRestorer {
   ): Promise<ImageBitmap[]> {
     validateFragmentImageCount(fragments, manifest);
 
+    if (!manifest.config.crossImageShuffle) {
+      return await this.restoreEachImage(fragments, manifest, fetchOptions);
+    }
+
     const fragmentImages = await Promise.all(
       fragments.map(async (fragment): Promise<ImageBufferData> => {
-        const image = await this.loadImageSource(fragment, fetchOptions);
-        return imageToImageBuffer(image);
+        return await this.loadImageBufferFromSource(fragment, fetchOptions);
       }),
     );
     const restoredBuffers = restoreImageBuffers(fragmentImages, manifest);
+    fragmentImages.length = 0;
 
-    return await Promise.all(
-      restoredBuffers.map((buffer, index) =>
-        imageBufferToImageBitmap(
-          buffer,
+    const restoredImages: ImageBitmap[] = [];
+
+    for (let index = 0; index < restoredBuffers.length; index++) {
+      restoredImages.push(
+        await imageBufferToImageBitmap(
+          restoredBuffers[index],
           manifest.images[index].w,
           manifest.images[index].h,
         ),
-      ),
-    );
+      );
+      await this.yieldToMainThread();
+    }
+
+    return restoredImages;
   }
 
   /**
@@ -66,6 +76,36 @@ export class ImageRestorer {
       fetchOptions,
     );
     return restoredImage;
+  }
+
+  private async restoreEachImage(
+    fragments: ImageSource[],
+    manifest: ManifestData,
+    fetchOptions?: RequestInit,
+  ): Promise<ImageBitmap[]> {
+    const restoredImages: ImageBitmap[] = [];
+
+    for (let index = 0; index < fragments.length; index++) {
+      const fragment = await this.loadImageBufferFromSource(
+        fragments[index],
+        fetchOptions,
+      );
+      const restoredBuffer = restoreSingleImageBuffer(
+        fragment,
+        manifest.config,
+        manifest.images[index],
+      );
+      restoredImages.push(
+        await imageBufferToImageBitmap(
+          restoredBuffer,
+          manifest.images[index].w,
+          manifest.images[index].h,
+        ),
+      );
+      await this.yieldToMainThread();
+    }
+
+    return restoredImages;
   }
 
   private async loadImageSource(
@@ -122,5 +162,30 @@ export class ImageRestorer {
     }
 
     throw new Error("Unsupported image source");
+  }
+
+  private async loadImageBufferFromSource(
+    sourceInput: ImageSource,
+    fetchOptions?: RequestInit,
+  ): Promise<ImageBufferData> {
+    const image = await this.loadImageSource(sourceInput, fetchOptions);
+    const imageBuffer = imageToImageBuffer(image);
+
+    if (
+      image instanceof ImageBitmap &&
+      (typeof sourceInput === "string" ||
+        (typeof URL !== "undefined" && sourceInput instanceof URL) ||
+        (typeof Blob !== "undefined" && sourceInput instanceof Blob))
+    ) {
+      image.close();
+    }
+
+    return imageBuffer;
+  }
+
+  private async yieldToMainThread(): Promise<void> {
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
   }
 }
