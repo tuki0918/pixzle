@@ -1,6 +1,7 @@
 export * from "./types";
 export * from "./constants";
 export * from "./helpers";
+export * from "./fragment-buffers";
 export * from "./block-utils";
 export * from "./block-operations";
 export * from "./block-permutation";
