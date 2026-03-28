@@ -13,7 +13,7 @@ import {
   findIndexInCumulative,
   invertPermutation,
 } from "@pixzle/core";
-import { imageBufferToImageBitmap, imageToImageBuffer } from "./block";
+import { imageBufferToImageBitmap, imageToImageBuffer } from "./image-buffer";
 
 export type ImageSource = string | URL | Blob | HTMLImageElement | ImageBitmap;
 
@@ -29,11 +29,11 @@ export class ImageRestorer {
     manifest: ManifestData,
     fetchOptions?: RequestInit,
   ): Promise<ImageBitmap[]> {
-    this._validateFragmentImageCount(fragments, manifest);
+    this.validateFragmentImageCount(fragments, manifest);
     if (manifest.config.crossImageShuffle) {
-      return await this._restoreCrossImage(fragments, manifest, fetchOptions);
+      return await this.restoreAcrossImages(fragments, manifest, fetchOptions);
     }
-    return await this._restorePerImage(fragments, manifest, fetchOptions);
+    return await this.restoreEachImage(fragments, manifest, fetchOptions);
   }
 
   /**
@@ -61,7 +61,7 @@ export class ImageRestorer {
     return restoredImage;
   }
 
-  private async _restorePerImage(
+  private async restoreEachImage(
     fragments: ImageSource[],
     manifest: ManifestData,
     fetchOptions?: RequestInit,
@@ -74,7 +74,7 @@ export class ImageRestorer {
     const restoredImages: ImageBitmap[] = [];
 
     for (let i = 0; i < fragments.length; i++) {
-      const image = await this._loadImage(fragments[i], fetchOptions);
+      const image = await this.loadImageSource(fragments[i], fetchOptions);
       const fragment = imageToImageBuffer(image);
       const imageInfo = manifest.images[i];
       const blockCount = blockCountsPerImage[i];
@@ -115,7 +115,7 @@ export class ImageRestorer {
     return restoredImages;
   }
 
-  private async _restoreCrossImage(
+  private async restoreAcrossImages(
     fragments: ImageSource[],
     manifest: ManifestData,
     fetchOptions?: RequestInit,
@@ -136,7 +136,7 @@ export class ImageRestorer {
     );
 
     const fragmentImages = await Promise.all(
-      fragments.map((fragment) => this._loadImage(fragment, fetchOptions)),
+      fragments.map((fragment) => this.loadImageSource(fragment, fetchOptions)),
     );
     const fragmentBuffers = fragmentImages.map((image) =>
       imageToImageBuffer(image),
@@ -201,7 +201,7 @@ export class ImageRestorer {
     return restoredImages;
   }
 
-  private async _loadImage(
+  private async loadImageSource(
     sourceInput: string | URL | Blob | HTMLImageElement | ImageBitmap,
     fetchOptions?: RequestInit,
   ): Promise<HTMLImageElement | ImageBitmap> {
@@ -257,7 +257,7 @@ export class ImageRestorer {
     throw new Error("Unsupported image source");
   }
 
-  private _validateFragmentImageCount(
+  private validateFragmentImageCount(
     fragments: ImageSource[],
     manifest: ManifestData,
   ): void {

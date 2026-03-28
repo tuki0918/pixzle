@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import * as blockModule from "./block";
+import * as blockModule from "./image-buffer";
 import { ImageRestorer } from "./restorer";
 
 // Mock the block module
-vi.mock("./block", () => ({
+vi.mock("./image-buffer", () => ({
   imageToImageBuffer: vi.fn(),
   imageBufferToImageBitmap: vi.fn(),
 }));

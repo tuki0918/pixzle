@@ -11,7 +11,7 @@ import {
   blocksToPngImage,
   imageToBlocks,
   splitImageToBlocks,
-} from "./block";
+} from "./image-buffer";
 import { decodeImage, encodePng, writePngFile } from "./image-codec";
 
 describe("extractBlock", () => {

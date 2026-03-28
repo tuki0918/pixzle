@@ -15,9 +15,9 @@ import {
   validateFileNames,
 } from "@pixzle/core";
 import { SeededRandom } from "@tuki0918/seeded-shuffle";
-import { createPngFromImageBuffer, loadImageBuffer } from "./block";
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
+import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
 import { generateManifestId } from "./utils";
 
 interface SourceImageData {
@@ -31,10 +31,10 @@ export class ImageFragmenter {
   private config: Required<FragmentationConfig>;
 
   constructor(config: FragmentationConfig) {
-    this.config = this._initializeConfig(config);
+    this.config = this.initializeConfig(config);
   }
 
-  private _initializeConfig(
+  private initializeConfig(
     config: FragmentationConfig,
   ): Required<FragmentationConfig> {
     return {
@@ -51,12 +51,12 @@ export class ImageFragmenter {
 
   async fragmentImages(paths: string[]): Promise<FragmentationResult> {
     if (this.config.crossImageShuffle) {
-      return await this._fragmentCrossImage(paths);
+      return await this.fragmentAcrossImages(paths);
     }
-    return await this._fragmentPerImage(paths);
+    return await this.fragmentEachImage(paths);
   }
 
-  private async _fragmentPerImage(
+  private async fragmentEachImage(
     paths: string[],
   ): Promise<FragmentationResult> {
     const manifestId = generateManifestId();
@@ -64,32 +64,25 @@ export class ImageFragmenter {
     const fragmentedImages: Buffer[] = [];
 
     for (const path of paths) {
-      const source = await this._loadSourceImage(path);
-      const imageInfo = this._createImageInfo(
-        path,
-        source.width,
-        source.height,
-      );
+      const source = await this.loadSourceImage(path);
+      const imageInfo = this.createImageInfo(path, source.width, source.height);
       imageInfos.push(imageInfo);
 
       const permutation = createPermutation(
         source.blockCount,
         this.config.seed,
       );
-      const fragment = await this._renderFragmentFromSource(
-        source,
-        permutation,
-      );
+      const fragment = await this.renderFragmentFromSource(source, permutation);
       fragmentedImages.push(fragment);
     }
 
     validateFileNames(imageInfos, this.config.preserveName);
-    const manifest = this._createManifest(manifestId, imageInfos);
+    const manifest = this.createManifest(manifestId, imageInfos);
 
     return { manifest, fragmentedImages };
   }
 
-  private async _fragmentCrossImage(
+  private async fragmentAcrossImages(
     paths: string[],
   ): Promise<FragmentationResult> {
     const manifestId = generateManifestId();
@@ -97,13 +90,13 @@ export class ImageFragmenter {
     const sources: SourceImageData[] = [];
 
     for (const path of paths) {
-      const source = await this._loadSourceImage(path);
+      const source = await this.loadSourceImage(path);
       sources.push(source);
-      imageInfos.push(this._createImageInfo(path, source.width, source.height));
+      imageInfos.push(this.createImageInfo(path, source.width, source.height));
     }
 
     validateFileNames(imageInfos, this.config.preserveName);
-    const manifest = this._createManifest(manifestId, imageInfos);
+    const manifest = this.createManifest(manifestId, imageInfos);
 
     const totalBlocks = sources.reduce(
       (sum, source) => sum + source.blockCount,
@@ -123,7 +116,7 @@ export class ImageFragmenter {
     let offset = 0;
 
     for (const fragmentBlockCount of blockCountsForCrossImages) {
-      const { blocksPerRow, width, height } = calculateFragmentGrid(
+      const { blocksPerRow, width, height } = calculateFragmentLayout(
         fragmentBlockCount,
         this.config.blockSize,
       );
@@ -163,7 +156,7 @@ export class ImageFragmenter {
     return { manifest, fragmentedImages };
   }
 
-  private _createManifest(
+  private createManifest(
     manifestId: string,
     imageInfos: ImageInfo[],
   ): ManifestData {
@@ -176,7 +169,7 @@ export class ImageFragmenter {
     };
   }
 
-  private async _loadSourceImage(path: string): Promise<SourceImageData> {
+  private async loadSourceImage(path: string): Promise<SourceImageData> {
     const buffer = await loadBuffer(path);
     const { imageBuffer, width, height } = await loadImageBuffer(buffer);
     const blockCounts = calculateBlockCounts(
@@ -194,7 +187,7 @@ export class ImageFragmenter {
     };
   }
 
-  private _createImageInfo(
+  private createImageInfo(
     path: string,
     width: number,
     height: number,
@@ -208,12 +201,12 @@ export class ImageFragmenter {
     };
   }
 
-  private async _renderFragmentFromSource(
+  private async renderFragmentFromSource(
     source: SourceImageData,
     permutation: number[],
   ): Promise<Buffer> {
     const blockCount = permutation.length;
-    const { blocksPerRow, width, height } = calculateFragmentGrid(
+    const { blocksPerRow, width, height } = calculateFragmentLayout(
       blockCount,
       this.config.blockSize,
     );
@@ -240,7 +233,7 @@ export class ImageFragmenter {
   }
 }
 
-function calculateFragmentGrid(
+function calculateFragmentLayout(
   blockCount: number,
   blockSize: number,
 ): {

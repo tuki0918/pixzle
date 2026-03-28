@@ -12,8 +12,8 @@ import {
   invertPermutation,
   validateFragmentImageCount,
 } from "@pixzle/core";
-import { createPngFromImageBuffer, loadImageBuffer } from "./block";
 import { loadBuffer } from "./file";
+import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
 
 interface FragmentImageData {
   buffer: Buffer;
@@ -28,12 +28,12 @@ export class ImageRestorer {
   ): Promise<Buffer[]> {
     validateFragmentImageCount(fragments, manifest);
     if (manifest.config.crossImageShuffle) {
-      return await this._restoreCrossImage(fragments, manifest);
+      return await this.restoreAcrossImages(fragments, manifest);
     }
-    return await this._restorePerImage(fragments, manifest);
+    return await this.restoreEachImage(fragments, manifest);
   }
 
-  private async _restorePerImage(
+  private async restoreEachImage(
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
@@ -44,7 +44,7 @@ export class ImageRestorer {
     const restoredImages: Buffer[] = [];
 
     for (let i = 0; i < fragments.length; i++) {
-      const fragment = await this._loadFragment(fragments[i]);
+      const fragment = await this.loadFragment(fragments[i]);
       const imageInfo = manifest.images[i];
       const blockCount = blockCountsPerImage[i];
 
@@ -84,7 +84,7 @@ export class ImageRestorer {
     return restoredImages;
   }
 
-  private async _restoreCrossImage(
+  private async restoreAcrossImages(
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
@@ -104,7 +104,7 @@ export class ImageRestorer {
     );
 
     const fragmentImages = await Promise.all(
-      fragments.map((fragment) => this._loadFragment(fragment)),
+      fragments.map((fragment) => this.loadFragment(fragment)),
     );
 
     const fragmentEnds = buildCumulativeCounts(blockCountsForCrossImages);
@@ -166,7 +166,7 @@ export class ImageRestorer {
     return restoredImages;
   }
 
-  private async _loadFragment(
+  private async loadFragment(
     fragment: string | Buffer,
   ): Promise<FragmentImageData> {
     const buffer = Buffer.isBuffer(fragment)

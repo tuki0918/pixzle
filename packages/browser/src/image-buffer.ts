@@ -3,44 +3,7 @@ import {
   splitImageToBlocks as coreSplitImageToBlocks,
 } from "@pixzle/core";
 
-/**
- * Split an image (HTMLImageElement or ImageBitmap) into blocks
- */
-export function splitImageToBlocks(
-  image: HTMLImageElement | ImageBitmap,
-  blockSize: number,
-): Uint8Array[] {
-  const width =
-    image instanceof HTMLImageElement ? image.naturalWidth : image.width;
-  const height =
-    image instanceof HTMLImageElement ? image.naturalHeight : image.height;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Could not get 2D context");
-
-  ctx.drawImage(image, 0, 0);
-  const imageData = ctx.getImageData(0, 0, width, height);
-
-  // imageData.data is Uint8ClampedArray, we need Uint8Array
-  // We create a copy to avoid issues if the canvas is reused or garbage collected in weird ways,
-  // though here it's local.
-  // coreSplitImageToBlocks expects Uint8Array.
-  const buffer = new Uint8Array(
-    imageData.data.buffer,
-    imageData.data.byteOffset,
-    imageData.data.byteLength,
-  );
-
-  return coreSplitImageToBlocks(buffer, width, height, blockSize);
-}
-
-/**
- * Extract a raw RGBA buffer from an image
- */
-export function imageToImageBuffer(image: HTMLImageElement | ImageBitmap): {
+function drawImageToBuffer(image: HTMLImageElement | ImageBitmap): {
   buffer: Uint8Array;
   width: number;
   height: number;
@@ -59,13 +22,37 @@ export function imageToImageBuffer(image: HTMLImageElement | ImageBitmap): {
   ctx.drawImage(image, 0, 0);
   const imageData = ctx.getImageData(0, 0, width, height);
 
-  const buffer = new Uint8Array(
-    imageData.data.buffer,
-    imageData.data.byteOffset,
-    imageData.data.byteLength,
-  );
+  return {
+    buffer: new Uint8Array(
+      imageData.data.buffer,
+      imageData.data.byteOffset,
+      imageData.data.byteLength,
+    ),
+    width,
+    height,
+  };
+}
 
-  return { buffer, width, height };
+/**
+ * Split an image (HTMLImageElement or ImageBitmap) into blocks
+ */
+export function splitImageToBlocks(
+  image: HTMLImageElement | ImageBitmap,
+  blockSize: number,
+): Uint8Array[] {
+  const { buffer, width, height } = drawImageToBuffer(image);
+  return coreSplitImageToBlocks(buffer, width, height, blockSize);
+}
+
+/**
+ * Extract a raw RGBA buffer from an image
+ */
+export function imageToImageBuffer(image: HTMLImageElement | ImageBitmap): {
+  buffer: Uint8Array;
+  width: number;
+  height: number;
+} {
+  return drawImageToBuffer(image);
 }
 
 /**

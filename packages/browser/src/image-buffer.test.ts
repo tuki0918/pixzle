@@ -5,7 +5,7 @@ import {
   imageBufferToImageBitmap,
   imageToImageBuffer,
   splitImageToBlocks,
-} from "./block";
+} from "./image-buffer";
 
 // Mock createImageBitmap since it's not available in happy-dom/jsdom usually
 global.createImageBitmap = vi.fn().mockImplementation(async (imageData) => {
