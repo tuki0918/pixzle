@@ -1,6 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import * as blockModule from "./image-buffer";
 import { ImageRestorer } from "./restorer";
+
+const { restoreImageBuffersMock } = vi.hoisted(() => ({
+  restoreImageBuffersMock: vi.fn(),
+}));
+
+vi.mock("@pixzle/core", async () => {
+  const actual =
+    await vi.importActual<typeof import("@pixzle/core")>("@pixzle/core");
+  return {
+    ...actual,
+    restoreImageBuffers: restoreImageBuffersMock,
+  };
+});
 
 // Mock the block module
 vi.mock("./image-buffer", () => ({
@@ -27,6 +40,11 @@ global.createImageBitmap = vi.fn().mockImplementation(async (source) => {
 });
 
 describe("ImageRestorer", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+    restoreImageBuffersMock.mockReset();
+  });
+
   it("should restore image from ImageBitmap", async () => {
     const restorer = new ImageRestorer();
     const mockImage = new MockImageBitmap(100, 100) as unknown as ImageBitmap;
@@ -197,5 +215,53 @@ describe("ImageRestorer", () => {
       "error",
       expect.any(Function),
     );
+  });
+
+  it("should release restored raw buffers after converting cross-image results", async () => {
+    const restorer = new ImageRestorer();
+    const restoredBuffers = [
+      new Uint8Array(100 * 100 * 4),
+      new Uint8Array(50 * 50 * 4),
+    ];
+
+    restoreImageBuffersMock.mockReturnValue(restoredBuffers);
+    vi.mocked(blockModule.imageToImageBuffer).mockReturnValue({
+      buffer: new Uint8Array(100 * 100 * 4),
+      width: 100,
+      height: 100,
+    });
+    vi.mocked(blockModule.imageBufferToImageBitmap)
+      .mockResolvedValueOnce(
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+      )
+      .mockResolvedValueOnce(
+        new MockImageBitmap(50, 50) as unknown as ImageBitmap,
+      );
+
+    await restorer.restoreImages(
+      [
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+        new MockImageBitmap(100, 100) as unknown as ImageBitmap,
+      ],
+      {
+        id: "test",
+        version: "0.0.0",
+        timestamp: new Date().toISOString(),
+        config: {
+          blockSize: 10,
+          seed: 123,
+          prefix: "img",
+          preserveName: false,
+          crossImageShuffle: true,
+        },
+        images: [
+          { w: 100, h: 100 },
+          { w: 50, h: 50 },
+        ],
+      },
+    );
+
+    expect(restoredBuffers[0]).toHaveLength(0);
+    expect(restoredBuffers[1]).toHaveLength(0);
   });
 });

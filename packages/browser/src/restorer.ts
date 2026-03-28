@@ -40,13 +40,15 @@ export class ImageRestorer {
     const restoredImages: ImageBitmap[] = [];
 
     for (let index = 0; index < restoredBuffers.length; index++) {
+      const restoredBuffer = restoredBuffers[index];
       restoredImages.push(
         await imageBufferToImageBitmap(
-          restoredBuffers[index],
+          restoredBuffer,
           manifest.images[index].w,
           manifest.images[index].h,
         ),
       );
+      restoredBuffers[index] = new Uint8Array(0);
       await this.yieldToMainThread();
     }
 

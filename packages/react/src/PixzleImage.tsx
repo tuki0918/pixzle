@@ -82,20 +82,20 @@ export const PixzleImage = React.forwardRef<
     }
   }, [error, onError]);
 
-  if (error) {
-    if (errorFallback) {
-      return (
-        <>
-          {typeof errorFallback === "function"
-            ? errorFallback(error)
-            : errorFallback}
-        </>
-      );
+  if (!bitmap) {
+    if (error) {
+      if (errorFallback) {
+        return (
+          <>
+            {typeof errorFallback === "function"
+              ? errorFallback(error)
+              : errorFallback}
+          </>
+        );
+      }
+      return null;
     }
-    return null;
-  }
 
-  if (isLoading || !bitmap) {
     return <>{fallback}</>;
   }
 

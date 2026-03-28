@@ -100,11 +100,6 @@ export const usePixzleImage = (
 
   useEffect(() => {
     let active = true;
-    setBitmap((current) => {
-      current?.close();
-      bitmapRef.current = undefined;
-      return undefined;
-    });
     setIsLoading(true);
     setError(null);
 
@@ -157,11 +152,6 @@ export const usePixzleImage = (
         setIsLoading(false);
       } catch (err) {
         if (active) {
-          setBitmap((current) => {
-            current?.close();
-            bitmapRef.current = undefined;
-            return undefined;
-          });
           setError(err instanceof Error ? err : new Error(String(err)));
           setIsLoading(false);
         }

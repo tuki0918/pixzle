@@ -121,7 +121,7 @@ describe("PixzleImage", () => {
     consoleSpy.mockRestore();
   });
 
-  it("should close the previous bitmap when a retry fails", async () => {
+  it("should keep the previous bitmap visible when a retry fails", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
     const firstBitmap = {
       width: 100,
@@ -133,7 +133,7 @@ describe("PixzleImage", () => {
       .mockResolvedValueOnce(firstBitmap)
       .mockRejectedValueOnce(new Error("Retry failed"));
 
-    const { rerender } = render(<PixzleImage {...defaultProps} />);
+    const { rerender, unmount } = render(<PixzleImage {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByRole("img", { name: "Restored Image" })).toBeDefined();
@@ -142,12 +142,16 @@ describe("PixzleImage", () => {
     rerender(<PixzleImage {...defaultProps} seed={456} />);
 
     await waitFor(() => {
-      expect(firstBitmap.close).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole("img", { name: "Restored Image" })).toBeDefined();
+      expect(firstBitmap.close).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(
         "PixzleImage restoration error:",
         expect.any(Error),
       );
     });
+
+    unmount();
+    expect(firstBitmap.close).toHaveBeenCalledTimes(1);
 
     consoleSpy.mockRestore();
   });
