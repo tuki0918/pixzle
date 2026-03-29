@@ -26,8 +26,8 @@ export interface FragmentationConfig {
   blockSize?: number;
   /** Prefix for fragment files (optional, default: "img") */
   prefix?: string;
-  /** Random seed (auto-generated if not specified) */
-  seed?: number;
+  /** Random seed (auto-generated from manifest id if not specified) */
+  seed?: string;
   /** Preserve original file name (optional, default: false) */
   preserveName?: boolean;
   /** Shuffle blocks across all images instead of within each image independently (optional, default: false) */

@@ -21,7 +21,7 @@ export function registerRestoreCommand(program: Command): void {
     .option("-m, --manifest <path>", "Manifest file path")
     .requiredOption("-o, --output <dir>", "Output directory")
     .option("-b, --block-size <number>", "Block size", Number.parseInt)
-    .option("-s, --seed <number>", "Random seed", Number.parseInt)
+    .option("-s, --seed <seed>", "Random seed")
     .option("-w, --width <number>", "Image width", Number.parseInt)
     .option("-h, --height <number>", "Image height", Number.parseInt)
     .action(handleRestoreCommand);

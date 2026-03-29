@@ -34,7 +34,7 @@ describe("fragmentImageBuffers", () => {
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 2,
-        seed: 123,
+        seed: "123",
         prefix: "img",
         preserveName: false,
         crossImageShuffle: false,
@@ -59,7 +59,7 @@ describe("fragmentImageBuffers", () => {
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 1,
-        seed: 77,
+        seed: "77",
         prefix: "img",
         preserveName: false,
         crossImageShuffle: true,

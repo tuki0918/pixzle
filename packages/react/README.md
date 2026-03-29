@@ -64,7 +64,7 @@ import { PixzleImage } from '@pixzle/react';
 ```tsx
 <PixzleImage
   blockSize={2}
-  seed={72411}
+  seed="custom-seed"
   imageInfo={{ w: 500, h: 500 }}
   image="https://example.com/fragment.png"
 />

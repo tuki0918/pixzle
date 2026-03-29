@@ -202,8 +202,8 @@ export async function createPngFromImageBuffer(
 export function blocksPerImage(
   allBlocks: Buffer[],
   fragmentBlocksCount: number[],
-  seed: number | string,
-  processFunc: (blocks: Buffer[], seed: number | string) => Buffer[],
+  seed: string,
+  processFunc: (blocks: Buffer[], seed: string) => Buffer[],
 ): Buffer[] {
   // Pre-allocate array to avoid resizing and stack overflow issues with push(...processed)
   // This assumes that processFunc preserves the number of blocks (which shuffle/unshuffle do)

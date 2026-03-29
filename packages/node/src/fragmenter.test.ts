@@ -114,7 +114,7 @@ describe("ImageFragmenter", () => {
       const config: FragmentationConfig = {
         blockSize: 8,
         prefix: "test",
-        seed: 12345,
+        seed: "12345",
         preserveName: true,
       };
       const fragmenter = new ImageFragmenter(config);
@@ -127,7 +127,7 @@ describe("ImageFragmenter", () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
         prefix: "test",
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([testImagePath]);
@@ -142,7 +142,7 @@ describe("ImageFragmenter", () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
         prefix: "test",
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([
@@ -158,7 +158,7 @@ describe("ImageFragmenter", () => {
       const config: FragmentationConfig = {
         blockSize: 2,
         prefix: "testprefix",
-        seed: 123456,
+        seed: "123456",
         preserveName: true,
       };
       const fragmenter = new ImageFragmenter(config);
@@ -170,14 +170,14 @@ describe("ImageFragmenter", () => {
       expect(result.manifest.timestamp).toBeDefined();
       expect(result.manifest.config.blockSize).toBe(2);
       expect(result.manifest.config.prefix).toBe("testprefix");
-      expect(result.manifest.config.seed).toBe(123456);
+      expect(result.manifest.config.seed).toBe("123456");
       expect(result.manifest.config.preserveName).toBe(true);
     });
 
     test("creates valid fragment images", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([testImagePath]);
@@ -245,7 +245,18 @@ describe("ImageFragmenter", () => {
       expect(result.manifest.config.preserveName).toBe(
         DEFAULT_FRAGMENTATION_CONFIG.PRESERVE_NAME,
       );
-      expect(result.manifest.config.seed).toBeDefined(); // Should be auto-generated
+      expect(result.manifest.config.seed).toBe(result.manifest.id);
+    });
+
+    test("keeps string seed as-is when specified", async () => {
+      const fragmenter = new ImageFragmenter({
+        blockSize: 2,
+        seed: "custom-seed",
+      });
+
+      const result = await fragmenter.fragmentImages([testImagePath]);
+
+      expect(result.manifest.config.seed).toBe("custom-seed");
     });
   });
 
@@ -279,7 +290,7 @@ describe("ImageFragmenter", () => {
     test("fragments with per-image shuffle (default)", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([testImagePath]);
@@ -291,7 +302,7 @@ describe("ImageFragmenter", () => {
     test("fragments multiple images with per-image shuffle (default)", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([
@@ -305,7 +316,7 @@ describe("ImageFragmenter", () => {
     });
 
     test("per-image shuffle produces different results than cross-image shuffle", async () => {
-      const seed = 123456;
+      const seed = "123456";
 
       const fragmenterCrossImage = new ImageFragmenter({
         blockSize: 2,
@@ -338,7 +349,7 @@ describe("ImageFragmenter", () => {
     test("defaults to per-image shuffle when crossImageShuffle is not specified", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
 
       const result = await fragmenter.fragmentImages([testImagePath]);
@@ -385,7 +396,7 @@ describe("ImageFragmenter", () => {
       try {
         const fragmenter = new ImageFragmenter({
           blockSize: 2,
-          seed: 12345,
+          seed: "12345",
           crossImageShuffle: false,
         });
 
@@ -414,7 +425,7 @@ describe("ImageFragmenter", () => {
     test("fragments with cross-image shuffle enabled", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         crossImageShuffle: true,
       });
 
@@ -427,7 +438,7 @@ describe("ImageFragmenter", () => {
     test("fragments multiple images with cross-image shuffle", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         crossImageShuffle: true,
       });
 
@@ -480,7 +491,7 @@ describe("ImageFragmenter", () => {
       try {
         const fragmenter = new ImageFragmenter({
           blockSize: 2,
-          seed: 12345,
+          seed: "12345",
           crossImageShuffle: true,
         });
 

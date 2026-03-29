@@ -34,6 +34,17 @@ const MockImageBitmap = class {
 // biome-ignore lint/suspicious/noExplicitAny: Mocking global ImageBitmap
 global.ImageBitmap = MockImageBitmap as any;
 
+class MockHTMLImageElement extends EventTarget {
+  complete = false;
+  onload: ((this: GlobalEventHandlers, ev: Event) => unknown) | null = null;
+  onerror: OnErrorEventHandler = null;
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: Mocking DOM globals in node test env
+global.HTMLImageElement = MockHTMLImageElement as any;
+// biome-ignore lint/suspicious/noExplicitAny: Mocking DOM globals in node test env
+global.Image = MockHTMLImageElement as any;
+
 // Mock createImageBitmap
 global.createImageBitmap = vi.fn().mockImplementation(async (source) => {
   return new MockImageBitmap(100, 100) as unknown as ImageBitmap;
@@ -49,7 +60,7 @@ describe("ImageRestorer", () => {
     const restorer = new ImageRestorer();
     const mockImage = new MockImageBitmap(100, 100) as unknown as ImageBitmap;
     const blockSize = 10;
-    const seed = 123;
+    const seed = "123";
     const imageInfo = { w: 100, h: 100 };
 
     const mockRestoredImage = new MockImageBitmap(
@@ -82,7 +93,7 @@ describe("ImageRestorer", () => {
     const restorer = new ImageRestorer();
     const mockBlob = new Blob([""]);
     const blockSize = 10;
-    const seed = 123;
+    const seed = "manifest-id-seed";
     const imageInfo = { w: 100, h: 100 };
 
     const mockRestoredImage = { width: 100, height: 100 } as ImageBitmap;
@@ -104,7 +115,7 @@ describe("ImageRestorer", () => {
     const restorer = new ImageRestorer();
     const mockUrl = "http://example.com/image.png";
     const blockSize = 10;
-    const seed = 123;
+    const seed = "123";
     const imageInfo = { w: 100, h: 100 };
 
     // Mock fetch
@@ -135,7 +146,7 @@ describe("ImageRestorer", () => {
     const restorer = new ImageRestorer();
     const mockUrl = new URL("http://example.com/image.png");
     const blockSize = 10;
-    const seed = 123;
+    const seed = "123";
     const imageInfo = { w: 100, h: 100 };
 
     // Mock fetch
@@ -249,7 +260,7 @@ describe("ImageRestorer", () => {
         timestamp: new Date().toISOString(),
         config: {
           blockSize: 10,
-          seed: 123,
+          seed: "123",
           prefix: "img",
           preserveName: false,
           crossImageShuffle: true,

@@ -23,7 +23,7 @@ pixzle shuffle <images...> -o <output_directory> [options]
 | `-o, --output <dir>` | Output directory (Required) | ✅ | - |
 | `-b, --block-size <number>` | Pixel block size | ー | 8 |
 | `-p, --prefix <prefix>` | Prefix for fragment files | ー | "img" |
-| `-s, --seed <seed>` | Random seed | ー | auto |
+| `-s, --seed <seed>` | Random seed (string) | ー | manifest id |
 | `--preserve-name` | Preserve original file names | ー | false |
 | `--cross-image-shuffle` | Shuffle blocks across all images | ー | false |
 
@@ -84,13 +84,13 @@ pixzle restore <fragment> -o <output_directory> -b <size> -s <seed> -w <width> -
 |--------|-------------|:----------:|
 | `-o, --output <dir>` | Output directory | ✅ |
 | `-b, --block-size <number>` | Pixel block size | ✅ |
-| `-s, --seed <number>` | Random seed | ✅ |
+| `-s, --seed <seed>` | Random seed (string) | ✅ |
 | `-w, --width <number>` | Image width | ✅ |
 | `-h, --height <number>` | Image height | ✅ |
 
 **Example:**
 ```bash
-pixzle restore ./fragmented.png -o ./restored -b 10 -s 12345 -w 500 -h 500
+pixzle restore ./fragmented.png -o ./restored -b 10 -s custom-seed -w 500 -h 500
 ```
 
 
@@ -107,7 +107,7 @@ pixzle restore ./fragmented.png -o ./restored -b 10 -s 12345 -w 500 -h 500
   "config": {
     "blockSize": 8,
     "prefix": "img",
-    "seed": 214448,
+    "seed": "631631d5-bcaa-40ac-9c1e-efd6e89e4600",
     "preserveName": false,
     "crossImageShuffle": false
   },

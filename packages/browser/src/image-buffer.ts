@@ -112,8 +112,8 @@ export async function blocksToImageBitmap(
 export function blocksPerImage(
   allBlocks: Uint8Array[],
   fragmentBlocksCount: number[],
-  seed: number | string,
-  processFunc: (blocks: Uint8Array[], seed: number | string) => Uint8Array[],
+  seed: string,
+  processFunc: (blocks: Uint8Array[], seed: string) => Uint8Array[],
 ): Uint8Array[] {
   // Pre-allocate array to avoid resizing and stack overflow issues with push(...processed)
   const processedBlocks: Uint8Array[] = new Array(allBlocks.length);

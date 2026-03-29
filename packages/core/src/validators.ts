@@ -90,8 +90,8 @@ export function validateRestoreImageOptions<
     throw new Error(`[${context}] blockSize must be a positive number.`);
   }
 
-  if (typeof options.seed !== "number") {
-    throw new Error(`[${context}] seed must be a number.`);
+  if (typeof options.seed !== "string") {
+    throw new Error(`[${context}] seed must be a string.`);
   }
 
   if (

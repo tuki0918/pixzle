@@ -22,13 +22,7 @@ export function registerShuffleCommand(program: Command): void {
       return num;
     })
     .option("-p, --prefix <prefix>", "Prefix for fragment files")
-    .option("-s, --seed <seed>", "Random seed", (value: string) => {
-      const num = Number.parseInt(value, 10);
-      if (Number.isNaN(num)) {
-        throw new Error("Seed must be an integer");
-      }
-      return num;
-    })
+    .option("-s, --seed <seed>", "Random seed")
     .option("--preserve-name", "Preserve original file names")
     .option(
       "--cross-image-shuffle",

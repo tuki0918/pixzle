@@ -9,26 +9,24 @@ import {
   fragmentImageBuffers,
   validateFileNames,
 } from "@pixzle/core";
-import { SeededRandom } from "@tuki0918/seeded-shuffle";
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
 import { generateManifestId } from "./utils";
 
 export class ImageFragmenter {
-  private config: Required<FragmentationConfig>;
+  private config: Omit<Required<FragmentationConfig>, "seed"> &
+    Pick<FragmentationConfig, "seed">;
 
   constructor(config: FragmentationConfig) {
     this.config = this.initializeConfig(config);
   }
 
-  private initializeConfig(
-    config: FragmentationConfig,
-  ): Required<FragmentationConfig> {
+  private initializeConfig(config: FragmentationConfig) {
     return {
       blockSize: config.blockSize ?? DEFAULT_FRAGMENTATION_CONFIG.BLOCK_SIZE,
       prefix: config.prefix ?? DEFAULT_FRAGMENTATION_CONFIG.PREFIX,
-      seed: config.seed || SeededRandom.generateSeed(),
+      seed: config.seed,
       preserveName:
         config.preserveName ?? DEFAULT_FRAGMENTATION_CONFIG.PRESERVE_NAME,
       crossImageShuffle:
@@ -39,6 +37,10 @@ export class ImageFragmenter {
 
   async fragmentImages(paths: string[]): Promise<FragmentationResult> {
     const manifestId = generateManifestId();
+    const config = {
+      ...this.config,
+      seed: this.config.seed ?? manifestId,
+    };
     const sources = await Promise.all(
       paths.map((path) => this.loadSourceImage(path)),
     );
@@ -48,7 +50,7 @@ export class ImageFragmenter {
 
     validateFileNames(imageInfos, this.config.preserveName);
 
-    const fragmentedBuffers = fragmentImageBuffers(sources, this.config);
+    const fragmentedBuffers = fragmentImageBuffers(sources, config);
     const fragmentedImages = await Promise.all(
       fragmentedBuffers.map((fragment) =>
         createPngFromImageBuffer(
@@ -60,20 +62,21 @@ export class ImageFragmenter {
     );
 
     return {
-      manifest: this.createManifest(manifestId, imageInfos),
+      manifest: this.createManifest(manifestId, config, imageInfos),
       fragmentedImages,
     };
   }
 
   private createManifest(
     manifestId: string,
+    config: NonNullable<FragmentationResult["manifest"]>["config"],
     imageInfos: ImageInfo[],
   ): ManifestData {
     return {
       id: manifestId,
       version: VERSION,
       timestamp: new Date().toISOString(),
-      config: this.config,
+      config,
       images: imageInfos,
     };
   }

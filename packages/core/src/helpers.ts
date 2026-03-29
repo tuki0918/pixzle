@@ -11,7 +11,7 @@ import type { ImageInfo, ManifestData } from "./types";
  */
 export function createSingleImageManifest(options: {
   blockSize: number;
-  seed: number;
+  seed: string;
   imageInfo: ImageInfo;
 }): ManifestData {
   return {
