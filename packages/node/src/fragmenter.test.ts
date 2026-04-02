@@ -245,7 +245,8 @@ describe("ImageFragmenter", () => {
       expect(result.manifest.config.preserveName).toBe(
         DEFAULT_FRAGMENTATION_CONFIG.PRESERVE_NAME,
       );
-      expect(result.manifest.config.seed).toBe(result.manifest.id);
+      expect(result.manifest.config.seed).toMatch(/^[0-9A-Za-z]{12}$/);
+      expect(result.manifest.config.seed).not.toBe(result.manifest.id);
     });
 
     test("keeps string seed as-is when specified", async () => {

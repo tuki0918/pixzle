@@ -12,7 +12,7 @@ import {
 import { VERSION } from "./constants";
 import { fileNameWithoutExtension, loadBuffer } from "./file";
 import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
-import { generateManifestId } from "./utils";
+import { generateManifestId, generateSeedId } from "./utils";
 
 export class ImageFragmenter {
   private config: Omit<Required<FragmentationConfig>, "seed"> &
@@ -39,7 +39,7 @@ export class ImageFragmenter {
     const manifestId = generateManifestId();
     const config = {
       ...this.config,
-      seed: this.config.seed ?? manifestId,
+      seed: this.config.seed ?? generateSeedId(),
     };
     const sources = await Promise.all(
       paths.map((path) => this.loadSourceImage(path)),

@@ -26,7 +26,7 @@ export interface FragmentationConfig {
   blockSize?: number;
   /** Prefix for fragment files (optional, default: "img") */
   prefix?: string;
-  /** Random seed (auto-generated from manifest id if not specified) */
+  /** Random seed (auto-generated if not specified) */
   seed?: string;
   /** Preserve original file name (optional, default: false) */
   preserveName?: boolean;
