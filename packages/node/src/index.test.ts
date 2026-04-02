@@ -283,7 +283,7 @@ describe("pixzle (error handling)", () => {
     // First fragment multiple images
     const fragmenter = new ImageFragmenter({
       blockSize: 1,
-      seed: 12345,
+      seed: "12345",
     });
     const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
       testImagePath,

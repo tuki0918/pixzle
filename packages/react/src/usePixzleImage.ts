@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
  */
 export interface UsePixzleImageExplicitProps {
   blockSize: number;
-  seed: number;
+  seed: string;
   imageInfo: ImageInfo;
   image: ImageSource;
   fetchOptions?: RequestInit;
@@ -106,7 +106,7 @@ export const usePixzleImage = (
     const restore = async () => {
       try {
         let resolvedBlockSize: number;
-        let resolvedSeed: number;
+        let resolvedSeed: string;
         let resolvedImageInfo: ImageInfo;
 
         if (blockSize !== undefined && seed !== undefined && imageInfo) {

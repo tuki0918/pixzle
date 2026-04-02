@@ -69,7 +69,7 @@ describe("PixzleImage", () => {
 
   const defaultProps = {
     blockSize: 10,
-    seed: 123,
+    seed: "123",
     imageInfo: { w: 100, h: 100 },
     image: "http://example.com/shuffled.png",
     alt: "Restored Image",
@@ -139,7 +139,7 @@ describe("PixzleImage", () => {
       expect(screen.getByRole("img", { name: "Restored Image" })).toBeDefined();
     });
 
-    rerender(<PixzleImage {...defaultProps} seed={456} />);
+    rerender(<PixzleImage {...defaultProps} seed="456" />);
 
     await waitFor(() => {
       expect(screen.getByRole("img", { name: "Restored Image" })).toBeDefined();

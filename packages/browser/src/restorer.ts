@@ -66,7 +66,7 @@ export class ImageRestorer {
   async restoreImage(
     imageSource: ImageSource,
     blockSize: number,
-    seed: number,
+    seed: string,
     imageInfo: ImageInfo,
     fetchOptions?: RequestInit,
   ): Promise<ImageBitmap> {

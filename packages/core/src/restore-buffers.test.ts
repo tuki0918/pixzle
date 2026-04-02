@@ -32,7 +32,7 @@ describe("restoreImageBuffers", () => {
     const original = createTestBuffer(4, 4);
     const manifest = createSingleImageManifest({
       blockSize: 2,
-      seed: 123,
+      seed: "123",
       imageInfo: { w: 4, h: 4 },
     });
 
@@ -63,7 +63,7 @@ describe("restoreImageBuffers", () => {
     const original = createTestBuffer(4, 4);
     const manifest = createSingleImageManifest({
       blockSize: 2,
-      seed: 123,
+      seed: "123",
       imageInfo: { w: 4, h: 4 },
     });
     const shuffledManifest: ManifestData = {
@@ -102,7 +102,7 @@ describe("restoreImageBuffers", () => {
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 1,
-        seed: 77,
+        seed: "77",
         prefix: "img",
         preserveName: false,
         crossImageShuffle: true,
@@ -148,5 +148,32 @@ describe("restoreImageBuffers", () => {
     );
 
     expect(restored).toEqual([imageA, imageB]);
+  });
+
+  test("restores a single image with string seed", () => {
+    const original = createTestBuffer(4, 4);
+    const manifest = createSingleImageManifest({
+      blockSize: 2,
+      seed: "manifest-id-seed",
+      imageInfo: { w: 4, h: 4 },
+    });
+
+    const blocks = splitImageToBlocks(original, 4, 4, 2);
+    const permutation = createPermutation(blocks.length, manifest.config.seed);
+    const shuffledBlocks = permutation.map((index) => blocks[index]);
+    const shuffled = blocksToImageBuffer(
+      shuffledBlocks,
+      4,
+      4,
+      manifest.config.blockSize,
+    );
+
+    const restored = restoreSingleImageBuffer(
+      { buffer: shuffled, width: 4, height: 4 },
+      manifest.config,
+      manifest.images[0],
+    );
+
+    expect(restored).toEqual(original);
   });
 });

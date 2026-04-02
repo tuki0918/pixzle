@@ -33,7 +33,18 @@ describe("validators", () => {
     const options = {
       image: "image.png",
       blockSize: 8,
-      seed: 123,
+      seed: "123",
+      imageInfo: { w: 10, h: 10 },
+    };
+
+    expect(validateRestoreImageOptions(options, "restoreImage")).toBe(options);
+  });
+
+  test("validateRestoreImageOptions accepts string seed", () => {
+    const options = {
+      image: "image.png",
+      blockSize: 8,
+      seed: "manifest-id-seed",
       imageInfo: { w: 10, h: 10 },
     };
 

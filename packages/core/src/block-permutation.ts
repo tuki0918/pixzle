@@ -1,9 +1,6 @@
 import { shuffle } from "@tuki0918/seeded-shuffle";
 
-export function createPermutation(
-  length: number,
-  seed: number | string,
-): number[] {
+export function createPermutation(length: number, seed: string): number[] {
   if (length <= 0) return [];
   const indices = Array.from({ length }, (_, i) => i);
   return shuffle(indices, seed);

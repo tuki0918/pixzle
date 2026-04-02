@@ -2,7 +2,7 @@ export interface ShuffleOptions {
   output: string;
   blockSize?: number;
   prefix?: string;
-  seed?: number;
+  seed?: string;
   preserveName?: boolean;
   crossImageShuffle?: boolean;
 }
@@ -11,7 +11,7 @@ export interface RestoreOptions {
   manifest?: string;
   output: string;
   blockSize?: number;
-  seed?: number;
+  seed?: string;
   width?: number;
   height?: number;
 }

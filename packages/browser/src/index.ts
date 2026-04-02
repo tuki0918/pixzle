@@ -26,7 +26,7 @@ export interface BrowserRestoreImageOptions {
   /** Block size used for fragmentation */
   blockSize: number;
   /** Seed used for shuffling */
-  seed: number;
+  seed: string;
   /** Information about the original image (dimensions) */
   imageInfo: ImageInfo;
   /** Fetch options to use when fetching resources */

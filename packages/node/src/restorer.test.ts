@@ -139,7 +139,7 @@ describe("ImageRestorer", () => {
       // First fragment the image
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -163,7 +163,7 @@ describe("ImageRestorer", () => {
       // First fragment multiple images
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -190,7 +190,7 @@ describe("ImageRestorer", () => {
       // Fragment with block size 1
       const fragmenter = new ImageFragmenter({
         blockSize,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -211,7 +211,7 @@ describe("ImageRestorer", () => {
       // First fragment and save to files
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -244,7 +244,7 @@ describe("ImageRestorer", () => {
       // First fragment
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -274,7 +274,7 @@ describe("ImageRestorer", () => {
       // Use a deterministic seed for consistent results
       const fragmenter = new ImageFragmenter({
         blockSize: 1, // Use block size 1 for pixel-perfect restoration
-        seed: 99999,
+        seed: "99999",
       });
 
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
@@ -295,7 +295,7 @@ describe("ImageRestorer", () => {
     test("handles non-existent fragment file", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest } = await fragmenter.fragmentImages([testImagePath]);
 
@@ -310,7 +310,7 @@ describe("ImageRestorer", () => {
     test("handles invalid fragment file", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest } = await fragmenter.fragmentImages([testImagePath]);
 
@@ -334,7 +334,7 @@ describe("ImageRestorer", () => {
     test("works with preserveName enabled", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         preserveName: true,
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
@@ -354,7 +354,7 @@ describe("ImageRestorer", () => {
     test("works with custom prefix", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         prefix: "custom-prefix",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
@@ -376,7 +376,7 @@ describe("ImageRestorer", () => {
     test("restores single image with per-image shuffle (default)", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -397,7 +397,7 @@ describe("ImageRestorer", () => {
     test("restores multiple images with per-image shuffle (default)", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
         testImagePath,
@@ -421,7 +421,7 @@ describe("ImageRestorer", () => {
     test("round-trip with per-image shuffle preserves image data", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 1,
-        seed: 99999,
+        seed: "99999",
         crossImageShuffle: false,
       });
 
@@ -441,7 +441,7 @@ describe("ImageRestorer", () => {
     test("round-trip with multiple images and per-image shuffle", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 1,
-        seed: 99999,
+        seed: "99999",
         crossImageShuffle: false,
       });
 
@@ -502,7 +502,7 @@ describe("ImageRestorer", () => {
       try {
         const fragmenter = new ImageFragmenter({
           blockSize: 2,
-          seed: 99999,
+          seed: "99999",
           crossImageShuffle: false,
         });
 
@@ -532,7 +532,7 @@ describe("ImageRestorer", () => {
     test("restores single image with cross-image shuffle", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         crossImageShuffle: true,
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
@@ -554,7 +554,7 @@ describe("ImageRestorer", () => {
     test("restores multiple images with cross-image shuffle", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 2,
-        seed: 12345,
+        seed: "12345",
         crossImageShuffle: true,
       });
       const { manifest, fragmentedImages } = await fragmenter.fragmentImages([
@@ -579,7 +579,7 @@ describe("ImageRestorer", () => {
     test("round-trip with cross-image shuffle preserves image data", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 1,
-        seed: 99999,
+        seed: "99999",
         crossImageShuffle: true,
       });
 
@@ -599,7 +599,7 @@ describe("ImageRestorer", () => {
     test("round-trip with multiple images and cross-image shuffle", async () => {
       const fragmenter = new ImageFragmenter({
         blockSize: 1,
-        seed: 99999,
+        seed: "99999",
         crossImageShuffle: true,
       });
 
@@ -660,7 +660,7 @@ describe("ImageRestorer", () => {
       try {
         const fragmenter = new ImageFragmenter({
           blockSize: 2,
-          seed: 99999,
+          seed: "99999",
           crossImageShuffle: true,
         });
 
