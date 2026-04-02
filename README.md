@@ -12,12 +12,15 @@ Please note that this does not guarantee strong security.
 
 ## Packages
 
-Please refer to each package's README for usage instructions.
+See each package README for usage details.
 
-- [Node.js](./packages/node/README.md)
-- [Browser](./packages/browser/README.md) (restore only)
-- [React](./packages/react/README.md) (restore only)
-- [CLI](./packages/cli/README.md)
+| Platform | Package | Shuffle | Restore |
+|------|-----------|:------:|:------:|
+| [CLI](./packages/cli/README.md) | `@pixzle/cli` | ✅ | ✅ |
+| [Node.js](./packages/node/README.md) | `@pixzle/node` | ✅ | ✅ |
+| [Browser](./packages/browser/README.md) | `@pixzle/browser` | - | ✅ |
+| [React](./packages/react/README.md) | `@pixzle/react` | - | ✅ |
+
 
 ## Quick Start (CLI)
 
