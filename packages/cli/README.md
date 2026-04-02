@@ -23,7 +23,7 @@ pixzle shuffle <images...> -o <output_directory> [options]
 | `-o, --output <dir>` | Output directory (Required) | ✅ | - |
 | `-b, --block-size <number>` | Pixel block size | ー | 8 |
 | `-p, --prefix <prefix>` | Prefix for fragment files | ー | "img" |
-| `-s, --seed <seed>` | Random seed (string) | ー | manifest id |
+| `-s, --seed <seed>` | Random seed (string) | ー | auto-generated 12-char ID |
 | `--preserve-name` | Preserve original file names | ー | false |
 | `--cross-image-shuffle` | Shuffle blocks across all images | ー | false |
 
@@ -107,7 +107,7 @@ pixzle restore ./fragmented.png -o ./restored -b 10 -s custom-seed -w 500 -h 500
   "config": {
     "blockSize": 8,
     "prefix": "img",
-    "seed": "631631d5-bcaa-40ac-9c1e-efd6e89e4600",
+    "seed": "4f90d13aBc42",
     "preserveName": false,
     "crossImageShuffle": false
   },
