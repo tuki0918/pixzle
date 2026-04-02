@@ -101,6 +101,9 @@ importers:
       '@tuki0918/seeded-shuffle':
         specifier: ^1.0.0
         version: 1.0.1
+      nanoid:
+        specifier: ^3.3.11
+        version: 3.3.11
       sharp:
         specifier: ^0.34.4
         version: 0.34.5

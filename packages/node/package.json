@@ -37,6 +37,7 @@
   "dependencies": {
     "@pixzle/core": "workspace:*",
     "@tuki0918/seeded-shuffle": "^1.0.0",
+    "nanoid": "^3.3.11",
     "sharp": "^0.34.4"
   },
   "devDependencies": {
