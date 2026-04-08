@@ -24,6 +24,12 @@ See each package README for usage details.
 | [Browser](./packages/browser/README.md) | `@pixzle/browser` | - | ✅ |
 | [React](./packages/react/README.md) | `@pixzle/react` | - | ✅ |
 
+## Clients
+
+| Client | OS | Shuffle | Restore |
+|------|------|:------:|:------:|
+| App | `Mac` \| `Win` | ✅ | ✅ |
+| [Raycast](https://github.com/tuki0918/pixzle-raycast) | `Mac` | ✅ | ✅ |
 
 ## Quick Start (CLI)
 
