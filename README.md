@@ -1,10 +1,13 @@
-# pixzle
+<div align="center">
+  <img src=".docs/icon.png" alt="pixzle Icon" width="128" height="128">
+  <h1 align="center">pixzle</h1>
+</div>
 
 ![](.docs/figure.png)
 
 This npm package provides functionality for image fragmentation and restoration.
 
-Please note that this does not guarantee strong security.
+Note: This does not guarantee strong security.
 
 ## Requirements
 
