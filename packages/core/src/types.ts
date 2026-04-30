@@ -62,6 +62,22 @@ export interface ManifestData {
   config: Required<FragmentationConfig>;
   /** Image information */
   images: ImageInfo[];
+  /** Auxiliary output artifacts generated with the manifest */
+  artifacts?: ManifestArtifacts;
+}
+
+export interface ManifestArtifacts {
+  /** Thumbnail output metadata */
+  thumbnails?: ThumbnailArtifact;
+}
+
+export interface ThumbnailArtifact {
+  /** Whether thumbnail output was generated */
+  enabled: true;
+  /** Maximum thumbnail width and height in pixels */
+  size: number;
+  /** Directory name relative to the shuffle output directory */
+  directory: "thumbnails";
 }
 
 export interface ImageBufferData {

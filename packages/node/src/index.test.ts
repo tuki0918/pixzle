@@ -339,12 +339,26 @@ describe("pixzle thumbnails", () => {
   });
 
   test("writes thumbnails from original images using the requested square bound", async () => {
-    await pixzle.shuffle({
+    const manifest = await pixzle.shuffle({
       images: [imagePath],
       config: { blockSize: 2, prefix: "thumbtest", seed: "thumb-seed" },
       outputDir,
       thumbnail: true,
       thumbnailSize: 5,
+    });
+
+    expect(manifest.artifacts?.thumbnails).toEqual({
+      enabled: true,
+      size: 5,
+      directory: "thumbnails",
+    });
+
+    const manifestPath = path.join(outputDir, "manifest.json");
+    const writtenManifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    expect(writtenManifest.artifacts?.thumbnails).toEqual({
+      enabled: true,
+      size: 5,
+      directory: "thumbnails",
     });
 
     const thumbnailPath = path.join(
@@ -357,5 +371,17 @@ describe("pixzle thumbnails", () => {
     const thumbnail = await expectPngImage(thumbnailPath);
     expect(thumbnail.width).toBe(5);
     expect(thumbnail.height).toBe(3);
+  });
+
+  test("does not write thumbnail artifacts when thumbnails are disabled", async () => {
+    const noThumbnailOutputDir = path.join(tmpDir, "output-no-thumbnail");
+
+    const manifest = await pixzle.shuffle({
+      images: [imagePath],
+      config: { blockSize: 2, prefix: "nothumb", seed: "thumb-seed" },
+      outputDir: noThumbnailOutputDir,
+    });
+
+    expect(manifest.artifacts).toBeUndefined();
   });
 });

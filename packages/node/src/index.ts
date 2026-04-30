@@ -33,6 +33,18 @@ async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
   const fragmenter = new ImageFragmenter(config ?? {});
   const { manifest, fragmentedImages } =
     await fragmenter.fragmentImages(images);
+  const shouldWriteThumbnails = thumbnail || thumbnailSize !== undefined;
+  const resolvedThumbnailSize = thumbnailSize ?? DEFAULT_THUMBNAIL_SIZE;
+
+  if (shouldWriteThumbnails) {
+    manifest.artifacts = {
+      thumbnails: {
+        enabled: true,
+        size: resolvedThumbnailSize,
+        directory: "thumbnails",
+      },
+    };
+  }
 
   await createDir(outputDir, true);
   await writeFile(
@@ -48,9 +60,13 @@ async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
     }),
   );
 
-  if (thumbnail || thumbnailSize !== undefined) {
-    const size = thumbnailSize ?? DEFAULT_THUMBNAIL_SIZE;
-    await writeThumbnails({ images, outputDir, manifest, size });
+  if (shouldWriteThumbnails) {
+    await writeThumbnails({
+      images,
+      outputDir,
+      manifest,
+      size: resolvedThumbnailSize,
+    });
   }
 
   return manifest;
