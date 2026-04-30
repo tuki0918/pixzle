@@ -5,6 +5,10 @@ export interface ShuffleOptions {
   config?: FragmentationConfig;
   /** Output directory (e.g., "./output/fragments") */
   outputDir: string;
+  /** Generate thumbnails for the original images */
+  thumbnail?: boolean;
+  /** Maximum thumbnail width and height in pixels */
+  thumbnailSize?: number;
 }
 
 export interface RestoreOptions {

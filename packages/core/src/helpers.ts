@@ -121,6 +121,20 @@ export function generateRestoredFileName(
 }
 
 /**
+ * Generate a thumbnail file name
+ * @param manifest - Manifest data
+ * @param index - Index number (0-based, but output is 1-based)
+ * @returns Thumbnail file name (e.g., img_1_thumbnail.png)
+ */
+export function generateThumbnailFileName(
+  manifest: ManifestData,
+  index: number,
+): string {
+  const restoredFileName = generateRestoredFileName(manifest, index);
+  return restoredFileName.replace(/\.png$/, "_thumbnail.png");
+}
+
+/**
  * Generate a restored original file name
  * @param imageInfo - Image information
  * @returns Restored original file name

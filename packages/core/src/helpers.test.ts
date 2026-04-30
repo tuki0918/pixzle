@@ -5,6 +5,7 @@ import {
   generateFragmentFileName,
   generateRestoredFileName,
   generateRestoredOriginalFileName,
+  generateThumbnailFileName,
 } from "./helpers";
 import type { ManifestData } from "./types";
 
@@ -117,6 +118,22 @@ describe("encodeFileName / decodeFileName", () => {
       const encoded = encodeFileName(name);
       expect(decodeFileName(encoded)).toBe(name);
     }
+  });
+});
+
+describe("generateThumbnailFileName", () => {
+  const mockManifest = {
+    config: { prefix: "img" },
+    images: [{ name: "test1" }, { name: "test2" }, { name: "test3" }],
+  } as ManifestData;
+
+  test("generates thumbnail file name with thumbnail suffix", () => {
+    expect(generateThumbnailFileName(mockManifest, 0)).toBe(
+      "img_1_thumbnail.png",
+    );
+    expect(generateThumbnailFileName(mockManifest, 2)).toBe(
+      "img_3_thumbnail.png",
+    );
   });
 });
 

@@ -26,10 +26,18 @@ pixzle shuffle <images...> -o <output_directory> [options]
 | `-s, --seed <seed>` | Random seed (string) | ー | auto-generated 12-char ID |
 | `--preserve-name` | Preserve original file names | ー | false |
 | `--cross-image-shuffle` | Shuffle blocks across all images | ー | false |
+| `--thumbnail` | Generate thumbnails for original images | ー | false |
+| `--thumbnail-size <px>` | Maximum thumbnail width and height | ー | 100 |
 
 **Example:**
 ```bash
 pixzle shuffle input.png -o ./output
+```
+
+Generate thumbnails in `./output/thumbnails`:
+
+```bash
+pixzle shuffle input.png -o ./output --thumbnail --thumbnail-size 100
 ```
 
 ### Input multiple images

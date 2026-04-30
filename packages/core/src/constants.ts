@@ -6,3 +6,5 @@ export const DEFAULT_FRAGMENTATION_CONFIG = {
   PRESERVE_NAME: false,
   CROSS_IMAGE_SHUFFLE: false,
 };
+
+export const DEFAULT_THUMBNAIL_SIZE = 100;

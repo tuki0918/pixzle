@@ -5,6 +5,8 @@ export interface ShuffleOptions {
   seed?: string;
   preserveName?: boolean;
   crossImageShuffle?: boolean;
+  thumbnail?: boolean;
+  thumbnailSize?: number;
 }
 
 export interface RestoreOptions {

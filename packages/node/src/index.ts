@@ -1,4 +1,5 @@
 import {
+  DEFAULT_THUMBNAIL_SIZE,
   type FragmentationConfig,
   MANIFEST_FILE_NAME,
   type ManifestData,
@@ -15,6 +16,7 @@ import {
 import { createDir, isUrl, loadJson, writeFile } from "./file";
 import { ImageFragmenter } from "./fragmenter";
 import { ImageRestorer } from "./restorer";
+import { writeThumbnails } from "./thumbnailer";
 
 export {
   ImageFragmenter,
@@ -25,7 +27,8 @@ export {
 };
 
 async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
-  const { images, config, outputDir } = validateShuffleOptions(options);
+  const { images, config, outputDir, thumbnail, thumbnailSize } =
+    validateShuffleOptions(options);
 
   const fragmenter = new ImageFragmenter(config ?? {});
   const { manifest, fragmentedImages } =
@@ -44,6 +47,11 @@ async function shuffle(options: ShuffleOptions): Promise<ManifestData> {
       return writeFile(outputDir, filename, img);
     }),
   );
+
+  if (thumbnail || thumbnailSize !== undefined) {
+    const size = thumbnailSize ?? DEFAULT_THUMBNAIL_SIZE;
+    await writeThumbnails({ images, outputDir, manifest, size });
+  }
 
   return manifest;
 }
@@ -100,6 +108,14 @@ function validateCommonOptions<T extends ShuffleOptions | RestoreOptions>(
 }
 
 function validateShuffleOptions(options: ShuffleOptions) {
+  if (options.thumbnailSize !== undefined) {
+    if (
+      !Number.isInteger(options.thumbnailSize) ||
+      options.thumbnailSize <= 0
+    ) {
+      throw new Error("thumbnailSize must be a positive integer");
+    }
+  }
   return validateCommonOptions(options, "shuffle");
 }
 

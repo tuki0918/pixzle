@@ -53,6 +53,21 @@ export async function encodePng(
     .toBuffer();
 }
 
+export async function resizePngInsideSquare(
+  input: string | Buffer,
+  size: number,
+): Promise<Buffer> {
+  return await sharp(input)
+    .resize({
+      width: size,
+      height: size,
+      fit: "inside",
+      withoutEnlargement: true,
+    })
+    .png()
+    .toBuffer();
+}
+
 export async function writePngFile(
   outputPath: string,
   imageBuffer: Buffer,

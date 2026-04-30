@@ -28,6 +28,18 @@ export function registerShuffleCommand(program: Command): void {
       "--cross-image-shuffle",
       "Shuffle blocks across all images instead of within each image independently",
     )
+    .option("--thumbnail", "Generate thumbnails for the original images")
+    .option(
+      "--thumbnail-size <px>",
+      "Maximum thumbnail width and height in pixels",
+      (value: string) => {
+        const num = Number.parseInt(value, 10);
+        if (Number.isNaN(num) || num <= 0) {
+          throw new Error("Thumbnail size must be a positive integer");
+        }
+        return num;
+      },
+    )
     .action(handleShuffleCommand);
 }
 
@@ -57,6 +69,8 @@ async function handleShuffleCommand(
       images: validatedImages,
       outputDir,
       config: Object.keys(config).length > 0 ? config : undefined,
+      thumbnail: options.thumbnail,
+      thumbnailSize: options.thumbnailSize,
     });
 
     console.log(`✅ Images fragmented successfully to: ${outputDir}`);

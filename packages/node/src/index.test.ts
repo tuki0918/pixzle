@@ -314,3 +314,48 @@ describe("pixzle (error handling)", () => {
     }
   });
 });
+
+describe("pixzle thumbnails", () => {
+  const tmpDir = path.join(tmpdir(), "index_test_tmp_thumbnails");
+  const outputDir = path.join(tmpDir, "output");
+  const imagePath = path.join(tmpDir, "wide.png");
+
+  beforeAll(async () => {
+    if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir);
+
+    const imageData = Buffer.alloc(20 * 10 * 4);
+    for (let i = 0; i < imageData.length; i += 4) {
+      imageData[i] = 255;
+      imageData[i + 1] = 0;
+      imageData[i + 2] = 0;
+      imageData[i + 3] = 255;
+    }
+
+    await writePngFile(imagePath, imageData, 20, 10);
+  });
+
+  afterAll(() => {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  test("writes thumbnails from original images using the requested square bound", async () => {
+    await pixzle.shuffle({
+      images: [imagePath],
+      config: { blockSize: 2, prefix: "thumbtest", seed: "thumb-seed" },
+      outputDir,
+      thumbnail: true,
+      thumbnailSize: 5,
+    });
+
+    const thumbnailPath = path.join(
+      outputDir,
+      "thumbnails",
+      "thumbtest_1_thumbnail.png",
+    );
+    expect(fs.existsSync(thumbnailPath)).toBe(true);
+
+    const thumbnail = await expectPngImage(thumbnailPath);
+    expect(thumbnail.width).toBe(5);
+    expect(thumbnail.height).toBe(3);
+  });
+});
