@@ -19,6 +19,9 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "clean": "rimraf packages/*/dist",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:preview": "vitepress preview docs",
     "prepare": "husky",
     "test": "pnpm run -r test",
     "test:ci": "pnpm run -r test",
@@ -43,6 +46,7 @@
     "rimraf": "^6.1.2",
     "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.4",
+    "vitepress": "1.6.4",
     "vitest": "^3.1.4"
   }
 }
