@@ -2,9 +2,9 @@
 layout: home
 
 hero:
-  name: pixzle
-  text: Image fragmentation and restoration.
-  tagline: Shuffle images into fragmented blocks and restore them in CLI, Node.js, browser, and React environments.
+  name: Pixzle
+  text: Reversible visual protection for images.
+  tagline: Split images into shuffled fragments, then restore them across platforms.
   image:
     src: /images/icon.png
     alt: pixzle icon
@@ -17,16 +17,13 @@ hero:
       link: /guide/cli
 
 features:
-  - title: CLI workflow
-    details: Fragment and restore images from the terminal with manifest-based restoration.
-  - title: Runtime packages
-    details: Use dedicated packages for Node.js, browser restoration, and React rendering.
-  - title: Reversible output
-    details: Store block size, seed, and image metadata in a manifest for predictable restoration.
+  - title: Shuffle
+    icon: 🔀
+    details: Split images into blocks and create shuffled fragments.
+  - title: Restore
+    icon: ↩️
+    details: Rebuild fragmented images from a manifest, seed, and image metadata.
+  - title: Use anywhere
+    icon: 🚀
+    details: Run pixzle from the CLI, Node.js, browser, or React.
 ---
-
-![pixzle result overview](/images/figure.png)
-
-::: warning
-pixzle is an image fragmentation tool. It does not guarantee strong security.
-:::
