@@ -49,6 +49,13 @@ export default defineConfig({
           { text: "@pixzle/react", link: "/packages/react" },
         ],
       },
+      {
+        text: "Clients",
+        items: [
+          { text: "App", link: "/clients/app" },
+          { text: "Raycast App", link: "/clients/raycast" },
+        ],
+      },
     ],
     socialLinks: [
       { icon: "github", link: "https://github.com/tuki0918/pixzle" },
