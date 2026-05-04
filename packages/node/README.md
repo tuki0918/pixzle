@@ -42,12 +42,12 @@ output
 
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/input_sample.png) | ![](../../.docs/input_sample_mono.png) | ![](../../.docs/input_sample_blue.png) |
+| ![](../../docs/public/images/input_sample.png) | ![](../../docs/public/images/input_sample_mono.png) | ![](../../docs/public/images/input_sample_blue.png) |
 | 500 x 500px (109KB) | 400 x 600px (4KB) | 600 x 400px (3KB) |
 
 | output 1 | output 2 | output 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/fragmented1/img_1_fragmented.png) | ![](../../.docs/fragmented1/img_2_fragmented.png) | ![](../../.docs/fragmented1/img_3_fragmented.png) |
+| ![](../../docs/public/images/fragmented1/img_1_fragmented.png) | ![](../../docs/public/images/fragmented1/img_2_fragmented.png) | ![](../../docs/public/images/fragmented1/img_3_fragmented.png) |
 | 504 x 504px (159KB) | 496 x 488px (39KB) | 496 x 488px (35KB) |
 
 </details>
@@ -81,12 +81,12 @@ output
 
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/fragmented1/img_1_fragmented.png) | ![](../../.docs/fragmented1/img_2_fragmented.png) | ![](../../.docs/fragmented1/img_3_fragmented.png) |
+| ![](../../docs/public/images/fragmented1/img_1_fragmented.png) | ![](../../docs/public/images/fragmented1/img_2_fragmented.png) | ![](../../docs/public/images/fragmented1/img_3_fragmented.png) |
 | 504 x 504px (159KB) | 496 x 488px (39KB) | 496 x 488px (35KB) |
 
 | output 1 | output 2 | output 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/restored1/img_1.png) | ![](../../.docs/restored1/img_2.png) | ![](../../.docs/restored1/img_3.png) |
+| ![](../../docs/public/images/restored1/img_1.png) | ![](../../docs/public/images/restored1/img_2.png) | ![](../../docs/public/images/restored1/img_3.png) |
 | 500 x 500px (116KB) | 400 x 600px (2KB) | 600 x 400px (2KB) |
 
 </details>

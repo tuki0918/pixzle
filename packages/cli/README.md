@@ -46,11 +46,11 @@ With `--cross-image-shuffle`, blocks are mixed across all input images, rather t
 
 | input 1 | input 2 | input 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/input_sample.png) | ![](../../.docs/input_sample_mono.png) | ![](../../.docs/input_sample_blue.png) |
+| ![](../../docs/public/images/input_sample.png) | ![](../../docs/public/images/input_sample_mono.png) | ![](../../docs/public/images/input_sample_blue.png) |
 
 | output 1 | output 2 | output 3 |
 |:-------:|:---------------:|:---------------:|
-| ![](../../.docs/output_m0.png) | ![](../../.docs/output_m1.png) | ![](../../.docs/output_m2.png) |
+| ![](../../docs/public/images/output_m0.png) | ![](../../docs/public/images/output_m1.png) | ![](../../docs/public/images/output_m2.png) |
 
 > [!WARNING]
 > - Currently, restoration with --cross-image-shuffle is only supported in Node.js and CLI environments.
