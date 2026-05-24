@@ -6,6 +6,7 @@ import {
   restoreImageBuffers,
   restoreSingleImageBuffer,
   validateFragmentImageCount,
+  validateManifestVersion,
 } from "@pixzle/core";
 import { imageBufferToImageBitmap, imageToImageBuffer } from "./image-buffer";
 
@@ -23,6 +24,7 @@ export class ImageRestorer {
     manifest: ManifestData,
     fetchOptions?: RequestInit,
   ): Promise<ImageBitmap[]> {
+    validateManifestVersion(manifest);
     validateFragmentImageCount(fragments, manifest);
 
     if (!manifest.config.crossImageShuffle) {

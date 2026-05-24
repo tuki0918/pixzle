@@ -1,3 +1,4 @@
+import { MIN_RESTORABLE_MANIFEST_VERSION } from "./constants";
 import { fragmentImageBuffers } from "./fragment-buffers";
 import { restoreImageBuffers } from "./restore-buffers";
 import type { ImageBufferData, ManifestData } from "./types";
@@ -30,7 +31,7 @@ describe("fragmentImageBuffers", () => {
     };
     const manifest: ManifestData = {
       id: "test",
-      version: "0.0.0",
+      version: MIN_RESTORABLE_MANIFEST_VERSION,
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 2,
@@ -55,7 +56,7 @@ describe("fragmentImageBuffers", () => {
     ];
     const manifest: ManifestData = {
       id: "test",
-      version: "0.0.0",
+      version: MIN_RESTORABLE_MANIFEST_VERSION,
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 1,

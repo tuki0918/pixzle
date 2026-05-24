@@ -1,4 +1,7 @@
-import { DEFAULT_FRAGMENTATION_CONFIG } from "./constants";
+import {
+  DEFAULT_FRAGMENTATION_CONFIG,
+  MIN_RESTORABLE_MANIFEST_VERSION,
+} from "./constants";
 import type { ImageInfo, ManifestData } from "./types";
 
 /**
@@ -16,7 +19,7 @@ export function createSingleImageManifest(options: {
 }): ManifestData {
   return {
     id: "manual",
-    version: "0.0.0",
+    version: MIN_RESTORABLE_MANIFEST_VERSION,
     timestamp: new Date().toISOString(),
     config: {
       blockSize: options.blockSize,

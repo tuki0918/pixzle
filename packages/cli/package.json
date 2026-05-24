@@ -1,6 +1,6 @@
 {
   "name": "@pixzle/cli",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "CLI implementation of image fragmentation and restoration",
   "type": "commonjs",
   "main": "dist/index.js",

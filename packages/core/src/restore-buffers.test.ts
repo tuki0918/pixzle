@@ -1,6 +1,7 @@
 import { blocksToImageBuffer, splitImageToBlocks } from "./block-operations";
 import { createPermutation } from "./block-permutation";
 import { calculateBlockCountsForCrossImages } from "./block-utils";
+import { MIN_RESTORABLE_MANIFEST_VERSION } from "./constants";
 import { createSingleImageManifest } from "./helpers";
 import {
   restoreImageBuffers,
@@ -98,7 +99,7 @@ describe("restoreImageBuffers", () => {
 
     const manifest: ManifestData = {
       id: "test",
-      version: "0.0.0",
+      version: MIN_RESTORABLE_MANIFEST_VERSION,
       timestamp: new Date().toISOString(),
       config: {
         blockSize: 1,

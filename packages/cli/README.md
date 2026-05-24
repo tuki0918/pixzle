@@ -110,7 +110,7 @@ pixzle restore ./fragmented.png -o ./restored -b 10 -s custom-seed -w 500 -h 500
 ```json
 {
   "id": "631631d5-bcaa-40ac-9c1e-efd6e89e4600",
-  "version": "0.0.0",
+  "version": "0.3.0",
   "timestamp": "2025-12-04T16:08:41.924Z",
   "config": {
     "blockSize": 8,

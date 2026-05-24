@@ -18,12 +18,16 @@ import type {
   ImageInfo,
   ManifestData,
 } from "./types";
-import { validateFragmentImageCount } from "./validators";
+import {
+  validateFragmentImageCount,
+  validateManifestVersion,
+} from "./validators";
 
 export function restoreImageBuffers(
   fragments: ImageBufferData[],
   manifest: ManifestData,
 ): Uint8Array[] {
+  validateManifestVersion(manifest);
   validateFragmentImageCount(fragments, manifest);
 
   if (manifest.config.crossImageShuffle) {

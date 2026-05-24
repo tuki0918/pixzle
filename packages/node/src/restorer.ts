@@ -3,6 +3,7 @@ import {
   type ManifestData,
   restoreImageBuffers,
   validateFragmentImageCount,
+  validateManifestVersion,
 } from "@pixzle/core";
 import { loadBuffer } from "./file";
 import { createPngFromImageBuffer, loadImageBuffer } from "./image-buffer";
@@ -12,6 +13,7 @@ export class ImageRestorer {
     fragments: (string | Buffer)[],
     manifest: ManifestData,
   ): Promise<Buffer[]> {
+    validateManifestVersion(manifest);
     validateFragmentImageCount(fragments, manifest);
 
     const fragmentImages = await Promise.all(
