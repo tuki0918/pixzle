@@ -43,7 +43,14 @@ function runPixzleCli(args) {
   }
 }
 
-runPixzleCli(["shuffle", ...inputImages, "--output", fragmentedDir]);
+runPixzleCli([
+  "shuffle",
+  ...inputImages,
+  "--output",
+  fragmentedDir,
+  "--seed",
+  "pixzle-test",
+]);
 
 runPixzleCli([
   "restore",
