@@ -9,6 +9,10 @@ This npm package provides functionality for image fragmentation and restoration.
 
 Note: This does not guarantee strong security.
 
+## Documentation
+
+- [Docs](https://tuki0918.github.io/pixzle/)
+
 ## Requirements
 
 - Node >= 20
