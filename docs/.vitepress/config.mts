@@ -4,10 +4,10 @@ export default defineConfig({
   title: "pixzle",
   description:
     "Image fragmentation and restoration tools for CLI, Node.js, browser, and React.",
-  base: "/pixzle/",
+  base: "/",
   cleanUrls: true,
   head: [
-    ["link", { rel: "icon", href: "/pixzle/images/icon.png" }],
+    ["link", { rel: "icon", href: "/images/icon.png" }],
     ["meta", { property: "og:title", content: "pixzle" }],
     [
       "meta",
@@ -21,7 +21,7 @@ export default defineConfig({
       "meta",
       {
         property: "og:image",
-        content: "https://tuki0918.github.io/pixzle/images/figure.png",
+        content: "https://pixzle.bbbit.cc/images/figure.png",
       },
     ],
   ],
